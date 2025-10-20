@@ -1,0 +1,23 @@
+{
+  "name": "blac__royale",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "kasynko",
+  "homepage": "https://github.com/Zenkovsky03/BLAC__ROYALE#readme",
+  "bugs": {
+    "url": "https://github.com/Zenkovsky03/BLAC__ROYALE/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zenkovsky03/BLAC__ROYALE.git"
+  },
+  "license": "ISC",
+  "author": "ja",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "5.1.0"
+  }
+}
