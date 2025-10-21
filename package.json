@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "dotenv": "^17.2.3",
-    "express": "5.1.0"
+    "express": "5.1.0",
+    "prisma-client": "^0.0.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
