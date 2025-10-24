@@ -18,11 +18,13 @@ export async function register(req: Request, res: Response) {
         const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create new user
+        // Create a new user
         const newUser = await prisma.user.create({
             data: {
-                email,
-                password: hashedPassword,
+                email : email,
+                hashedPassword : hashedPassword,
+                username : email,
+                balance : 0,
             },
             // Dont return password
             select: { id: true, email: true },
@@ -47,7 +49,7 @@ export async function login(req: Request, res: Response) {
         }
 
         // Chek if the password is correct
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid credentials.' });
         }

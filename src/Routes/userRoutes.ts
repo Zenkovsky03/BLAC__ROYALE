@@ -15,7 +15,7 @@ UserRouter.get('/profile', protect, async (req: any, res) =>
     {
         const userProfile = await prisma.user.findUnique({
             where: { id: userId },
-            select: { id: true, email: true, createdAt: true, balance: true },
+            select: { id: true, email: true, createdAt: true, balance: true , username: true },
         });
 
         if (!userProfile)
