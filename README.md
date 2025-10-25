@@ -14,3 +14,5 @@ Określenie wymagań funkcjonalnych (MVP):
  - Bezpieczeństwo
  - System rankingowy
  - Gry: RULETKA, SAPER, SLOT, SUWAK, COINFLIP
+
+For migrations use: npx prisma db push
