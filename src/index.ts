@@ -7,7 +7,7 @@ const app = express()
 app.use(express.json()) // Adding middleware to parse JSON bodies
 
 const router = express.Router()
-router.get('/', (req, res) => res.send('Hello World!'))
+router.get('/', (req, res) => res.send('Nie grasz nie wygrasz!'))
 
 app.use('/api', router)
 app.use('/api/users', UserRouter)
