@@ -44,7 +44,7 @@ export async function withdraw(req: AuthRequest, res: Response)
             {
                 where: {userId},
                 data: {balance: {increment: amount} , transactions: {create: {amount: amount, type: "WITHDRAWAL"}}},
-                select: {balance: true , transactions: {select: {amount: true, type: true , timestamp: true}}}
+                select: {balance: true , transactions: {select: {amount: true, type: true , timestamp: true}} }
             })
 
         res.status(200).json(updatedWallet); // Respond with updated wallet
