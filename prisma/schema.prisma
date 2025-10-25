@@ -64,3 +64,10 @@ enum TransactionType {
   BET
   WIN
 }
+
+model Game {
+  id Int @id @default(autoincrement())
+  name String @unique
+  description String?
+  isActive Boolean @default(true)
+}
