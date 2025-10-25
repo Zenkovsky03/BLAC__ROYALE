@@ -1,14 +1,14 @@
 import type {Request, Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
 
-interface AuthRequest extends Request
+export interface AuthRequest extends Request
 {
-    userId?: number;
+    userId?: string;
 }
 
 export const protect = (req: AuthRequest, res: Response, next: NextFunction) =>
 {
-    // Unwrap token from request header
+    // Unwrap token from a request header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer '))
     {
@@ -20,7 +20,7 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction) =>
     try {
         //Verify and decode the token
         const decoded = jwt.verify(token as string, process.env.JWT_SECRET as string) as unknown as {
-            userId: number;
+            userId: string;
         };
 
         req.userId = decoded.userId;

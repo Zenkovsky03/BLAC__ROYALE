@@ -2,9 +2,11 @@ import type {Request, Response} from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
+//@ts-ignore
+import { AuthRequest } from '../Middleware/authMiddleware.ts';
 const prisma = new PrismaClient(); // ORM client
 
+//POST
 export async function register(req: Request, res: Response) {
     const { email, password } = req.body;
 
@@ -24,7 +26,7 @@ export async function register(req: Request, res: Response) {
                 email : email,
                 hashedPassword : hashedPassword,
                 username : email,
-                balance : 0,
+                wallet: {create : {}},
             },
             // Dont return password
             select: { id: true, email: true },
@@ -37,6 +39,7 @@ export async function register(req: Request, res: Response) {
     }
 }
 
+//POST
 export async function login(req: Request, res: Response) {
     const { email, password } = req.body; // Unwrap body
 
@@ -69,3 +72,25 @@ export async function login(req: Request, res: Response) {
         res.status(500).json({ message: 'Login failed.' });
     }
 }
+
+//Get
+export const profile = async (req: AuthRequest, res: Response) =>
+{
+    const userId = req.userId!; // From token
+
+    try {
+        const userProfile = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, email: true, createdAt: true, username: true },
+        });
+
+        if (!userProfile) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json(userProfile);
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        res.status(500).json({ message: 'Failed to fetch user profile.' });
+    }
+};
