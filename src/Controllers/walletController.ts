@@ -74,6 +74,6 @@ export async function getWallet(req: AuthRequest, res: Response)
     catch (error)
     {
         console.error(error);
-        res.status(500).json({message: 'Deposit/Withdraw failed.'});
+        res.status(500).json({message: 'No wallet found.'});
     }
 }

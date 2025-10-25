@@ -58,16 +58,18 @@ model Transaction {
   type             TransactionType // DEPOSIT | WITHDRAWAL | BET | WIN
 }
 
+model Game {
+  id String @id @default(uuid())
+  name String @unique
+  description String?
+  isActive Boolean @default(true)
+  winChancePrecentage Int // Max win chance, or only on games with const win chance
+  minWinChancePrecentage Int? // Optional minimum win chance on games with varying win chance
+}
+
 enum TransactionType {
   DEPOSIT
   WITHDRAWAL
   BET
   WIN
-}
-
-model Game {
-  id Int @id @default(autoincrement())
-  name String @unique
-  description String?
-  isActive Boolean @default(true)
 }

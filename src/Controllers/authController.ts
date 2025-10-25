@@ -94,3 +94,12 @@ export const profile = async (req: AuthRequest, res: Response) =>
         res.status(500).json({ message: 'Failed to fetch user profile.' });
     }
 };
+
+export const isAuthenticated = (req: AuthRequest, res: Response) =>
+{
+    if (req.userId) {
+        res.status(200).json({ message: 'Authenticated! : )' });
+    } else {
+        res.status(401).json({ message: 'Unauthorized' });
+    }
+};
