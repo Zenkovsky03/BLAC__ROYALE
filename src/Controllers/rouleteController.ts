@@ -16,7 +16,7 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
     try
     {
         let winMultiplayer = 1;
-        let WinScenario = RouletteWinScenarios.No;
+        let WinScenario = 0;
 
         prisma.wallet.update({
             where: {userId},
@@ -27,15 +27,12 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
         if (randomNumber == number)
         {
             winMultiplayer = winMultiplayer * NumWinMulti;
-            WinScenario = RouletteWinScenarios.Number;
+            WinScenario++;
         }
         if (color == randomNumber%2)
         {
             winMultiplayer = winMultiplayer * ColWinMulti;
-            if (WinScenario == RouletteWinScenarios.Number)
-                WinScenario = RouletteWinScenarios.Both;
-            else
-                WinScenario = RouletteWinScenarios.Color;
+            WinScenario += 2;
         }
 
         let gain = 0;
@@ -58,12 +55,5 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
     }
 }
 
-//ENUM for win scenarios
-enum RouletteWinScenarios
-{
-    "No" = 0, // LOST
-    "Number" = 1, // Guessed number
-    "Color" = 2, // Guessed color
-    "Both" = 3, // Guessed both
-}
+// Win Scenario : 0 = No Win , 1 = Number Win , 2 = Color Win , 3 = Both Win
 
