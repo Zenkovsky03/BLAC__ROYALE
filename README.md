@@ -29,7 +29,7 @@ Projekt ma charakter **edukacyjny i demonstracyjny** – nie służy do prawdziw
 ### Rejestracja i logowanie
 - Tworzenie nowego konta użytkownika  
 - Logowanie z wykorzystaniem hasła (opcjonalnie 2FA)  
-- Weryfikacja pełnoletności (18+)
+- Weryfikacja pełnoletności
 
 ### Zarządzanie kontem użytkownika
 - Edycja danych profilu  
@@ -37,7 +37,7 @@ Projekt ma charakter **edukacyjny i demonstracyjny** – nie służy do prawdziw
 - Podgląd historii gier i transakcji  
 
 ### Portfel i saldo użytkownika
-- Wirtualna waluta (np. „BetCoins”)  
+- Wirtualna waluta (MufaCOIN)  
 - Doładowanie i wypłata środków (symulacja)  
 - Historia transakcji  
 
@@ -50,10 +50,9 @@ Dostępne mini-gry w wersji MVP:
 - 🪙 **Coinflip** – rzut monetą: orzeł czy reszka?
 
 ### Bezpieczeństwo
-- Szyfrowanie haseł (np. bcrypt)  
+- Szyfrowanie haseł
 - Walidacja danych użytkownika  
 - Sesje z tokenami JWT  
-- Ochrona przed botami (CAPTCHA)
 
 ### System rankingowy
 - Tabela najlepszych graczy tygodnia  
