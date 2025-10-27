@@ -1,7 +1,5 @@
 node_modules
-.env
 /generated/prisma
-.idea/
 # =========================
 # General
 # =========================
@@ -80,4 +78,7 @@ test-results/
 coverage/
 reports/
 uploads/
+
+#Migrations
+*.sql
 

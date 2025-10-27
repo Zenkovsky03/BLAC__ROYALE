@@ -10,8 +10,8 @@ export async function deposit(req: AuthRequest, res: Response)
     const userId = req.userId!;
     const {amount} = req.body;
 
-    if (amount >= 0)
-        return res.status(400).json({message: 'Withdrawn amount must be lesser than 0.'});
+    if (amount <= 0)
+        return res.status(400).json({message: 'Deposited amount must be grater than 0.'});
 
     try {
         const updatedWallet = await prisma.wallet.update(
@@ -35,16 +35,30 @@ export async function withdraw(req: AuthRequest, res: Response)
     const userId = req.userId!;
     const {amount} = req.body;
 
-    if (amount >= 0)
-        return res.status(400).json({message: 'Withdrawn amount must be lesser than 0.'});
+    if (amount <= 0)
+        return res.status(400).json({message: 'Withdrawal amount must be greater than 0.'});
 
     try {
+
+        const balance = await prisma.wallet.findUnique({where: {userId}, select: {balance: true}})
+
+        if (!balance)
+        {
+            return res.status(404).json({message: 'Wallet not found.'});
+        }
+
+        if (balance.balance < amount)
+        {
+            return res.status(400).json({message: 'Insufficient balance.'});
+        }
+
         const updatedWallet = await prisma.wallet.update(
             {
                 where: {userId},
-                data: {balance: {increment: amount} , transactions: {create: {amount: amount, type: "WITHDRAWAL"}}},
+                data: {balance: {decrement: amount} , transactions: {create: {amount: amount, type: "WITHDRAWAL"}}},
                 select: {balance: true , transactions: {select: {amount: true, type: true , timestamp: true}} }
             })
+
 
         res.status(200).json(updatedWallet); // Respond with updated wallet
     }
@@ -62,13 +76,13 @@ export async function getWallet(req: AuthRequest, res: Response)
 
     try
     {
-        const wallet = prisma.wallet.findUnique(
+        const wallet = await prisma.wallet.findUnique(
             {
                 where: {userId}
                 ,select: {balance: true , transactions: true}
             });
 
-    res.status(200).json({wallet}); // Respond with the wallet
+    res.status(200).json(wallet); // Respond with the wallet
     }
     catch (error)
     {

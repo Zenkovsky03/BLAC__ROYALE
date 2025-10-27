@@ -6,26 +6,42 @@ const WalletRouter = Router();
 
 /**
  * @swagger
- * /api/wallet:
- *   get:
- *     summary: Get wallet balance
+ * /api/wallet/deposit:
+ *   post:
+ *     summary: Add funds to wallet
  *     tags: [Wallet]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 example: 500
+ *                 minimum: 0.01
+ *                 description: Amount to add to wallet
  *     responses:
  *       200:
- *         description: Wallet information retrieved successfully
+ *         description: Funds added successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 balance:
- *                   type: number
- *                   example: 1000
- *                 currency:
+ *                 message:
  *                   type: string
- *                   example: USD
+ *                   example: Funds added successfully
+ *                 newBalance:
+ *                   type: number
+ *                   example: 1500
+ *       400:
+ *         description: Invalid amount
  *       401:
  *         description: Unauthorized
  *       500:
@@ -34,9 +50,9 @@ const WalletRouter = Router();
 WalletRouter.post('/deposit', protect, deposit)
 /**
  * @swagger
- * /api/wallet/add-funds:
+ * /api/wallet/withdraw:
  *   post:
- *     summary: Add funds to wallet
+ *     summary: Take funds from wallet
  *     tags: [Wallet]
  *     security:
  *       - bearerAuth: []
@@ -78,25 +94,12 @@ WalletRouter.post('/deposit', protect, deposit)
 WalletRouter.post('/withdraw', protect, withdraw)
 /**
  * @swagger
- * /api/wallet/transactions:
+ * /api/wallet/getWallet:
  *   get:
- *     summary: Get transaction history
+ *     summary: Get wallet
  *     tags: [Wallet]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 50
- *         description: Number of transactions to retrieve
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *           default: 0
- *         description: Number of transactions to skip
  *     responses:
  *       200:
  *         description: Transaction history retrieved successfully
@@ -125,6 +128,6 @@ WalletRouter.post('/withdraw', protect, withdraw)
  *       500:
  *         description: Server error
  */
-WalletRouter.post('/getWallet', protect, getWallet)
+WalletRouter.get('/getWallet', protect, getWallet)
 
 export default WalletRouter;

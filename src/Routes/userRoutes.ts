@@ -124,7 +124,7 @@ UserRouter.post('/login', login);
 /**
  * @swagger
  * /api/users/isAuthenticated:
- *   get:
+ *   post:
  *     summary: Check if user is authenticated
  *     tags: [Users]
  *     security:
@@ -144,6 +144,6 @@ UserRouter.post('/login', login);
  *       401:
  *         description: Unauthorized
  */
-UserRouter.get('/isAuthenticated', protect, isAuthenticated)
+UserRouter.post('/isAuthenticated', protect, isAuthenticated)
 
 export default UserRouter;

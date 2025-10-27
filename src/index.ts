@@ -61,7 +61,7 @@ const router = express.Router()
  */
 router.get('/', (req, res) => res.send('Nie grasz nie wygrasz!'))
 
-app.use('/api', router)
+app.use('/', router)
 app.use('/api/users', UserRouter)
 app.use('/api/wallet' , WalletRouter)
 app.use('/api/games', GamesRouter)
