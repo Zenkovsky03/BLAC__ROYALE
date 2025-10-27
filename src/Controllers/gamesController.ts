@@ -1,7 +1,7 @@
 import type { Response} from "express";
 import { PrismaClient } from '@prisma/client';
-//@ts-ignore
-import { AuthRequest } from '../Middleware/authMiddleware.ts';
+
+import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 
 const prisma = new PrismaClient(); // ORM client
 
@@ -39,3 +39,4 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
         res.status(500).json({message: 'No games found.'});
     }
 }
+

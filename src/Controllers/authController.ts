@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 //@ts-ignore
-import { AuthRequest } from '../Middleware/authMiddleware.ts';
+import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 const prisma = new PrismaClient(); // ORM client
 
 //POST
