@@ -72,7 +72,7 @@ WalletRouter.post('/deposit', protect, deposit)
  *                 description: Amount to add to wallet
  *     responses:
  *       200:
- *         description: Funds added successfully
+ *         description: Funds withdrawn successfully
  *         content:
  *           application/json:
  *             schema:

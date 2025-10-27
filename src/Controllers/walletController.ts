@@ -4,7 +4,7 @@ import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 
 const prisma = new PrismaClient(); // ORM client
 
-//POST deposit/withdraw
+
 export async function deposit(req: AuthRequest, res: Response)
 {
     const userId = req.userId!;
@@ -26,7 +26,7 @@ export async function deposit(req: AuthRequest, res: Response)
     catch (error)
     {
         console.error(error);
-        res.status(500).json({message: 'Deposit/Withdraw failed.'});
+        res.status(500).json({message: 'Deposit failed.'});
     }
 }
 

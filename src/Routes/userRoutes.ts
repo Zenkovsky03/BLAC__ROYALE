@@ -26,8 +26,10 @@ const UserRouter = Router();
  *                   type: string
  *                 username:
  *                   type: string
- *       401:
- *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ *       500:
+ *          description: Failed to fetch user profile
  */
 UserRouter.get('/profile', protect, profile )
 /**
@@ -72,6 +74,8 @@ UserRouter.get('/profile', protect, profile )
  *                   type: string
  *       400:
  *         description: Invalid input or user already exists
+ *       500:
+ *         description: Registration failed
  */
 UserRouter.post('/register', register);
 /**
@@ -119,12 +123,14 @@ UserRouter.post('/register', register);
  *                       type: string
  *       401:
  *         description: Invalid credentials
+ *       500:
+ *         description: Login failed
  */
 UserRouter.post('/login', login);
 /**
  * @swagger
  * /api/users/isAuthenticated:
- *   post:
+ *   get:
  *     summary: Check if user is authenticated
  *     tags: [Users]
  *     security:
@@ -144,6 +150,6 @@ UserRouter.post('/login', login);
  *       401:
  *         description: Unauthorized
  */
-UserRouter.post('/isAuthenticated', protect, isAuthenticated)
+UserRouter.get('/isAuthenticated', protect, isAuthenticated)
 
 export default UserRouter;

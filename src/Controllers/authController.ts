@@ -5,14 +5,35 @@ import jwt from 'jsonwebtoken';
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 const prisma = new PrismaClient(); // ORM client
 
+export const profile = async (req: AuthRequest, res: Response) =>
+{
+    const userId = req.userId!; // From token
+
+    try {
+        const userProfile = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, email: true, createdAt: true, username: true },
+        });
+
+        if (!userProfile) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json(userProfile);
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Failed to fetch user profile.' });
+    }
+};
+
 //POST
 export async function register(req: Request, res: Response) {
-    const { email, password } = req.body;
+    const { email, password, username } = req.body;
 
     try { // Check if the user already exists
             const existingUser = await prisma.user.findUnique({ where: { email } });
             if (existingUser) {
-                return res.status(409).json({ message: 'User already exists.' });
+                return res.status(400).json({ message: 'User already exists.' });
         }
 
         // Hash password
@@ -24,7 +45,7 @@ export async function register(req: Request, res: Response) {
             data: {
                 email : email,
                 hashedPassword : hashedPassword,
-                username : email,
+                username : username,
                 wallet: {create : {}},
             },
             // Dont return password
@@ -60,7 +81,7 @@ export async function login(req: Request, res: Response) {
         const token = jwt.sign(
             { userId: user.id, email: user.email }, // Payload (non-sensitive data)
             process.env.JWT_SECRET as string,
-            { expiresIn: '6h' } // Token expiration time
+            { expiresIn: '2h' } // Token expiration time
         );
 
         // Respond with the token,
@@ -72,32 +93,10 @@ export async function login(req: Request, res: Response) {
     }
 }
 
-//Get
-export const profile = async (req: AuthRequest, res: Response) =>
-{
-    const userId = req.userId!; // From token
-
-    try {
-        const userProfile = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { id: true, email: true, createdAt: true, username: true },
-        });
-
-        if (!userProfile) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-
-        res.status(200).json(userProfile);
-    } catch (error) {
-        console.error("Error fetching profile:", error);
-        res.status(500).json({ message: 'Failed to fetch user profile.' });
-    }
-};
-
 export const isAuthenticated = (req: AuthRequest, res: Response) =>
 {
     if (req.userId) {
-        res.status(200).json({ message: 'Authenticated! : )' });
+        res.status(200).json({ message: 'Authenticated!' });
     } else {
         res.status(401).json({ message: 'Unauthorized' });
     }
