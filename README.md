@@ -62,9 +62,9 @@ Dostępne mini-gry w wersji MVP:
 | Frontend | React |
 | Backend  | Node.js (Express) |
 | Baza danych | MongoDB / PostgreSQL |
-| Autoryzacja ---- |
-| Stylizacja | CSS |
-| Hosting ----|
+| Autoryzacja  |
+| Style | CSS |
+| Hosting |
 For migrations use: npx prisma db push
 
 ---
