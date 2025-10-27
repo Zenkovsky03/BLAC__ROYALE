@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 const prisma = new PrismaClient(); // ORM client
 
+
+//GET
 export async function getGames(req: AuthRequest, res: Response)
 {
     try
@@ -13,24 +15,6 @@ export async function getGames(req: AuthRequest, res: Response)
         } )
 
         res.status(200).json({games}); // Respond with the games
-    }
-    catch (error)
-    {
-        console.error(error);
-        res.status(500).json({message: 'No games found.'});
-    }
-}
-
-export async function PlayRoulette(req: AuthRequest, res: Response)
-{
-    //const userId = req.userId!;
-
-
-    try
-    {
-        const randomNumber = (Math.random() * 1000)
-
-        res.status(200).json({randomNumber}); // Respond with the games
     }
     catch (error)
     {

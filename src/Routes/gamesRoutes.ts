@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { protect } from '../Middleware/authMiddleware.ts';
-import { getGames , PlayRoulette} from "../Controllers/gamesController.ts";
+import { getGames} from "../Controllers/gamesController.ts";
+import  { PlayRoulette } from '../Controllers/rouleteController.ts';
 
 const GamesRouter = Router();
 
