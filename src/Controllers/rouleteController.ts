@@ -15,6 +15,22 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
 
     try
     {
+        if (betAmount <= 0)
+        {
+            return res.status(400).json({message: 'Bet amount must be greater than 0.'});
+        }
+
+        const balance = await prisma.wallet.findUnique({where: {userId}, select: {balance: true}})
+
+        if (!balance)
+        {
+            return res.status(404).json({message: 'Wallet not found.'});
+        }
+        if (balance < betAmount)
+        {
+            return res.status(400).json({message: 'Insufficient balance.'});
+        }
+
         let winMultiplayer = 1;
         let WinScenario = 0;
 
@@ -22,7 +38,7 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
             where: {userId},
             data: {balance: {decrement: betAmount}},
         })
-        const randomNumber = (Math.random() * 100)%37
+        const randomNumber = Math.trunc(Math.random() * 100)%37
 
         if (randomNumber == number)
         {
@@ -38,9 +54,11 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
         let gain = 0;
 
         if (winMultiplayer != 1)
+        {
             gain = betAmount * winMultiplayer;
+        }
 
-        prisma.wallet.update({
+        await prisma.wallet.update({
             where: {userId},
             data: {balance: {increment: gain } ,
                 transactions: {create: {amount: betAmount * winMultiplayer, type: "WIN"}}},
