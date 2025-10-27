@@ -72,8 +72,9 @@ Dostępne mini-gry w wersji MVP:
 | Autoryzacja  |
 | Style | CSS |
 | Hosting |
-For migrations use: npx prisma db push
 
 ---
+
+For migrations use: npx prisma db push
 
 
