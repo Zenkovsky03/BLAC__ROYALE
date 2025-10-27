@@ -1,11 +1,9 @@
 import type { Response} from "express";
 import { PrismaClient } from '@prisma/client';
-
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
-
 const prisma = new PrismaClient(); // ORM client
 
-export async function getGames(req: Request, res: Response)
+export async function getGames(req: AuthRequest, res: Response)
 {
     try
     {
@@ -25,7 +23,8 @@ export async function getGames(req: Request, res: Response)
 
 export async function PlayRoulette(req: AuthRequest, res: Response)
 {
-    const userId = req.userId!;
+    //const userId = req.userId!;
+
 
     try
     {

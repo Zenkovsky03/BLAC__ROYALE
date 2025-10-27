@@ -1,7 +1,5 @@
 import { Router } from 'express';
-// @ts-ignore
 import { protect } from '../Middleware/authMiddleware.ts';
-// @ts-ignore
 import {deposit, getWallet, withdraw} from '../Controllers/walletController.ts'
 
 const WalletRouter = Router();

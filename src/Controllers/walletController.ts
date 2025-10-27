@@ -1,7 +1,6 @@
 import type { Response} from "express";
 import { PrismaClient } from '@prisma/client';
-//@ts-ignore
-import { AuthRequest } from '../Middleware/authMiddleware.ts';
+import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 
 const prisma = new PrismaClient(); // ORM client
 
