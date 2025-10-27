@@ -70,6 +70,6 @@ model Game {
 enum TransactionType {
   DEPOSIT
   WITHDRAWAL
-  BET
+  LOST
   WIN
 }
