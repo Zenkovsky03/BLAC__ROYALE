@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { protect } from '../Middleware/authMiddleware.ts';
-import {register, login, profile, isAuthenticated} from '../Controllers/authController.ts';
+import {register, login, profile, isAuthenticated, updateUsername} from '../Controllers/authController.ts';
 
 const UserRouter = Router();
 
@@ -151,5 +151,42 @@ UserRouter.post('/login', login);
  *         description: Unauthorized
  */
 UserRouter.get('/isAuthenticated', protect, isAuthenticated)
+/**
+ * @swagger
+ * /api/users/updateUsername:
+ *   patch:
+ *     summary: Update user username
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 format: string
+ *                 example: johndoe2
+ *     responses:
+ *       200:
+ *         description: Username updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 authenticated:
+ *                   type: boolean
+ *                 userId:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ */
+UserRouter.patch('/updateUsername', protect, updateUsername)
 
 export default UserRouter;

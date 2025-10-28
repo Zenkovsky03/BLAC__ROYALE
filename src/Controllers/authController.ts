@@ -12,7 +12,7 @@ export const profile = async (req: AuthRequest, res: Response) =>
     try {
         const userProfile = await prisma.user.findUnique({
             where: { id: userId },
-            select: { id: true, email: true, createdAt: true, username: true },
+            select: {  email: true, createdAt: true, username: true },
         });
 
         if (!userProfile) {
@@ -49,10 +49,10 @@ export async function register(req: Request, res: Response) {
                 wallet: {create : {}},
             },
             // Dont return password
-            select: { id: true, email: true },
+            select: {  email: true , createdAt: true ,  username: true },
         });
 
-        res.status(201).json({ user: newUser }); // Respond with the new user
+        res.status(201).json({ newUser }); // Respond with the new user
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Registration failed.' });
@@ -84,13 +84,44 @@ export async function login(req: Request, res: Response) {
             { expiresIn: '2h' } // Token expiration time
         );
 
+        const loggedInUser = await prisma.user.findUnique({
+            where: {email},
+            select: {  email: true , createdAt: true ,  username: true} })
+
         // Respond with the token,
-        res.status(200).json({ token });
+        res.status(200).json({ token , loggedInUser });
     } catch (error) {
         // or error
         console.error(error);
         res.status(500).json({ message: 'Login failed.' });
     }
+}
+
+export async function updateUsername(req: AuthRequest, res: Response)
+{
+    const userId = req.userId!;
+    const {username} = req.body;
+
+    try
+    {
+        const user = await prisma.user.findUnique({where: {id: userId}});
+        if (!user)
+        {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        const updatedUser = await prisma.user.update({
+            where: {id: userId},
+            data: {username: username},
+            select: {  email: true , createdAt: true ,  username: true }});
+        res.status(200).json({ message: 'Username updated successfully.', user: updatedUser})
+    }
+    catch (error)
+    {
+        console.error(error);
+        res.status(500).json({message: 'Failed to update username.'});
+    }
+
+
 }
 
 export const isAuthenticated = (req: AuthRequest, res: Response) =>
