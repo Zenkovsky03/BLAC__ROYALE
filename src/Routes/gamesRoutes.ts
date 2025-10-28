@@ -13,8 +13,6 @@ const GamesRouter = Router();
  *   get:
  *     summary: Get all available games
  *     tags: [Games]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of available games
@@ -45,7 +43,7 @@ const GamesRouter = Router();
  *       500:
  *         description: Server error
  */
-GamesRouter.get("/getGames" , protect , getGames)
+GamesRouter.get("/getGames"  , getGames)
 /**
  * @swagger
  * /api/games/PlayRoulette:
