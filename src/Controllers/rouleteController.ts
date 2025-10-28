@@ -15,21 +15,6 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
 
     try
     {
-        if (betAmount <= 0)
-        {
-            return res.status(400).json({message: 'Bet amount must be greater than 0.'});
-        }
-
-        const balance = await prisma.wallet.findUnique({where: {userId}, select: {balance: true}})
-
-        if (!balance)
-        {
-            return res.status(404).json({message: 'Wallet not found.'});
-        }
-        if (balance.balance < betAmount)
-        {
-            return res.status(400).json({message: 'Insufficient balance.'});
-        }
 
         let winMultiplayer = 1;
         let WinScenario = 0;
@@ -45,7 +30,7 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
             winMultiplayer = winMultiplayer * NumWinMulti;
             WinScenario++;
         }
-        if (color == randomNumber%2)
+        if (color == randomNumber%2) // two colors
         {
             winMultiplayer = winMultiplayer * ColWinMulti;
             WinScenario += 2;
@@ -58,14 +43,14 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
             gain = betAmount * winMultiplayer;
             await prisma.wallet.update({
                 where: {userId},
-                data: { balance: {increment: gain } , transactions: {create: {amount: betAmount * winMultiplayer, type: "WIN"}}},
+                data: { balance: {increment: gain } , transactions: {create: {amount: (betAmount * winMultiplayer) - betAmount, type: "WIN"}}},
             })
             return res.status(200).json( { gain , winMultiplayer , WinScenario  , randomNumber} );
         }
 
         await prisma.wallet.update({
             where: {userId},
-            data: {transactions: {create: {amount: betAmount * winMultiplayer, type: "LOST"}}},
+            data: {transactions: {create: {amount: betAmount , type: "LOST"}}},
         })
 
         res.status(200).json( { gain , winMultiplayer , WinScenario  , randomNumber} );
@@ -77,5 +62,12 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
     }
 }
 
-// Win Scenario : 0 = No Win , 1 = Number Win , 2 = Color Win , 3 = Both Win
-
+/* Just for documentation
+enum WinScenarios
+{
+    LOOSE,
+    NUMBER_WIN,
+    COLOR_WIN,
+    BOTH_WIN,
+}
+*/

@@ -5,6 +5,29 @@ import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 const prisma = new PrismaClient(); // ORM client
 
 
+
+//GET
+export async function getWallet(req: AuthRequest, res: Response)
+{
+    const userId = req.userId!;
+
+    try
+    {
+        const wallet = await prisma.wallet.findUnique(
+            {
+                where: {userId}
+                ,select: {balance: true , transactions: true}
+            });
+
+        res.status(200).json(wallet); // Respond with the wallet
+    }
+    catch (error)
+    {
+        console.error(error);
+        res.status(500).json({message: 'No wallet found.'});
+    }
+}
+
 export async function deposit(req: AuthRequest, res: Response)
 {
     const userId = req.userId!;
@@ -35,23 +58,8 @@ export async function withdraw(req: AuthRequest, res: Response)
     const userId = req.userId!;
     const {amount} = req.body;
 
-    if (amount <= 0)
-        return res.status(400).json({message: 'Withdrawal amount must be greater than 0.'});
-
-    try {
-
-        const balance = await prisma.wallet.findUnique({where: {userId}, select: {balance: true}})
-
-        if (!balance)
-        {
-            return res.status(404).json({message: 'Wallet not found.'});
-        }
-
-        if (balance.balance < amount)
-        {
-            return res.status(400).json({message: 'Insufficient balance.'});
-        }
-
+    try
+    {
         const updatedWallet = await prisma.wallet.update(
             {
                 where: {userId},
@@ -69,24 +77,3 @@ export async function withdraw(req: AuthRequest, res: Response)
     }
 }
 
-//GET
-export async function getWallet(req: AuthRequest, res: Response)
-{
-    const userId = req.userId!;
-
-    try
-    {
-        const wallet = await prisma.wallet.findUnique(
-            {
-                where: {userId}
-                ,select: {balance: true , transactions: true}
-            });
-
-    res.status(200).json(wallet); // Respond with the wallet
-    }
-    catch (error)
-    {
-        console.error(error);
-        res.status(500).json({message: 'No wallet found.'});
-    }
-}

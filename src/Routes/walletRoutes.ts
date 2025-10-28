@@ -1,9 +1,47 @@
 import { Router } from 'express';
 import { protect } from '../Middleware/authMiddleware.ts';
 import {deposit, getWallet, withdraw} from '../Controllers/walletController.ts'
+import {balanceCheck} from "../Middleware/balanceMiddleware.ts";
 
 const WalletRouter = Router();
 
+/**
+ * @swagger
+ * /api/wallet/getWallet:
+ *   get:
+ *     summary: Get wallet
+ *     tags: [Wallet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Transaction history retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 transactions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       amount:
+ *                         type: number
+ *                       type:
+ *                         type: string
+ *                         enum: [WIN, LOSS, DEPOSIT]
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+WalletRouter.get('/getWallet', protect, getWallet)
 /**
  * @swagger
  * /api/wallet/deposit:
@@ -91,43 +129,7 @@ WalletRouter.post('/deposit', protect, deposit)
  *       500:
  *         description: Server error
  */
-WalletRouter.post('/withdraw', protect, withdraw)
-/**
- * @swagger
- * /api/wallet/getWallet:
- *   get:
- *     summary: Get wallet
- *     tags: [Wallet]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Transaction history retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 transactions:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                       amount:
- *                         type: number
- *                       type:
- *                         type: string
- *                         enum: [WIN, LOSS, DEPOSIT]
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-WalletRouter.get('/getWallet', protect, getWallet)
+WalletRouter.post('/withdraw', protect , balanceCheck , withdraw)
+
 
 export default WalletRouter;
