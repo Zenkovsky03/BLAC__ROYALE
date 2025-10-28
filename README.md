@@ -55,7 +55,7 @@ Dostępne mini-gry w wersji MVP:
 - Sesje z tokenami JWT  
 
 ### System rankingowy
-- Tabela najlepszych graczy tygodnia  
+- Tabela najlepszych graczy (tygodnia?)
 - Punkty rankingowe zależne od aktywności i wygranych  
 - Odznaki i poziomy prestiżu  
 
@@ -65,12 +65,11 @@ Dostępne mini-gry w wersji MVP:
 
 | Warstwa | Technologia |
 |----------|--------------|
-| Frontend | React |
+| Frontend | Vue |
 | Backend  | Node.js (Express) |
-| Baza danych | MongoDB / PostgreSQL |
-| Autoryzacja  |
-| Style | CSS |
-| Hosting |
+| Baza danych |  PostgreSQL |
+| ORM | Prisma |
+
 
 ---
 
