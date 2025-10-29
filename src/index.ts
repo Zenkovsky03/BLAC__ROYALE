@@ -15,9 +15,9 @@ const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'Blackjack Royale API',
+            title: 'Blac Casino API',
             version: '1.0.0',
-            description: 'API documentation for Blackjack Royale game - Nie grasz nie wygrasz!',
+            description: 'API documentation for Blac Casino - Nie grasz nie wygrasz!',
         },
         servers: [
             {
