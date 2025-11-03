@@ -13,9 +13,12 @@
   },
   "license": "ISC",
   "author": "ja",
-  "main": "src/index.ts",
+  "main": "backend/src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "frontend": "npm --prefix ./frontend run dev",
+    "backend": "nodemon ./backend/src/index.ts",
+    "start": "npm run frontend & npm run backend"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
