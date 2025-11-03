@@ -26,7 +26,6 @@ export const profile = async (req: AuthRequest, res: Response) =>
     }
 };
 
-//POST
 export async function register(req: Request, res: Response) {
     const { email, password, username } = req.body;
 
@@ -59,7 +58,6 @@ export async function register(req: Request, res: Response) {
     }
 }
 
-//POST
 export async function login(req: Request, res: Response) {
     const { email, password } = req.body; // Unwrap body
 

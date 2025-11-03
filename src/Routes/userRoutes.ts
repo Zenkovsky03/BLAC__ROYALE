@@ -129,7 +129,7 @@ UserRouter.post('/register', register);
 UserRouter.post('/login', login);
 /**
  * @swagger
- * /api/users/isAuthenticated:
+ * /api/users/is-authenticated:
  *   get:
  *     summary: Check if user is authenticated
  *     tags: [Users]
@@ -150,10 +150,10 @@ UserRouter.post('/login', login);
  *       401:
  *         description: Unauthorized
  */
-UserRouter.get('/isAuthenticated', protect, isAuthenticated)
+UserRouter.get('/is-authenticated', protect, isAuthenticated)
 /**
  * @swagger
- * /api/users/updateUsername:
+ * /api/users/update-username:
  *   patch:
  *     summary: Update user username
  *     tags: [Users]
@@ -187,6 +187,6 @@ UserRouter.get('/isAuthenticated', protect, isAuthenticated)
  *       401:
  *         description: Unauthorized
  */
-UserRouter.patch('/updateUsername', protect, updateUsername)
+UserRouter.patch('/update-username', protect, updateUsername)
 
 export default UserRouter;

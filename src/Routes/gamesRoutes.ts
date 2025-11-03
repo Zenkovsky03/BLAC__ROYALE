@@ -9,7 +9,7 @@ const GamesRouter = Router();
 
 /**
  * @swagger
- * /api/games/getGames:
+ * /api/games/get-games:
  *   get:
  *     summary: Get all available games
  *     tags: [Games]
@@ -43,10 +43,10 @@ const GamesRouter = Router();
  *       500:
  *         description: Server error
  */
-GamesRouter.get("/getGames"  , getGames)
+GamesRouter.get("/get-games"  , getGames)
 /**
  * @swagger
- * /api/games/PlayRoulette:
+ * /api/games/play-roulette:
  *   post:
  *     summary: Play roulette game
  *     tags: [Games]
@@ -106,10 +106,10 @@ GamesRouter.get("/getGames"  , getGames)
  *       500:
  *         description: Failed to play the game
  */
-GamesRouter.post("/PlayRoulette" , protect, balanceCheck , PlayRoulette)
+GamesRouter.post("/play-roulette" , protect, balanceCheck , PlayRoulette)
 /**
  * @swagger
- * /api/games/PlayCoinFlip:
+ * /api/games/play-coin-flip:
  *   post:
  *     summary: Play coin flip game
  *     tags: [Games]
@@ -154,6 +154,6 @@ GamesRouter.post("/PlayRoulette" , protect, balanceCheck , PlayRoulette)
  *       500:
  *         description: Failed to play the game
  */
-GamesRouter.post("/PlayCoinFlip" , protect, balanceCheck , PlayCoinFlip)
+GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
 
 export default GamesRouter;

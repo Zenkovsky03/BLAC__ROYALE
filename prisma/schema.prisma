@@ -73,3 +73,9 @@ enum TransactionType {
   LOST
   WIN
 }
+
+model SaperMap {
+  id String @id @default(uuid())
+  n Int
+  map String // Map stored as string
+}
