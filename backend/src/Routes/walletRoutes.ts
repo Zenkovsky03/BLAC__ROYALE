@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { protect } from '../Middleware/authMiddleware.ts';
 import {deposit, getWallet, withdraw} from '../Controllers/walletController.ts'
 import {balanceCheck} from "../Middleware/balanceMiddleware.ts";
-import {ranking} from "../Controllers/rankingController.ts";
 
 const WalletRouter = Router();
 
@@ -133,6 +132,5 @@ WalletRouter.post('/deposit', protect, deposit)
 WalletRouter.post('/withdraw', protect , balanceCheck , withdraw)
 
 
-WalletRouter.get('/ranking', protect, ranking)
 
 export default WalletRouter;
