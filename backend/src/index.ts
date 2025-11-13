@@ -1,4 +1,6 @@
 import express from 'express'
+import path, { dirname } from 'node:path'
+import { fileURLToPath} from "node:url";
 // @ts-ignore
 import UserRouter from "./Routes/userRoutes.ts";
 import WalletRouter from "./Routes/walletRoutes.ts";
@@ -10,6 +12,9 @@ import swaggerUi from "swagger-ui-express"
 const app = express()
 
 app.use(express.json()) // Adding middleware to parse JSON bodies
+
+const filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(filename)
 
 const swaggerOptions = {
     definition: {
@@ -37,8 +42,10 @@ const swaggerOptions = {
         },
     },
     // Path to the API routes where you have JSDoc comments
-    apis: ['./src/Routes/*.ts', './src/index.ts'],
+
+    apis: [path.join(__dirname, 'Routes', '*.ts' ), path.join(__dirname, 'index.ts')],
 };
+console.log(__dirname)
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
