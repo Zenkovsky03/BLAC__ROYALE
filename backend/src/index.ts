@@ -7,7 +7,9 @@ import WalletRouter from "./Routes/walletRoutes.ts";
 import GamesRouter from "./Routes/gamesRoutes.ts";
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
+import dotenv from 'dotenv';
 
+dotenv.config({ path: './.env'});
 
 const app = express()
 

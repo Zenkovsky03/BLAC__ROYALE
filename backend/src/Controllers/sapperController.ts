@@ -25,14 +25,15 @@ export async function StartSapper(req: AuthRequest, res: Response)
         const mapData = generateSapperMap( mapSize , bombsCount);
         const initialMask = Array(mapSize * mapSize).fill('0').join('');
 
-        const mapRecord = await prisma.sapperMap.create( {
-            data: {
-                n: mapSize,
-                map: mapData,
-                userId: userId,
-                mask: initialMask,
-            },
-        });
+        const data = {
+            n: mapSize,
+            map: mapData,
+            mask: initialMask,
+            bet: betAmount,
+            userId: userId
+        };
+
+        const mapRecord = await prisma.sapperMap.create({ data: data });
 
         const maskedMap = maskSapperMap(mapData, initialMask);
 

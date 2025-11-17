@@ -78,7 +78,7 @@ model SapperMap {
   n  Int
   map String // Map stored as string
   mask String // Mask of discovered fields
-  bet number
+  bet Int
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
