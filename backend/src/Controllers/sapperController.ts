@@ -9,14 +9,117 @@ const prisma = new PrismaClient(); // ORM client
 // mask: '0' undiscovered , '1' discovered
 // masked map: '?' undiscovered
 
+
+//POST
+
+export async function Resign(req: AuthRequest, res: Response)
+{
+    const userId = String(req.params.userId);
+
+    try
+    {
+        const map = destroyMap(userId);
+        if (map === null)
+        {
+            return res.status(404).json({ message: 'No map found for user.' });
+        }
+
+        //Payout
+
+    }
+    catch (err)
+    {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to resign. KEEP PLAYING!!!' });
+    }
+
+}
+
+//POST
+export async function PlaySapper(req: AuthRequest, res: Response) {
+    const { X, Y } = req.body;
+    const userId = String(req.params.userId);
+
+    try {
+        const map = await prisma.sapperMap.findFirst({ where: { userId: userId } });
+
+        if (map === null) {
+            console.warn(`Map not found for userId: ${userId}`);
+            return res.status(404).json({ message: `Sapper map not found for user ${userId}.` });
+        }
+        const xValue = Number(X.value);
+        const yValue = Number(Y.value);
+
+        if (isNaN(xValue) || isNaN(yValue)) {
+            return res.status(400).json({ message: 'Invalid coordinates provided.' });
+        }
+
+        const index = xValue * map.n + yValue;
+
+        if (index < 0 || index >= map.mask.length) {
+            return res.status(400).json({ message: 'Coordinates are out of map bounds.' });
+        }
+
+        map.mask = map.mask.slice(0, index) + '1' + map.mask.slice(index + 1);
+
+        if (map.map[index] === '.')
+        {
+            //loose
+            await destroyMap(userId);
+            return res.json({ message: 'Game lost.' , map: map });
+
+        }
+        else
+        {
+            map.winMultiplayer += Number(map.map[xValue * map.n + yValue]) / 10;
+
+            const updatedMap = await prisma.sapperMap.update({
+                where: { id: map.id },
+                data: map
+            });
+
+            map.mask.split('');
+            let count = 0;
+            for (let i = 0; i < map.mask.length; i++)
+            {
+                if (map.mask[i] === '1')
+                {
+                    count++;
+                }
+            }
+
+            if (count === map.mask.length)
+            {
+                await destroyMap(userId);
+
+                // Payout here
+
+                return res.json({ message: 'Game ended.' , map: map });
+            }
+
+            return res.json({ message: 'Game continues...' , map: maskSapperMap(updatedMap.map , updatedMap.mask ) });
+        }
+
+    } catch (err) {
+        // This catch block handles unexpected database or server errors
+        console.error(err);
+        res.status(500).json({ message: 'Failed playing sapper game due to a server error.' });
+    }
+}
+
 //POST
 export async function StartSapper(req: AuthRequest, res: Response)
 {
     const { bombsCount , betAmount , mapSize } = req.body;
 
     const userId = req.userId!;
+
+    await destroyMap(userId);
+
     try
     {
+
+
         if (mapSize * mapSize - 1 <= bombsCount)
         {
             new Error('Invalid arguments: The number of bombs (bombsCount) must be less than the total number of cells minus one (mapSize * mapSize - 1).');
@@ -30,17 +133,16 @@ export async function StartSapper(req: AuthRequest, res: Response)
             map: mapData,
             mask: initialMask,
             bet: betAmount,
-            userId: userId
+            userId: userId,
+            winMultiplayer: 1,
         };
 
         const mapRecord = await prisma.sapperMap.create({ data: data });
 
-        const maskedMap = maskSapperMap(mapData, initialMask);
+        const maskedMap = maskSapperMap(mapRecord.map, initialMask);
 
         return res.json({
-            mapId: mapRecord.id,
-            mapSize: mapSize,
-            maskedMap: maskedMap
+            map: maskedMap
         });
     }
     catch (err)
@@ -124,4 +226,17 @@ function getRandomIntInclusive(min: number, max: number): number
     max = Math.floor(max);
 
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+async function destroyMap(userId: string)
+{
+    try {
+        return await prisma.sapperMap.deleteMany({where: {userId: userId},});
+
+    }
+    catch (err)
+    {
+        console.error("Failed to destroy map record:", err);
+        return null;
+    }
 }

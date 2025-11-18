@@ -79,7 +79,8 @@ model SapperMap {
   map String // Map stored as string
   mask String // Mask of discovered fields
   bet Int
+  winMultiplayer Float
 
-  userId String
+  userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 }
