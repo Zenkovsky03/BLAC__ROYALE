@@ -10,6 +10,7 @@ import SapperRouter from "./Routes/sapperRoutes.ts";
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
 import dotenv from 'dotenv';
+import RankingRoutes from "./Routes/rankingRoutes.ts";
 
 dotenv.config({ path: './.env'});
 
@@ -78,6 +79,7 @@ app.use('/api/users', UserRouter)
 app.use('/api/wallet' , WalletRouter)
 app.use('/api/games', GamesRouter)
 app.use('/api/Sapper', SapperRouter)
+app.use('/api/ranking', RankingRoutes)
 
 // Serve Swagger documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

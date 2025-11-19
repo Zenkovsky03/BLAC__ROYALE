@@ -155,7 +155,7 @@ SapperRouter.post("/start-sapper", protect, balanceCheck , startSapper);
  *                   type: string
  *                   example: Failed playing sapper game due to a server error.
  */
-SapperRouter.post("/play-sapper", protect, balanceCheck , playSapper);
+SapperRouter.post("/play-sapper", protect , playSapper);
 
 /**
  * @swagger
@@ -226,7 +226,7 @@ SapperRouter.post("/play-sapper", protect, balanceCheck , playSapper);
  *                   type: string
  *                   example: Failed to resign. KEEP PLAYING!!!
  */
-SapperRouter.post("/resign-sapper", protect, balanceCheck , resignSapper);
+SapperRouter.post("/resign-sapper", protect , resignSapper);
 
 export default SapperRouter;
 
