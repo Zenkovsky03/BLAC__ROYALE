@@ -12,20 +12,28 @@ const prisma = new PrismaClient(); // ORM client
 
 //POST
 
-export async function Resign(req: AuthRequest, res: Response)
+export async function resignSapper(req: AuthRequest, res: Response)
 {
     const userId = String(req.params.userId);
 
     try
     {
-        const map = destroyMap(userId);
+        const map = await prisma.sapperMap.findFirst({ where: { userId } });
         if (map === null)
         {
             return res.status(404).json({ message: 'No map found for user.' });
         }
 
-        //Payout
+        let win = map.bet * map.winMultiplayer;
 
+        await prisma.wallet.update({
+            where: {userId},
+            data: { balance: {increment: win } , transactions: {create: {amount: win , type: "WIN"}}},
+        })
+
+        await destroyMap(userId);
+
+        return res.json({ message: 'Game ended.', map: map , wallet: prisma.wallet.findFirst({ where: { userId } }) });
     }
     catch (err)
     {
@@ -36,7 +44,7 @@ export async function Resign(req: AuthRequest, res: Response)
 }
 
 //POST
-export async function PlaySapper(req: AuthRequest, res: Response) {
+export async function playSapper(req: AuthRequest, res: Response) {
     const { X, Y } = req.body;
     const userId = String(req.params.userId);
 
@@ -47,8 +55,8 @@ export async function PlaySapper(req: AuthRequest, res: Response) {
             console.warn(`Map not found for userId: ${userId}`);
             return res.status(404).json({ message: `Sapper map not found for user ${userId}.` });
         }
-        const xValue = Number(X.value);
-        const yValue = Number(Y.value);
+        const xValue = Number(X);
+        const yValue = Number(Y);
 
         if (isNaN(xValue) || isNaN(yValue)) {
             return res.status(400).json({ message: 'Invalid coordinates provided.' });
@@ -64,7 +72,6 @@ export async function PlaySapper(req: AuthRequest, res: Response) {
 
         if (map.map[index] === '.')
         {
-            //loose
             await destroyMap(userId);
             return res.json({ message: 'Game lost.' , map: map });
 
@@ -78,25 +85,6 @@ export async function PlaySapper(req: AuthRequest, res: Response) {
                 data: map
             });
 
-            map.mask.split('');
-            let count = 0;
-            for (let i = 0; i < map.mask.length; i++)
-            {
-                if (map.mask[i] === '1')
-                {
-                    count++;
-                }
-            }
-
-            if (count === map.mask.length)
-            {
-                await destroyMap(userId);
-
-                // Payout here
-
-                return res.json({ message: 'Game ended.' , map: map });
-            }
-
             return res.json({ message: 'Game continues...' , map: maskSapperMap(updatedMap.map , updatedMap.mask ) });
         }
 
@@ -108,7 +96,7 @@ export async function PlaySapper(req: AuthRequest, res: Response) {
 }
 
 //POST
-export async function StartSapper(req: AuthRequest, res: Response)
+export async function startSapper(req: AuthRequest, res: Response)
 {
     const { bombsCount , betAmount , mapSize } = req.body;
 
@@ -118,7 +106,10 @@ export async function StartSapper(req: AuthRequest, res: Response)
 
     try
     {
-
+        await prisma.wallet.update({
+            where: {userId},
+            data: { balance: {decrement: betAmount } , transactions: {create: {amount: betAmount , type: "BET"}}},
+        })
 
         if (mapSize * mapSize - 1 <= bombsCount)
         {
@@ -141,6 +132,8 @@ export async function StartSapper(req: AuthRequest, res: Response)
 
         const maskedMap = maskSapperMap(mapRecord.map, initialMask);
 
+        console.log(mapRecord.map)
+        console.log(maskedMap);
         return res.json({
             map: maskedMap
         });
@@ -240,3 +233,4 @@ async function destroyMap(userId: string)
         return null;
     }
 }
+
