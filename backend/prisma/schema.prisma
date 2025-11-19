@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  shadowDatabaseUrl = ""
 }
 
 /// Dont touch its default in db
@@ -21,13 +20,15 @@ model spatial_ref_sys {
 
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String
+  id              String   @id @default(uuid())
+  email           String   @unique
+  username        String
   hashedPassword  String
-  createdAt DateTime @default(now())
+  createdAt       DateTime @default(now())
 
   wallet Wallet?
+
+  sapperMaps SapperMap[]
 
   role UserRole @default(NORMAL)
 }
@@ -44,7 +45,7 @@ model Wallet {
   user User @relation(fields: [userId], references: [id])
 
   balance Decimal @default(0.00) @db.Decimal(10, 2) // Kaska
-  transactions     Transaction[]
+  transactions Transaction[]
 }
 
 model Transaction {
@@ -55,16 +56,14 @@ model Transaction {
   wallet           Wallet       @relation(fields: [walletId], references: [id])
 
   amount           Decimal      @db.Decimal(10, 2)
-  type             TransactionType // DEPOSIT | WITHDRAWAL | BET | WIN
+  type             TransactionType // DEPOSIT | WITHDRAWAL | LOST | WIN | BET
 }
 
 model Game {
-  id String @id @default(uuid())
-  name String @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String?
-  isActive Boolean @default(true)
-  winChancePrecentage Int // Max win chance, or only on games with const win chance
-  minWinChancePrecentage Int? // Optional minimum win chance on games with varying win chance
+  isActive    Boolean @default(true)
 }
 
 enum TransactionType {
@@ -72,10 +71,17 @@ enum TransactionType {
   WITHDRAWAL
   LOST
   WIN
+  BET
 }
 
-model SaperMap {
+model SapperMap {
   id String @id @default(uuid())
-  n Int
+  n  Int
   map String // Map stored as string
+  mask String // Mask of discovered fields
+  bet Int
+  winMultiplayer Float
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 }
