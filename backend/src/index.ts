@@ -69,6 +69,7 @@ const router = express.Router()
  *             schema:
  *               type: string
  *               example: Nie grasz nie wygrasz!
+ *
  */
 router.get('/', (req, res) => res.send('Nie grasz nie wygrasz!'))
 
