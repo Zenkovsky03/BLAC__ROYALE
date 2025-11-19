@@ -5,13 +5,9 @@ import { fileURLToPath} from "node:url";
 import UserRouter from "./Routes/userRoutes.ts";
 import WalletRouter from "./Routes/walletRoutes.ts";
 import GamesRouter from "./Routes/gamesRoutes.ts";
-import SapperRouter from "./Routes/sapperRoutes.ts";
-
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
-import dotenv from 'dotenv';
 
-dotenv.config({ path: './.env'});
 
 const app = express()
 
@@ -76,7 +72,6 @@ app.use('/', router)
 app.use('/api/users', UserRouter)
 app.use('/api/wallet' , WalletRouter)
 app.use('/api/games', GamesRouter)
-app.use('/api/Sapper', SapperRouter)
 
 // Serve Swagger documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
