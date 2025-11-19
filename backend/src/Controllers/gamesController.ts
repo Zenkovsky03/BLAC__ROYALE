@@ -11,7 +11,7 @@ export async function getGames(req: AuthRequest, res: Response)
     {
         const games = await prisma.game.findMany( {
             where: { isActive: true },
-            select: { name: true, description: true , winChancePrecentage: true , minWinChancePrecentage: true}
+            select: { name: true, description: true }
         } )
 
         res.status(200).json({games}); // Respond with the games
