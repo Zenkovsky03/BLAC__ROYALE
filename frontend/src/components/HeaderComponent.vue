@@ -1,11 +1,20 @@
 <template>
   <header class="flex w-full items-center justify-between whitespace-nowrap border-b border-solid border-primary/20 px-4 py-4 sm:px-6 lg:px-8">
-    <div class="flex items-center gap-4 text-white">
-      <div class="size-8 text-primary">
-        <img src="../../assets/logo_prototype.jpeg" alt="">
+    <div class="flex items-center gap-3 text-white">
+      <div class="w-9 h-9 rounded-full overflow-hidden border border-[#b84ff6]/70 shadow-[0_0_15px_#b84ff6]">
+        <img
+            src="../../assets/logo_prototype.png"
+            alt="Logo"
+            class="w-full h-full object-cover"
+        />
       </div>
-      <h2 class="text-white text-2xl font-black leading-tight tracking-wider uppercase">Blac Royale</h2>
+
+      <h2 class="text-2xl font-black leading-tight tracking-wider uppercase">
+        BLAC ROYALE
+      </h2>
     </div>
+
+
     <div class="flex-1 justify-end gap-8 md:flex">
       <div class="flex items-center gap-9">
         <a class="text-white text-sm font-medium leading-normal transition-colors hover:text-primary" href="#games">Games</a>
@@ -17,7 +26,7 @@
         >
           <span class="truncate">Sign Up</span>
         </button>
-        <button
+        <button @click="$emit('open-login')"
             class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 border border-primary text-primary text-sm font-bold leading-normal tracking-[0.015em] transition-all duration-300 hover:bg-primary/20 hover:text-white hover:shadow-glow-primary"
         >
           <span class="truncate">Login</span>
@@ -28,6 +37,7 @@
 </template>
 
 <script setup>
+  defineEmits(['open-login', 'open-register'])
 </script>
 
 <style scoped>

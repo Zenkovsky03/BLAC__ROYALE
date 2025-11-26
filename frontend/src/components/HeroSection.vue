@@ -11,7 +11,7 @@
               Enter the Realm of Blac Royale
             </h1>
             <h2 class="mx-auto max-w-lg text-secondary text-sm font-normal leading-normal @[480px]:text-lg @[480px]:font-normal @[480px]:leading-normal">
-              Claim Your 200% Welcome Bonus & 100 Free Spins. Your Cyberpunk Adventure Awaits.
+              Claim Your 200% Welcome Bonus.
             </h2>
           </div>
           <button

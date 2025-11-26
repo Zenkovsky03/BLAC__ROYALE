@@ -12,7 +12,7 @@
             </div>
             <h2 class="text-white text-xl font-black uppercase tracking-wider">Blac Royale</h2>
           </div>
-          <p class="text-sm text-white/60">The future of online gaming. Fair, secure, and immersive experiences in a cyberpunk world.</p>
+          <p class="text-sm text-white/60">The future of online gaming. Fair, secure, and immersive experiences.</p>
         </div>
         <div>
           <h3 class="font-bold text-primary">Legal</h3>
