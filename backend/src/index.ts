@@ -11,11 +11,12 @@ import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
 import dotenv from 'dotenv';
 import RankingRoutes from "./Routes/rankingRoutes.ts";
-
+import cors from 'cors';
 dotenv.config({ path: './.env'});
 
 const app = express()
-
+app.use(cors({ origin: 'http://localhost:5173' })); // lub origin: true na dev
+app.use(express.json());
 app.use(express.json()) // Adding middleware to parse JSON bodies
 
 const filename = fileURLToPath(import.meta.url);

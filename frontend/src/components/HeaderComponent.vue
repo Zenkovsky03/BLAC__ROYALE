@@ -21,7 +21,7 @@
         <a class="text-white text-sm font-medium leading-normal transition-colors hover:text-primary" href="#leaderboard">Leaderboard</a>
       </div>
       <div class="flex gap-2">
-        <button
+        <button @click="$emit('open-register')"
             class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 border border-primary text-primary text-sm font-bold leading-normal tracking-[0.015em] transition-all duration-300 hover:bg-primary/20 hover:text-white hover:shadow-glow-primary"
         >
           <span class="truncate">Sign Up</span>
