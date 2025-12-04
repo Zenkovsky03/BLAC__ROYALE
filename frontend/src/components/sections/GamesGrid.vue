@@ -14,7 +14,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import GameCard from './GameCard.vue'
+import GameCard from '../ui/GameCard.vue'
 
 defineEmits(['gameClick'])
 

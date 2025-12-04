@@ -3,7 +3,7 @@
     <div class="flex items-center gap-3 text-white">
       <div class="w-9 h-9 rounded-full overflow-hidden border border-[#b84ff6]/70 shadow-[0_0_15px_#b84ff6]">
         <img
-            src="../../assets/logo_prototype.png"
+            src="../../../assets/logo_prototype.png"
             alt="Logo"
             class="w-full h-full object-cover"
         />
