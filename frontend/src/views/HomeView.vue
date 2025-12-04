@@ -21,7 +21,7 @@
           <!-- Main content -->
           <main class="flex flex-col gap-10 py-10 md:gap-16 md:py-16" v-if="auth.booted">
             <HeroSection />
-            <GamesGrid />
+            <GamesGrid  @gameClick="openGameModal"/>
             <LeaderboardSection />
           </main>
 
@@ -40,6 +40,12 @@
     <AccountModal v-if="auth.isAuthenticated"/>
     <TransactionHistoryModal v-if="auth.isAuthenticated"/>
     <SlotGameModal />
+    <MinesweeperGameModal
+        v-if="showMinesweeper"
+        :balance="auth.balance ?? 0"
+        @close="showMinesweeper = false"
+        @balanceChange="handleBalanceChange"
+    />
   </div>
 </template>
 
@@ -59,11 +65,11 @@ import WithdrawModal from '@/components/modals/WithdrawModal.vue'
 import AccountModal from '@/components/modals/AccountModal.vue'
 import TransactionHistoryModal from '@/components/modals/TransactionHistoryModal.vue'
 import SlotGameModal from '@/components/games/SlotGameModal.vue'
-
+import MinesweeperGameModal from '@/components/games/MinesweeperGameModal.vue'
 const auth = useAuthStore()
 const showLogin = ref(false)
 const showRegister = ref(false)
-
+const showMinesweeper = ref(false)
 onMounted(async () => {
   auth.hydrateFromStorage()
   if (auth.isAuthenticated) await auth.fetchBalance()
@@ -77,5 +83,25 @@ async function onLoggedIn(payload: { token: string; user: any }) {
 
 function onLogout() {
   auth.logout()
+}
+
+async function handleBalanceChange(amount: number) {
+  // UWAGA: Ta implementacja jest mockowa.
+  // W tym mocku, zmieniamy saldo w Pinia Store i odświeżamy
+  if (auth.balance !== null) {
+    auth.balance += amount
+  }
+}
+function openGameModal(game: { id: string, name: string }) {
+  if (game.id === 'minesweeper') {
+    // 2. Wymuś logowanie, jeśli użytkownik nie jest zalogowany
+    if (!auth.isAuthenticated) {
+      showLogin.value = true;
+      return;
+    }
+    // 3. Jeśli zalogowany, otwórz modal
+    showMinesweeper.value = true;
+  }
+  // Tutaj dodasz logikę dla innych gier:
 }
 </script>
