@@ -1,7 +1,7 @@
 import express from 'express'
 import path, { dirname } from 'node:path'
 import { fileURLToPath} from "node:url";
-// @ts-ignore
+
 import UserRouter from "./Routes/userRoutes.ts";
 import WalletRouter from "./Routes/walletRoutes.ts";
 import GamesRouter from "./Routes/gamesRoutes.ts";

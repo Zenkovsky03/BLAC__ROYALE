@@ -1,49 +1,12 @@
 import { Router } from 'express';
 import { protect } from '../Middleware/authMiddleware.ts';
-import { getGames} from "../Controllers/gamesController.ts";
 import  { PlayRoulette } from '../Controllers/rouleteController.ts';
 import {balanceCheck} from "../Middleware/balanceMiddleware.ts";
 import {PlayCoinFlip} from "../Controllers/coinflipController.ts";
 
 const GamesRouter = Router();
 
-/**
- * @swagger
- * /api/games/get-games:
- *   get:
- *     summary: Get all available games
- *     tags: [Games]
- *     responses:
- *       200:
- *         description: List of available games
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 games:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       name:
- *                         type: string
- *                         example: Roulette
- *                       description:
- *                         type: string
- *                         example: Classic casino roulette game
- *                       winChancePrecentage:
- *                         type: number
- *                         example: 48.6
- *                       minWinChancePrecentage:
- *                         type: number
- *                         example: 2.7
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Server error
- */
-GamesRouter.get("/get-games"  , getGames)
+
 /**
  * @swagger
  * /api/games/play-roulette:
