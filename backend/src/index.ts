@@ -79,7 +79,7 @@ app.use('/', router)
 app.use('/api/users', UserRouter)
 app.use('/api/wallet' , WalletRouter)
 app.use('/api/games', GamesRouter)
-app.use('/api/Sapper', SapperRouter)
+app.use('/api/sapper', SapperRouter)
 app.use('/api/ranking', RankingRoutes)
 
 // Serve Swagger documentation
