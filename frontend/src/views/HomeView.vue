@@ -40,10 +40,10 @@
     <AccountModal v-if="auth.isAuthenticated"/>
     <TransactionHistoryModal v-if="auth.isAuthenticated"/>
     <SlotGameModal />
-    <CoinflipGameModal
-      v-if="showCoinflip"
+    <SliderGameModal
+      v-if="showSlider"
       :balance="auth.balance ?? 0"
-      @close="showCoinflip = false"
+      @close="showSlider = false"
       @balanceChange="handleBalanceChange"
     />
     <MinesweeperGameModal
@@ -72,12 +72,12 @@ import AccountModal from '@/components/modals/AccountModal.vue'
 import TransactionHistoryModal from '@/components/modals/TransactionHistoryModal.vue'
 import SlotGameModal from '@/components/games/SlotGameModal.vue'
 import MinesweeperGameModal from '@/components/games/MinesweeperGameModal.vue'
-import CoinflipGameModal from '@/components/games/CoinflipGameModal.vue'
+import SliderGameModal from '@/components/games/SliderGameModal.vue'
 const auth = useAuthStore()
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showMinesweeper = ref(false)
-const showCoinflip = ref(false)
+const showSlider = ref(false)
 onMounted(async () => {
   auth.hydrateFromStorage()
   if (auth.isAuthenticated) await auth.fetchBalance()
@@ -102,14 +102,16 @@ async function handleBalanceChange(amount: number) {
 }
 function openGameModal(game: { id: string, name: string }) {
   if (!auth.isAuthenticated) {
-    showLogin.value = true;
-    return;
+      showLogin.value = true;
+      return;
   }
+
   if (game.id === 'minesweeper') {
     showMinesweeper.value = true;
   }
-  if (game.id === 'coinflip') {
-    showCoinflip.value = true;
+  if (game.id === 'slider') {
+    showSlider.value = true;
   }
+  // Tutaj dodasz logikę dla innych gier:
 }
 </script>
