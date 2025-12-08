@@ -87,9 +87,7 @@ export async function getRankings(req: Request, res: Response) {
             .sort((a, b) => b.totalWinnings - a.totalWinnings)
             .map((user, index) => ({
                 rank: index + 1,
-                userId: user.userId,
                 username: user.username,
-                email: user.email,
                 totalWinnings: user.totalWinnings.toFixed(2),
                 winCount: user.winCount
             }));

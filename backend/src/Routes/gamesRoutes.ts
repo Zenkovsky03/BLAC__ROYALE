@@ -4,6 +4,7 @@ import  { PlayRoulette } from '../Controllers/rouleteController.ts';
 import {balanceCheck} from "../Middleware/balanceMiddleware.ts";
 import {PlayCoinFlip} from "../Controllers/coinflipController.ts";
 import {slotsSpin} from "../Controllers/slotsController.ts";
+import {sliderPlay} from "../Controllers/sliderController.ts";
 
 const GamesRouter = Router();
 
@@ -70,7 +71,7 @@ const GamesRouter = Router();
  *       500:
  *         description: Failed to play the game
  */
-GamesRouter.post("/play-roulette" , protect, balanceCheck , PlayRoulette)
+GamesRouter.post("/play-roulette" , protect, balanceCheck , PlayRoulette);
 /**
  * @swagger
  * /api/games/play-coin-flip:
@@ -118,16 +119,14 @@ GamesRouter.post("/play-roulette" , protect, balanceCheck , PlayRoulette)
  *       500:
  *         description: Failed to play the game
  */
-GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
-
+GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip);
 /**
  * @swagger
- * /api/slots-spin:
+ * /api/games/play-slots:
  *   post:
  *     summary: Spin the slot machine
- *     description: Performs a slot machine spin with 9 possible symbols. Deducts bet from wallet balance and adds winnings if applicable.
- *     tags:
- *       - Slots
+ *     description: Play a slot machine game with three reels. Each spin deducts the bet amount and awards winnings based on symbol matches.
+ *     tags: [Slots]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -137,18 +136,12 @@ GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
  *           schema:
  *             type: object
  *             required:
- *               - userId
  *               - bet
  *             properties:
- *               userId:
- *                 type: string
- *                 format: uuid
- *                 description: The ID of the user spinning
- *                 example: "550e8400-e29b-41d4-a716-446655440000"
  *               bet:
  *                 type: number
- *                 minimum: 0.01
- *                 description: The amount to bet on this spin
+ *                 minimum: 1
+ *                 description: Amount to wager on this spin
  *                 example: 10
  *     responses:
  *       200:
@@ -163,7 +156,7 @@ GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
  *                   items:
  *                     type: string
  *                     enum: [CHERRY, LEMON, ORANGE, PLUM, GRAPE, WATERMELON, BELL, STAR, SEVEN]
- *                   description: Array of 3 symbol names that appeared
+ *                   description: Symbol names for each of the three reels
  *                   example: ["CHERRY", "CHERRY", "CHERRY"]
  *                 symbols:
  *                   type: array
@@ -171,33 +164,33 @@ GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
  *                     type: integer
  *                     minimum: 1
  *                     maximum: 9
- *                   description: Array of 3 symbol IDs (1-9)
+ *                   description: Numeric IDs corresponding to the reel symbols
  *                   example: [1, 1, 1]
  *                 bet:
  *                   type: number
- *                   description: The amount that was bet
+ *                   description: Amount wagered on this spin
  *                   example: 10
  *                 winAmount:
  *                   type: number
- *                   description: Total amount won (0 if no win)
+ *                   description: Total amount won (0 if no winning combination)
  *                   example: 20
  *             examples:
  *               winning_spin:
- *                 summary: Winning spin example
+ *                 summary: Winning spin with three cherries
  *                 value:
- *                   reels: ["SEVEN", "SEVEN", "SEVEN"]
- *                   symbols: [9, 9, 9]
+ *                   reels: ["CHERRY", "CHERRY", "CHERRY"]
+ *                   symbols: [1, 1, 1]
  *                   bet: 10
- *                   winAmount: 500
+ *                   winAmount: 20
  *               losing_spin:
- *                 summary: Losing spin example
+ *                 summary: Losing spin with no matches
  *                 value:
  *                   reels: ["CHERRY", "LEMON", "ORANGE"]
  *                   symbols: [1, 2, 3]
  *                   bet: 10
  *                   winAmount: 0
  *       400:
- *         description: Invalid request or insufficient balance
+ *         description: Insufficient balance or invalid bet amount
  *         content:
  *           application/json:
  *             schema:
@@ -205,9 +198,9 @@ GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Invalid request"
+ *                   example: "Insufficient balance"
  *       401:
- *         description: Unauthorized - Authentication required
+ *         description: Unauthorized - Invalid or missing authentication token
  *         content:
  *           application/json:
  *             schema:
@@ -215,7 +208,7 @@ GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Not authorized, token failed"
+ *                   example: "Unauthorized"
  *       404:
  *         description: User not found
  *         content:
@@ -227,7 +220,7 @@ GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
  *                   type: string
  *                   example: "User not found"
  *       500:
- *         description: Server error
+ *         description: Server error during spin processing
  *         content:
  *           application/json:
  *             schema:
@@ -240,59 +233,131 @@ GamesRouter.post("/play-coin-flip" , protect, balanceCheck , PlayCoinFlip)
 GamesRouter.post("/play-slots", protect, balanceCheck , slotsSpin);
 /**
  * @swagger
+ * /api/games/play-slider:
+ *   post:
+ *     summary: Play the slider game
+ *     description: Place a bet on the slider game by selecting a range (min-max). Win if the random number falls within your range, with payouts based on range size.
+ *     tags: [Slider]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - bet
+ *               - min
+ *               - max
+ *             properties:
+ *               bet:
+ *                 type: number
+ *                 description: The amount to bet (must be non-negative)
+ *                 example: 100
+ *               min:
+ *                 type: integer
+ *                 description: Minimum range value (0-100, must be less than max)
+ *                 minimum: 0
+ *                 maximum: 100
+ *                 example: 30
+ *               max:
+ *                 type: integer
+ *                 description: Maximum range value (0-100, must be greater than min)
+ *                 minimum: 0
+ *                 maximum: 100
+ *                 example: 70
+ *     responses:
+ *       200:
+ *         description: Game played successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 num:
+ *                   type: integer
+ *                   description: The randomly generated number (0-100)
+ *                   example: 45
+ *                 bet:
+ *                   type: number
+ *                   description: The bet amount
+ *                   example: 100
+ *                 winAmount:
+ *                   type: number
+ *                   description: The amount won (0 if lost, bet*(1+multiplier) if won normally, bet*(1+multiplier)*2 if hit exact boundary)
+ *                   example: 160
+ *       400:
+ *         description: Invalid request parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Invalid request
+ *       401:
+ *         description: Unauthorized - Invalid or missing authentication token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Unauthorized
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Spin failed
+ */
+GamesRouter.post('/play-slider' , protect , balanceCheck , sliderPlay);
+
+/**
+ * @swagger
  * components:
  *   schemas:
- *     Symbol:
+ *     SlotSymbol:
  *       type: object
  *       properties:
  *         id:
  *           type: integer
- *           description: Symbol ID (1-9)
+ *           description: Unique identifier for the symbol
  *         weight:
  *           type: integer
- *           description: Weight for random selection (higher = more common)
+ *           description: Probability weight for symbol appearance
  *         payout:
  *           type: object
- *           description: Payout multipliers for matching symbols
- *           properties:
- *             3:
- *               type: number
- *               description: Multiplier when 3 symbols match
+ *           description: Payout multipliers based on number of matching symbols
  *       example:
  *         id: 1
  *         weight: 100
  *         payout:
  *           3: 2
- *
- *     SlotSymbols:
- *       type: object
- *       description: All available slot symbols with their properties
- *       properties:
- *         CHERRY:
- *           $ref: '#/components/schemas/Symbol'
- *         LEMON:
- *           $ref: '#/components/schemas/Symbol'
- *         ORANGE:
- *           $ref: '#/components/schemas/Symbol'
- *         PLUM:
- *           $ref: '#/components/schemas/Symbol'
- *         GRAPE:
- *           $ref: '#/components/schemas/Symbol'
- *         WATERMELON:
- *           $ref: '#/components/schemas/Symbol'
- *         BELL:
- *           $ref: '#/components/schemas/Symbol'
- *         STAR:
- *           $ref: '#/components/schemas/Symbol'
- *         SEVEN:
- *           $ref: '#/components/schemas/Symbol'
- *
  *   securitySchemes:
  *     bearerAuth:
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
- *       description: JWT token obtained from login endpoint
  */
+
+
 
 export default GamesRouter;

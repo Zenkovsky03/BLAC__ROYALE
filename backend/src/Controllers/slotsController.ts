@@ -22,10 +22,8 @@ type SymbolKey = keyof typeof SYMBOLS;
 export async function slotsSpin(req: AuthRequest, res: Response) {
     try {
         // Validation
-        const {userId, bet} = req.body;
-
-        if (!userId)
-            return res.status(400).json({error: 'Invalid request'});
+        const {bet} = req.body;
+        const userId = String(req.userId!);
 
         const user = await prisma.user.findUnique({where: {id: userId}});
 
@@ -57,7 +55,7 @@ export async function slotsSpin(req: AuthRequest, res: Response) {
             })
         }
 
-        res.json({
+        return res.json({
             reels,
             symbols: reels.map(r => SYMBOLS[r].id),
             bet,
