@@ -15,7 +15,6 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
 
     try
     {
-
         let winMultiplayer = 1;
         let WinScenario = 0;
 

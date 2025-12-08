@@ -41,7 +41,7 @@ const WalletRouter = Router();
  *       500:
  *         description: Server error
  */
-WalletRouter.get('/getwallet', protect, getWallet)
+WalletRouter.get('/get-wallet', protect, getWallet)
 /**
  * @swagger
  * /api/wallet/deposit:

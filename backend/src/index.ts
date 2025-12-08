@@ -1,7 +1,7 @@
 import express from 'express'
 import path, { dirname } from 'node:path'
 import { fileURLToPath} from "node:url";
-// @ts-ignore
+
 import UserRouter from "./Routes/userRoutes.ts";
 import WalletRouter from "./Routes/walletRoutes.ts";
 import GamesRouter from "./Routes/gamesRoutes.ts";
@@ -79,7 +79,7 @@ app.use('/', router)
 app.use('/api/users', UserRouter)
 app.use('/api/wallet' , WalletRouter)
 app.use('/api/games', GamesRouter)
-app.use('/api/Sapper', SapperRouter)
+app.use('/api/sapper', SapperRouter)
 app.use('/api/ranking', RankingRoutes)
 
 // Serve Swagger documentation
