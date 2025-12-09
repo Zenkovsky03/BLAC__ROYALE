@@ -22,7 +22,6 @@
           <main class="flex flex-col gap-10 py-10 md:gap-16 md:py-16" v-if="auth.booted">
             <HeroSection />
             <GamesGrid  @gameClick="openGameModal"/>
-            <LeaderboardSection />
           </main>
 
         </div>
