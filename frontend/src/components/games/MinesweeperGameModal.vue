@@ -51,10 +51,21 @@
             </div>
           </div>
 
-          <button @click="startGame" class="cyber-button-start mx-auto w-full max-w-md">
-            <span class="material-symbols-outlined text-3xl">play_arrow</span>
-            START GAME
-          </button>
+          <div class="flex flex-col items-center gap-3">
+            <button
+                @click="startGame"
+                :disabled="betAmount > props.balance"
+                class="cyber-button-start mx-auto w-full max-w-md transition-all"
+                :class="{ 'opacity-50 grayscale cursor-not-allowed': betAmount > props.balance }"
+            >
+              <span class="material-symbols-outlined text-3xl">play_arrow</span>
+              START GAME
+            </button>
+
+            <div v-if="betAmount > props.balance" class="text-red-500 font-bold uppercase tracking-wider text-sm animate-pulse">
+              Insufficient Funds! (Available: ${{ props.balance }})
+            </div>
+          </div>
         </div>
 
         <div v-else>
@@ -186,21 +197,22 @@ const gridStyle = computed(() => ({
 
 // === GAME LOGIC ===
 function startGame() {
+  if (betAmount.value > props.balance) {
+    alert("Niewystarczające środki! Doładuj konto.")
+    return
+  }
   const totalCells = gridSize.value * gridSize.value
   const bombIndices = new Set()
   while (bombIndices.size < bombs.value) {
     bombIndices.add(Math.floor(Math.random() * totalCells))
   }
 
-  // Calculate multiplier based on risk
   const safeCells = totalCells - bombs.value
-  // Simple incremental multiplier logic for demonstration (can be made exponential)
   const stepMultiplier = 1 + (bombs.value / totalCells) * 0.5;
 
   cells.value = Array.from({length: totalCells}, (_, i) => ({
     bomb: bombIndices.has(i),
     revealed: false,
-    // We store the POTENTIAL new multiplier if this cell is clicked next
     multiplierStep: stepMultiplier
   }))
 
