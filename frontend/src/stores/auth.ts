@@ -2,11 +2,19 @@ import { defineStore } from 'pinia'
 
 type User = { id: string; email: string; username?: string } | null
 
+interface Transaction {
+    id: string;
+    amount: string;
+    type: 'DEPOSIT' | 'WITHDRAWAL' | 'WIN' | 'LOST' | 'BET';
+    timestamp: string;
+}
+
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         token: '' as string,
-        user: null as User,
+        user: null as any,
         balance: null as number | null,
+        transactions: [] as Transaction[],
         booted: false,
     }),
     getters: {
@@ -28,7 +36,6 @@ export const useAuthStore = defineStore('auth', {
         },
         async fetchBalance() {
             const base = import.meta.env.VITE_API_URL || ''
-
             const res = await fetch(`${base}/api/wallet/get-wallet`, {
                 headers: { Authorization: `Bearer ${this.token}` }
             })
@@ -37,9 +44,11 @@ export const useAuthStore = defineStore('auth', {
                 const data = await res.json()
 
                 this.balance = data.balance ? Number(data.balance) : 0
+
+                this.transactions = data.transactions || []
             } else {
-                // Jeśli błąd (np. 401, 404), ustawiamy 0
                 this.balance = 0
+                this.transactions = []
             }
         },
         // --- TO JEST FUNKCJA, KTÓREJ CI BRAKOWAŁO ---

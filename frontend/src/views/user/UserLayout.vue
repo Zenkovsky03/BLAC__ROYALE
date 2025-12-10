@@ -5,5 +5,4 @@
 </template>
 
 <script setup>
-// Ten plik jest teraz tylko ramką (wrapperem)
 </script>

@@ -17,21 +17,37 @@
           </div>
           <div class="flex flex-col gap-4">
             <h2 class="text-lg font-bold uppercase tracking-widest text-primary">Recent Activity</h2>
+
             <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between text-sm">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-green-400">arrow_upward</span>
-                  <p class="text-white/80">Won on <span class="font-bold text-white">Minesweeper</span></p>
-                </div>
-                <p class="font-mono font-bold text-green-400">+$50.00</p>
+
+              <div v-if="auth.transactions.length === 0" class="text-white/50 text-sm italic">
+                No recent activity.
               </div>
-              <div class="flex items-center justify-between text-sm">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-red-400">arrow_downward</span>
-                  <p class="text-white/80">Lost on <span class="font-bold text-white">Roulette</span></p>
+
+              <div
+                  v-for="tx in auth.transactions"
+                  :key="tx.id"
+                  class="flex items-center justify-between text-sm rounded-lg bg-white/5 p-2 px-3 border border-white/5 hover:border-white/10 transition-colors"
+              >
+                <div class="flex items-center gap-3">
+        <span
+            class="material-symbols-outlined"
+            :class="getIconColor(tx.type)"
+        >
+          {{ getIconName(tx.type) }}
+        </span>
+
+                  <p class="text-white/80">
+                    {{ formatLabel(tx.type) }}
+                    <span class="text-xs text-white/40 block">{{ formatDate(tx.timestamp) }}</span>
+                  </p>
                 </div>
-                <p class="font-mono font-bold text-red-400">-$20.00</p>
+
+                <p class="font-mono font-bold" :class="getAmountColor(tx.type)">
+                  {{ getSign(tx.type) }}${{ Number(tx.amount).toFixed(2) }}
+                </p>
               </div>
+
             </div>
           </div>
         </div>
@@ -113,6 +129,45 @@ const handleChangePasswordClick = () => {
 
 const handleNotificationsClick = () => {
   router.push('/panel/notifications');
+};
+
+
+// Helpery do ikon i kolorów
+const getIconName = (type) => {
+  if (['DEPOSIT', 'WIN'].includes(type)) return 'arrow_upward';
+  if (['WITHDRAWAL', 'LOST', 'BET'].includes(type)) return 'arrow_downward';
+  return 'circle';
+};
+
+const getIconColor = (type) => {
+  if (['DEPOSIT', 'WIN'].includes(type)) return 'text-green-400';
+  return 'text-red-400';
+};
+
+const getAmountColor = (type) => {
+  if (['DEPOSIT', 'WIN'].includes(type)) return 'text-green-400';
+  return 'text-red-400';
+};
+
+const getSign = (type) => {
+  if (['DEPOSIT', 'WIN'].includes(type)) return '+';
+  return '-';
+};
+
+const formatLabel = (type) => {
+  switch (type) {
+    case 'DEPOSIT': return 'Deposit Funds';
+    case 'WITHDRAWAL': return 'Withdrawal';
+    case 'WIN': return 'Game Win';
+    case 'LOST': return 'Game Loss';
+    case 'BET': return 'Game Bet';
+    default: return type;
+  }
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 </script>
 
