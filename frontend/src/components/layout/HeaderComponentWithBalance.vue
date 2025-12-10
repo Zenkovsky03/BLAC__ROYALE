@@ -2,6 +2,9 @@
 import { useAuthStore } from '@/stores/auth.js'
 import { useRouter } from 'vue-router'
 
+// Definiujemy zdarzenie, które emitujemy do rodzica (otwarcie modala)
+const emit = defineEmits(['open-wallet'])
+
 const auth = useAuthStore()
 const router = useRouter()
 
@@ -31,7 +34,6 @@ function handleLogout() {
     </div>
 
     <div class="flex-1 justify-end gap-8 md:flex">
-
       <router-link
           :to="{ path: '/home', hash: '#games' }"
           class="text-white text-sm font-medium leading-normal transition-colors hover:text-primary flex items-center gap-2"
@@ -39,37 +41,40 @@ function handleLogout() {
         Games
       </router-link>
 
-        <router-link
-            to="/leaderboard"
-            class="text-white text-sm font-medium leading-normal transition-colors hover:text-primary flex items-center gap-"
-        >
-          <span class="material-symbols-outlined text-lg">leaderboard</span>
-          Leaderboard
-        </router-link>
+      <router-link
+          to="/leaderboard"
+          class="text-white text-sm font-medium leading-normal transition-colors hover:text-primary flex items-center gap-2"
+      >
+        <span class="material-symbols-outlined text-lg">leaderboard</span>
+        Leaderboard
+      </router-link>
+    </div>
+
+    <div class="flex items-center gap-4 pl-6">
+
+      <div
+          @click="$emit('open-wallet')"
+          class=" cursor-pointer select-none lg:block rounded-lg bg-[#1b1b1b] px-4 py-2 text-sm font-semibold text-white border border-white/10 transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_rgba(184,79,246,0.3)] hover:scale-105"
+      >
+        {{ auth.balance ?? 0 }}$
       </div>
 
-      <div class="flex items-center gap-4 pl-6">
+      <router-link
+          to="/panel"
+          class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-background-dark text-sm font-bold leading-normal tracking-[0.015em] transition-all duration-300 hover:scale-105 hover:shadow-glow-primary"
+      >
+        <span class="material-symbols-outlined text-lg mr-2">person</span>
+        <span class="truncate">Panel</span>
+      </router-link>
 
-        <div class=" lg:block rounded-lg bg-[#1b1b1b] px-4 py-2 text-sm font-semibold text-white border border-white/10">
-          {{ auth.balance ?? 0 }}$
-        </div>
+      <button
+          @click="handleLogout"
+          class="flex items-center justify-center rounded-lg h-10 px-4 border border-red-500/50 text-red-500 text-sm font-bold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400"
+      >
+        Logout
+      </button>
 
-        <router-link
-            to="/panel"
-            class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-background-dark text-sm font-bold leading-normal tracking-[0.015em] transition-all duration-300 hover:scale-105 hover:shadow-glow-primary"
-        >
-          <span class="material-symbols-outlined text-lg mr-2">person</span>
-          <span class="truncate">Panel</span>
-        </router-link>
-
-        <button
-            @click="handleLogout"
-            class="flex items-center justify-center rounded-lg h-10 px-4 border border-red-500/50 text-red-500 text-sm font-bold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400"
-        >
-          Logout
-        </button>
-
-      </div>
+    </div>
   </header>
 </template>
 
