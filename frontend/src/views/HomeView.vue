@@ -72,14 +72,16 @@ import TransactionHistoryModal from '@/components/modals/TransactionHistoryModal
 import SlotGameModal from '@/components/games/SlotGameModal.vue'
 import MinesweeperGameModal from '@/components/games/MinesweeperGameModal.vue'
 import SliderGameModal from '@/components/games/SliderGameModal.vue'
-const auth = useAuthStore()
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showMinesweeper = ref(false)
 const showSlider = ref(false)
+const auth = useAuthStore()
+
 onMounted(async () => {
-  auth.hydrateFromStorage()
-  if (auth.isAuthenticated) await auth.fetchBalance()
+  if (auth.isAuthenticated) {
+    await auth.fetchBalance()
+  }
 })
 
 async function onLoggedIn(payload: { token: string; user: any }) {
