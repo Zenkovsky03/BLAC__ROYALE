@@ -1,7 +1,5 @@
 import type { Request, Response } from "express";
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import {prisma} from "../../prisma/prismaSingleton.ts";
 
 export async function getRankings(req: Request, res: Response) {
     const period = req.params.period;

@@ -1,8 +1,7 @@
 import type {AuthRequest} from "../Middleware/authMiddleware.ts";
-import { PrismaClient } from '@prisma/client';
 import type {Response} from "express";
 
-const prisma = new PrismaClient();
+import {prisma} from "../../prisma/prismaSingleton.ts";
 
 const SYMBOLS = {
     CHERRY: { id: 1, weight: 100, payout: { 3: 2 } },
