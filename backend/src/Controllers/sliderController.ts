@@ -1,8 +1,7 @@
 import type {AuthRequest} from "../Middleware/authMiddleware.ts";
-import { PrismaClient } from '@prisma/client';
 import type {Response} from "express";
 
-const prisma = new PrismaClient();
+import {prisma} from "../../prisma/prismaSingleton.ts";
 
 export async function sliderPlay(req: AuthRequest, res: Response)
 {
@@ -27,7 +26,7 @@ export async function sliderPlay(req: AuthRequest, res: Response)
 
         const num = getRandomInt(0, 100);
 
-        let winAmount = 0;
+        let winAmount;
         const diffMultiplayer = 1 - (max - min)/100
 
         if (num > max || num < min)
