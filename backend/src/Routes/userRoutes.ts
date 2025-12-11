@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { protect } from '../Middleware/authMiddleware.ts';
-import {register, login, profile, isAuthenticated, updateUsername , updateEmail , changePassword} from '../Controllers/authController.ts';
+import {register, login, profile, isAuthenticated, updateUsername, updateEmail, changePassword, deleteUser} from '../Controllers/authController.ts';
 import {requestPasswordReset , verifyResetToken , resetPassword  } from '../Controllers/passwordResetController.ts';
 
 const UserRouter = Router();
@@ -421,6 +421,58 @@ UserRouter.patch('/update-email', protect, updateEmail)
  *                   example: Internal server error
  */
 UserRouter.patch('/changePassword', protect, changePassword)
+/**
+ * @swagger
+ * /api/users/delete-user:
+ *   delete:
+ *     summary: Delete user account
+ *     description: Permanently delete the authenticated user's account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid token.
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Server error
+ */
+UserRouter.delete('/delete-user', protect, deleteUser);
 /**
  * @swagger
  * /api/users/is-authenticated:
