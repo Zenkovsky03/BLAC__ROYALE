@@ -13,11 +13,11 @@ import dotenv from 'dotenv';
 import RankingRoutes from "./Routes/rankingRoutes.ts";
 import cors from 'cors';
 import nodemailer from "nodemailer";
+import AdminRouter from "./Routes/adminRoutes.ts";
 dotenv.config({ path: './.env'});
 
 const app = express()
 app.use(cors({ origin: 'http://localhost:5173' })); // lub origin: true na dev
-app.use(express.json());
 app.use(express.json()) // Adding middleware to parse JSON bodies
 
 const filename = fileURLToPath(import.meta.url);
@@ -82,6 +82,7 @@ app.use('/api/wallet' , WalletRouter)
 app.use('/api/games', GamesRouter)
 app.use('/api/sapper', SapperRouter)
 app.use('/api/ranking', RankingRoutes)
+app.use('/api/admin', AdminRouter)
 
 // Serve Swagger documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
