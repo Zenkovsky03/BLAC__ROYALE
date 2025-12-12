@@ -2,18 +2,11 @@ import type { Response} from "express";
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 import {prisma} from "../../prisma/prismaSingleton.ts";
 
-
-// bomb '.'
-// number is just number
-// mask: '0' undiscovered , '1' discovered
-// masked map: '?' undiscovered
-
-
 //POST
-
 export async function resignSapper(req: AuthRequest, res: Response)
 {
-    const userId = String(req.params.userId);
+    // POPRAWKA: ID bierzemy z tokena (req.userId), a nie z parametrów URL
+    const userId = req.userId!;
 
     try
     {
@@ -32,65 +25,89 @@ export async function resignSapper(req: AuthRequest, res: Response)
 
         await destroyMap(userId);
 
-        return res.json({ message: 'Game ended.', map: map , wallet: prisma.wallet.findFirst({ where: { userId } }) });
+        // Zwracamy map.map (string), aby frontend mógł go wyświetlić
+        return res.json({ message: 'Game ended.', map: { ...map, map: map.map } });
     }
     catch (err)
     {
         console.error(err);
-        res.status(500).json({ message: 'Failed to resign. KEEP PLAYING!!!' });
+        res.status(500).json({ message: 'Failed to resign.' });
     }
-
 }
 
 //POST
+// backend/src/Controllers/sapperController.ts
+
 export async function playSapper(req: AuthRequest, res: Response) {
     const { X, Y } = req.body;
-    const userId = String(req.params.userId);
+    const userId = req.userId!;
 
     try {
         const map = await prisma.sapperMap.findFirst({ where: { userId: userId } });
 
         if (map === null) {
-            console.warn(`Map not found for userId: ${userId}`);
-            return res.status(404).json({ message: `Sapper map not found for user ${userId}.` });
+            return res.status(404).json({ message: `Sapper map not found.` });
         }
         const xValue = Number(X);
         const yValue = Number(Y);
-
-        if (isNaN(xValue) || isNaN(yValue)) {
-            return res.status(400).json({ message: 'Invalid coordinates provided.' });
-        }
-
         const index = xValue * map.n + yValue;
 
-        if (index < 0 || index >= map.mask.length) {
-            return res.status(400).json({ message: 'Coordinates are out of map bounds.' });
+        if (index < 0 || index >= map.mask.length) return res.status(400).json({ message: 'Out of bounds.' });
+
+        // Jeśli już kliknięte - zwróć to co jest
+        if (map.mask[index] === '1') {
+            return res.json({ message: 'Field already revealed.', map: maskSapperMap(map.map, map.mask), multiplier: map.winMultiplayer });
         }
 
+        // Odkrywamy pole
         map.mask = map.mask.slice(0, index) + '1' + map.mask.slice(index + 1);
 
         if (map.map[index] === '.')
         {
+            // --- PRZEGRANA ---
             await destroyMap(userId);
-            return res.json({ message: 'Game lost.' , map: map });
-
+            // Zwracamy pełną mapę (map.map), żeby user widział gdzie były bomby
+            return res.json({ message: 'Game lost.', map: map.map, multiplier: 0 });
         }
         else
         {
-            map.winMultiplayer += Number(map.map[xValue * map.n + yValue]) / 10;
+            // --- WYGRANA RUNDA (MATEMATYKA KASYNA) ---
 
-            const updatedMap = await prisma.sapperMap.update({
-                where: { id: map.id },
-                data: map
+            const totalCells = map.n * map.n;
+            const totalBombs = map.map.split('').filter(c => c === '.').length;
+
+            // Ile pól było odkrytych PRZED tym ruchem? (liczymy '1' w masce i odejmujemy to obecne, które właśnie dodaliśmy)
+            const revealedBefore = map.mask.split('').filter(c => c === '1').length - 1;
+
+            // Ile było dostępnych pól do kliknięcia?
+            const remainingUnknown = totalCells - revealedBefore;
+
+            // Ile z nich było bezpiecznych?
+            const remainingSafe = remainingUnknown - totalBombs;
+
+            // Szansa na trafienie w tym ruchu:
+            const probability = remainingSafe / remainingUnknown;
+
+            // Nowy mnożnik = Stary Mnożnik * (1 / Szansa).
+            // Dajemy 99% payout (1% dla kasyna house edge)
+            const houseEdge = 0.99;
+            const stepMultiplier = (1 / probability) * houseEdge;
+
+            map.winMultiplayer = map.winMultiplayer * stepMultiplier;
+
+            const updatedMap = await prisma.sapperMap.update({ where: { id: map.id }, data: map });
+
+            return res.json({
+                message: 'Game continues...',
+                // Zamiast liczb, frontend dostanie po prostu odkrytą mapę
+                map: maskSapperMap(updatedMap.map, updatedMap.mask),
+                multiplier: updatedMap.winMultiplayer
             });
-
-            return res.json({ message: 'Game continues...' , map: maskSapperMap(updatedMap.map , updatedMap.mask ) });
         }
 
     } catch (err) {
-        // This catch block handles unexpected database or server errors
         console.error(err);
-        res.status(500).json({ message: 'Failed playing sapper game due to a server error.' });
+        res.status(500).json({ message: 'Server error.' });
     }
 }
 
@@ -98,8 +115,7 @@ export async function playSapper(req: AuthRequest, res: Response) {
 export async function startSapper(req: AuthRequest, res: Response)
 {
     const { bombsCount , betAmount , mapSize } = req.body;
-
-    const userId = req.userId!;
+    const userId = req.userId!; // Tu było dobrze
 
     await destroyMap(userId);
 
@@ -112,7 +128,8 @@ export async function startSapper(req: AuthRequest, res: Response)
 
         if (mapSize * mapSize - 1 <= bombsCount)
         {
-            new Error('Invalid arguments: The number of bombs (bombsCount) must be less than the total number of cells minus one (mapSize * mapSize - 1).');
+            // Poprawione rzucanie błędu
+            throw new Error('Too many bombs');
         }
 
         const mapData = generateSapperMap( mapSize , bombsCount);
@@ -128,11 +145,8 @@ export async function startSapper(req: AuthRequest, res: Response)
         };
 
         const mapRecord = await prisma.sapperMap.create({ data: data });
-
         const maskedMap = maskSapperMap(mapRecord.map, initialMask);
 
-        console.log(mapRecord.map)
-        console.log(maskedMap);
         return res.json({
             map: maskedMap
         });
@@ -143,6 +157,8 @@ export async function startSapper(req: AuthRequest, res: Response)
         res.status(500).json({message: 'Failed starting sapper game.'});
     }
 }
+
+// --- Helper Functions ---
 
 function generateSapperMap(size: number, bombs: number): string
 {
@@ -176,22 +192,14 @@ function generateSapperMap(size: number, bombs: number): string
                 const maxRow = map2D.length - 1;
                 const maxCol = map2D[i]!.length - 1;
 
-                if ( i > 0 && j > 0 && map2D[i-1]![j-1] === '.' )
-                    count++;
-                if ( i > 0 && map2D[i-1]![j] === '.' )
-                    count++;
-                if ( j > 0 && map2D[i]![j-1] === '.' )
-                    count++;
-                if ( i > 0 && j < maxCol && map2D[i-1]![j+1] === '.' )
-                    count++;
-                if ( i < maxRow && j > 0  && map2D[i+1]![j-1] === '.' )
-                    count++;
-                if ( i < maxRow && map2D[i+1]![j] === '.' )
-                    count++;
-                if ( j < maxCol && map2D[i]![j+1] === '.' )
-                    count++;
-                if ( i < maxRow && j < maxCol && map2D[i+1]![j+1] === '.' )
-                    count++;
+                if ( i > 0 && j > 0 && map2D[i-1]![j-1] === '.' ) count++;
+                if ( i > 0 && map2D[i-1]![j] === '.' ) count++;
+                if ( j > 0 && map2D[i]![j-1] === '.' ) count++;
+                if ( i > 0 && j < maxCol && map2D[i-1]![j+1] === '.' ) count++;
+                if ( i < maxRow && j > 0  && map2D[i+1]![j-1] === '.' ) count++;
+                if ( i < maxRow && map2D[i+1]![j] === '.' ) count++;
+                if ( j < maxCol && map2D[i]![j+1] === '.' ) count++;
+                if ( i < maxRow && j < maxCol && map2D[i+1]![j+1] === '.' ) count++;
                 map2D[i]![j] = count.toString();
             }
         }
@@ -216,7 +224,6 @@ function getRandomIntInclusive(min: number, max: number): number
 {
     min = Math.ceil(min);
     max = Math.floor(max);
-
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
@@ -224,7 +231,6 @@ async function destroyMap(userId: string)
 {
     try {
         return await prisma.sapperMap.deleteMany({where: {userId: userId},});
-
     }
     catch (err)
     {
@@ -232,4 +238,3 @@ async function destroyMap(userId: string)
         return null;
     }
 }
-

@@ -26,7 +26,7 @@
         <p class="mt-2 text-sm text-secondary/80">Join the elite players club</p>
       </div>
 
-      <form @submit.prevent="handleRegister" class="space-y-5">
+      <form @submit.prevent="handleRegister" class="space-y-4">
 
         <div class="space-y-2">
           <label class="text-xs font-bold uppercase tracking-wider text-primary">Username</label>
@@ -56,6 +56,21 @@
                 required
                 placeholder="user@example.com"
                 class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-4 text-white placeholder-white/20 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)]"
+            />
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-primary">Date of Birth</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-primary transition-colors">
+              calendar_month
+            </span>
+            <input
+                v-model="dateOfBirth"
+                type="date"
+                required
+                class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-4 text-white placeholder-white/50 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)] appearance-none"
             />
           </div>
         </div>
@@ -121,6 +136,7 @@ import { useAuthStore } from '@/stores/auth.js'
 
 const email = ref('')
 const username = ref('')
+const dateOfBirth = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
@@ -131,25 +147,48 @@ const API = import.meta.env.VITE_API_URL || ''
 
 const auth = useAuthStore()
 
+function getAge(dateString: string) {
+  const today = new Date();
+  const birthDate = new Date(dateString);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 async function handleRegister() {
-  if (!email.value || !password.value) {
+  if (!email.value || !password.value || !dateOfBirth.value) {
     alert('Please fill in all fields.')
     return
   }
+
   if (password.value !== confirmPassword.value) {
     alert('Passwords do not match.')
     return
   }
 
+  // WERYFIKACJA WIEKU (18+)
+  const age = getAge(dateOfBirth.value);
+  if (age < 18) {
+    alert('You must be at least 18 years old to register.');
+    return;
+  }
+
   loading.value = true
   try {
+    // Wysyłamy sformatowaną datę (ISO) do backendu
+    const isoDate = new Date(dateOfBirth.value).toISOString();
+
     const res = await fetch(`${API}/api/users/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: email.value,
         username: username.value || undefined,
-        password: password.value
+        password: password.value,
+        dateOfBirth: isoDate // Dodane pole
       })
     })
 
@@ -158,8 +197,6 @@ async function handleRegister() {
       throw new Error(data?.message || 'Registration failed')
     }
 
-    // Backend zwraca { token, newUser } lub podobne.
-    // Sprawdź czy data.loggedInUser istnieje, jeśli nie - użyj data.newUser
     const user = data.loggedInUser || data.newUser
 
     auth.loginSuccess(data.token, user)
@@ -177,5 +214,14 @@ async function handleRegister() {
 <style scoped>
 .neon-text {
   text-shadow: 0 0 10px rgba(184, 79, 246, 0.6);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 </style>

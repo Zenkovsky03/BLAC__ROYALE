@@ -32,7 +32,7 @@ const games = ref([
     description: 'A thrilling game of logic and chance. Don\'t hit the mines!'
   },
   {
-    id: 'slot',
+    id: 'slots',
     name: 'Slot',
     icon: '🎰',
     description: 'Classic three-reel system with a futuristic cyberpunk twist.'

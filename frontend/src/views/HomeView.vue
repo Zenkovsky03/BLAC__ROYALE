@@ -33,29 +33,50 @@
         @select-deposit="openDeposit"
         @select-withdraw="openWithdraw"
     />
+    <DepositModal v-if="showDeposit" @close="showDeposit = false"/>
+    <WithdrawModal v-if="showWithdraw" @close="showWithdraw = false"/>
 
     <LoginModal v-if="showLogin" @close="showLogin = false" @login="onLoggedIn" />
     <RegisterModal v-if="showRegister" @close="showRegister = false" />
 
-    <DepositModal v-if="showDeposit" @close="showDeposit = false"/>
-    <WithdrawModal v-if="showWithdraw" @close="showWithdraw = false"/>
-
     <AccountModal v-if="auth.isAuthenticated"/>
     <TransactionHistoryModal v-if="auth.isAuthenticated"/>
 
-    <SlotGameModal />
+    <SlotGameModal
+        v-if="showSlots"
+        :balance="auth.balance ?? 0"
+        @close="showSlots = false"
+        @balanceChange="handleBalanceChange"
+    />
+
     <SliderGameModal
         v-if="showSlider"
         :balance="auth.balance ?? 0"
         @close="showSlider = false"
         @balanceChange="handleBalanceChange"
     />
+
     <MinesweeperGameModal
         v-if="showMinesweeper"
         :balance="auth.balance ?? 0"
         @close="showMinesweeper = false"
         @balanceChange="handleBalanceChange"
     />
+
+    <CoinflipGameModal
+        v-if="showCoinflip"
+        :balance="auth.balance ?? 0"
+        @close="showCoinflip = false"
+        @balanceChange="handleBalanceChange"
+    />
+
+    <RouletteGameModal
+        v-if="showRoulette"
+        :balance="auth.balance ?? 0"
+        @close="showRoulette = false"
+        @balanceChange="handleBalanceChange"
+    />
+
   </div>
 </template>
 
@@ -63,7 +84,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
-// Importy komponentów
+// Importy komponentów layoutu
 import HeaderComponent from '@/components/layout/HeaderComponent.vue'
 import HeaderComponentWithBalance from '@/components/layout/HeaderComponentWithBalance.vue'
 import FooterComponent from '@/components/layout/FooterComponent.vue'
@@ -77,40 +98,43 @@ import DepositModal from '@/components/modals/DepositModal.vue'
 import WithdrawModal from '@/components/modals/WithdrawModal.vue'
 import AccountModal from '@/components/modals/AccountModal.vue'
 import TransactionHistoryModal from '@/components/modals/TransactionHistoryModal.vue'
+import WalletSelectionModal from '@/components/modals/WalletSelectionModal.vue'
+
+// Importy Gier
 import SlotGameModal from '@/components/games/SlotGameModal.vue'
 import MinesweeperGameModal from '@/components/games/MinesweeperGameModal.vue'
 import SliderGameModal from '@/components/games/SliderGameModal.vue'
-
-// !!! WAŻNE: Import nowego modala !!!
-import WalletSelectionModal from '@/components/modals/WalletSelectionModal.vue'
+import CoinflipGameModal from '@/components/games/CoinflipGameModal.vue'
+import RouletteGameModal from '@/components/games/RouletteGameModal.vue'
 
 const auth = useAuthStore()
 
 // --- Stan Modali ---
 const showLogin = ref(false)
 const showRegister = ref(false)
-
-// Nowe zmienne dla portfela
 const showWalletSelection = ref(false)
 const showDeposit = ref(false)
 const showWithdraw = ref(false)
 
-// Gry
+// Gry - zmienne widoczności
 const showMinesweeper = ref(false)
 const showSlider = ref(false)
+const showCoinflip = ref(false)
+const showRoulette = ref(false)
+const showSlots = ref(false) // 2. NOWA ZMIENNA
 
 // --- Logika Portfela ---
 function openDeposit() {
-  showWalletSelection.value = false // Zamykamy wybór
-  showDeposit.value = true          // Otwieramy wpłatę
+  showWalletSelection.value = false
+  showDeposit.value = true
 }
 
 function openWithdraw() {
-  showWalletSelection.value = false // Zamykamy wybór
-  showWithdraw.value = true         // Otwieramy wypłatę
+  showWalletSelection.value = false
+  showWithdraw.value = true
 }
 
-// --- Reszta Logiki ---
+// --- Logika Startowa ---
 onMounted(async () => {
   if (auth.isAuthenticated) {
     await auth.fetchBalance()
@@ -129,12 +153,22 @@ function handleBalanceChange(amount: number) {
   }
 }
 
+// --- Otwieranie Gier ---
 function openGameModal(game: { id: string, name: string }) {
+  // Blokada dla niezalogowanych
   if (!auth.isAuthenticated) {
     showLogin.value = true;
     return;
   }
+
+  // 3. LOGIKA OTWIERANIA
   if (game.id === 'minesweeper') showMinesweeper.value = true;
   if (game.id === 'slider') showSlider.value = true;
+  if (game.id === 'coinflip') showCoinflip.value = true;
+  if (game.id === 'roulette') showRoulette.value = true;
+
+  if (game.id === 'slots') {
+    showSlots.value = true;
+  }
 }
 </script>
