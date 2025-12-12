@@ -1,9 +1,7 @@
 import type {NextFunction} from "express";
 import type {AuthRequest} from "./authMiddleware.ts";
-import { PrismaClient } from '@prisma/client';
+import {prisma} from "../../prisma/prismaSingleton.ts";
 
-// Checks if balance is enough for wrapped operation
-const prisma = new PrismaClient(); // ORM client
 export const balanceCheck = async (req: AuthRequest, res: any, next: NextFunction) =>
 {
     const { betAmount } = req.body;

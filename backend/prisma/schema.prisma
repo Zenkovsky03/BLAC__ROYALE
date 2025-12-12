@@ -16,19 +16,23 @@ model spatial_ref_sys {
   srtext    String? @db.VarChar(2048)
   proj4text String? @db.VarChar(2048)
 }
+
 /// Dont touch its default in db
 
-
 model User {
-  id              String   @id @default(uuid())
-  email           String   @unique
-  username        String
-  hashedPassword  String
-  createdAt       DateTime @default(now())
+  id             String   @id @default(uuid())
+  email          String   @unique
+  username       String
+  name           String?
+  surname        String?
+  dateOfBirth    DateTime
+  hashedPassword String
+  createdAt      DateTime @default(now())
 
   wallet Wallet?
 
-  sapperMaps SapperMap[]
+  sapperMaps    SapperMap[]
+  PasswordReset PasswordReset[]
 
   role UserRole @default(NORMAL)
 }
@@ -42,21 +46,21 @@ model Wallet {
   id String @id @default(uuid())
 
   userId String @unique
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  balance Decimal @default(0.00) @db.Decimal(10, 2) // Kaska
+  balance      Decimal       @default(0.00) @db.Decimal(10, 2) // Kaska
   transactions Transaction[]
 }
 
 model Transaction {
-  id               String       @id @default(uuid())
-  timestamp        DateTime     @default(now())
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
 
-  walletId         String
-  wallet           Wallet       @relation(fields: [walletId], references: [id])
+  walletId String
+  wallet   Wallet @relation(fields: [walletId], references: [id])
 
-  amount           Decimal      @db.Decimal(10, 2)
-  type             TransactionType // DEPOSIT | WITHDRAWAL | LOST | WIN | BET
+  amount Decimal         @db.Decimal(10, 2)
+  type   TransactionType // DEPOSIT | WITHDRAWAL | LOST | WIN | BET
 }
 
 model Game {
@@ -75,13 +79,26 @@ enum TransactionType {
 }
 
 model SapperMap {
-  id String @id @default(uuid())
-  n  Int
-  map String // Map stored as string
-  mask String // Mask of discovered fields
-  bet Int
+  id             String @id @default(uuid())
+  n              Int
+  map            String // Map stored as string
+  mask           String // Mask of discovered fields
+  bet            Int
   winMultiplayer Float
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

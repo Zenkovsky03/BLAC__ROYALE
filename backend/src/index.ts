@@ -12,6 +12,7 @@ import swaggerUi from "swagger-ui-express"
 import dotenv from 'dotenv';
 import RankingRoutes from "./Routes/rankingRoutes.ts";
 import cors from 'cors';
+import nodemailer from "nodemailer";
 dotenv.config({ path: './.env'});
 
 const app = express()
@@ -73,7 +74,7 @@ const router = express.Router()
  *               example: Nie grasz nie wygrasz!
  *
  */
-router.get('/', (req, res) => res.send('Nie grasz nie wygrasz!'))
+router.get('/', (_req, res) => res.send('Nie grasz nie wygrasz!'))
 
 app.use('/', router)
 app.use('/api/users', UserRouter)
@@ -89,3 +90,34 @@ app.listen(8000, () => {
     console.log('Server running on http://localhost:8000');
     console.log('API Documentation available at http://localhost:8000/docs');
 })
+
+
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
+export const sendResetEmail = async (email: string, resetToken: string) => {
+    const mailOptions = {
+        from: `"${process.env.APP_NAME || 'Your App'}" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: 'Password Reset Request',
+        html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Password Reset Request</h2>
+        <p>You requested to reset your password. Use the following code to reset it:</p>
+        <div style="background-color: #f5f5f5; padding: 20px; text-align: center; margin: 20px 0; border-radius: 4px;">
+          <code style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">${resetToken}</code>
+        </div>
+        <p style="color: #666; font-size: 14px;">This code will expire in 1 hour.</p>
+        <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+      </div>
+    `,
+    };
+
+    await transporter.sendMail(mailOptions);
+};
