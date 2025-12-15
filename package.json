@@ -14,11 +14,16 @@
   "license": "ISC",
   "author": "ja",
   "main": "backend/src/index.ts",
+  "prisma": {
+    "seed": "ts-node backend/prisma/seed.ts"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "frontend": "npm --prefix ./frontend run dev",
     "backend": "nodemon ./backend/src/index.ts",
-    "start": "npm run frontend & npm run backend"
+    "start": "npm run frontend & npm run backend",
+    "seed": "prisma db seed",
+    "seed:rich": "ts-node backend/prisma/seedRich.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
