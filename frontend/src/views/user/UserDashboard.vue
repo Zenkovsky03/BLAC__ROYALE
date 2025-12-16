@@ -4,6 +4,16 @@
       <div class="grid grid-cols-1 gap-6 rounded-xl border border-primary/30 bg-background-dark/50 p-6 shadow-2xl shadow-primary/10 backdrop-blur-xl lg:grid-cols-3 lg:gap-8 lg:p-8">
 
         <div class="flex flex-col gap-6 lg:col-span-1">
+
+          <div class="mb-2">
+            <router-link
+                to="/home"
+                class="inline-flex items-center gap-2 text-sm font-bold text-gray-400 transition-colors hover:text-primary group"
+            >
+              <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+              Back to Casino
+            </router-link>
+          </div>
           <div class="flex items-center gap-4">
             <img alt="User Avatar" class="h-16 w-16 rounded-full border-2 border-primary shadow-glow-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsZLYQAYUqMhZbUIuTqO7srsKXNp6yrj2QIqxVWUG4F_vuZvC7_tR_PMij_Gvcv8txeRgQxzOja4eap-mAqCMpUFznhghXbr8p7I32hOQphTp1IZNr8HWSiwmvxLqc_1WB0A4zW4fxmNKxV1d8HFcDdv8oZimsK1Vv5-Od5sPS_uHMEiBC4DjOedVJRdL9n78hAl6nohVLOPiOCv-w_ojSi8Td18iZhLfSA-vH8gh2K2DtwUe6INEh4SwmSh04qu4K4majW8f_5Ro" />
             <div>
@@ -30,12 +40,12 @@
                   class="flex items-center justify-between text-sm rounded-lg bg-white/5 p-2 px-3 border border-white/5 hover:border-white/10 transition-colors"
               >
                 <div class="flex items-center gap-3">
-        <span
-            class="material-symbols-outlined"
-            :class="getIconColor(tx.type)"
-        >
-          {{ getIconName(tx.type) }}
-        </span>
+                  <span
+                      class="material-symbols-outlined"
+                      :class="getIconColor(tx.type)"
+                  >
+                    {{ getIconName(tx.type) }}
+                  </span>
 
                   <p class="text-white/80">
                     {{ formatLabel(tx.type) }}
@@ -109,10 +119,10 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth'; // 1. Importujemy store
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
-const auth = useAuthStore(); // 2. Używamy store
+const auth = useAuthStore();
 
 // Funkcje obsługujące kliknięcia w kafelki
 const handlePersonalInfoClick = () => {

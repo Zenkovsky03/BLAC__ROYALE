@@ -2,6 +2,16 @@
   <div class="min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4 md:px-8">
     <div class="max-w-4xl mx-auto">
 
+      <div class="mb-8">
+        <router-link
+            to="/home"
+            class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-gray-400 transition-all hover:border-[#b84ff6]/50 hover:bg-white/10 hover:text-white group"
+        >
+          <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          Back to Home
+        </router-link>
+      </div>
+
       <div class="mb-12 border-b border-white/10 pb-8">
         <h1 class="text-4xl md:text-5xl font-black uppercase tracking-tight text-white mb-4">
           Responsible <span class="text-[#b84ff6]">Gaming</span>
