@@ -6,9 +6,14 @@
       <div class="mb-8 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="text-4xl">🪙</span>
-          <h2 class="text-3xl font-black uppercase tracking-wider text-white neon-text-glow">
-            Cyber Coinflip
-          </h2>
+          <div class="flex flex-col">
+            <h2 class="text-3xl font-black uppercase tracking-wider text-white neon-text-glow">
+              Cyber Coinflip
+            </h2>
+            <span v-if="isTestMode" class="text-xs text-yellow-400 font-mono uppercase tracking-wider">
+              🧪 TEST MODE
+            </span>
+          </div>
         </div>
         <button @click="$emit('close')" class="group rounded-full bg-white/5 p-2 transition-all hover:bg-red-500/20">
           <span class="material-symbols-outlined text-white/70 transition-colors group-hover:text-red-400">close</span>
@@ -75,13 +80,13 @@
 
             <div class="coin-scene">
               <div class="coin" :class="{ 'flipping': isFlipping, 'show-heads': coinResult === 'heads', 'show-tails': coinResult === 'tails' }">
-                <div class="coin-face coin-front">
-                  <div class="absolute inset-0 rounded-full border-[4px] border-[#b4860b] opacity-50"></div>
-                  <span class="text-5xl">H</span>
+                <!-- Główna powierzchnia monety (HEADS) -->
+                <div class="heads">
+                  <span class="coin-letter">H</span>
                 </div>
-                <div class="coin-face coin-back">
-                  <div class="absolute inset-0 rounded-full border-[4px] border-[#008b8b] opacity-50"></div>
-                  <span class="text-5xl">T</span>
+                <!-- Tylna powierzchnia (TAILS) -->
+                <div class="tails">
+                  <span class="coin-letter">T</span>
                 </div>
               </div>
             </div>
@@ -169,8 +174,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import confetti from "canvas-confetti"
 
-const props = defineProps({ balance: Number })
+const props = defineProps({
+  balance: Number,
+  isTestMode: { type: Boolean, default: false }
+})
 const emit = defineEmits(['close', 'balanceChange'])
 
 const auth = useAuthStore()
@@ -186,6 +195,38 @@ const coinResult = ref<'heads'|'tails'|null>(null)
 
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
+// Funkcja confetti przy wygranej
+function fireConfetti() {
+  // Złote confetti dla wygranej w coinflip
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#FFD700', '#FFA500', '#FF8C00', '#DAA520', '#B8860B']
+  })
+
+  // Dodatkowy burst z góry
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: ['#FFD700', '#FFA500', '#FF8C00']
+    })
+  }, 200)
+
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: ['#FFD700', '#FFA500', '#FF8C00']
+    })
+  }, 400)
+}
+
 async function flipCoin() {
   if (isFlipping.value) return
 
@@ -200,51 +241,84 @@ async function flipCoin() {
   coinResult.value = null
 
   try {
-    // 1. Mapowanie wyboru na backend (Heads=0, Tails=1)
-    const betValue = selectedSide.value === 'heads' ? 0 : 1;
+    let isWin: boolean
+    let gain: number
+    let finalSide: 'heads' | 'tails'
 
-    // 2. Zapytanie do API
-    const res = await fetch(`${API}/api/games/play-coin-flip`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
-        betAmount: betAmount.value,
-        bet: betValue
-      })
-    });
+    if (props.isTestMode) {
+      // === TRYB TESTOWY - SYMULACJA ===
+      // Losowy wynik (50/50)
+      const randomResult = Math.random() < 0.5
+      const coinLanded = randomResult ? 'heads' : 'tails'
 
-    if (!res.ok) throw new Error('Game Error');
+      isWin = coinLanded === selectedSide.value
+      gain = isWin ? betAmount.value : -betAmount.value
+      finalSide = coinLanded
 
-    const data = await res.json();
-    const isWin = data.result === 'WIN';
-    const gain = data.gain;
-
-    // 3. Ustalanie co wypadło (dedukcja)
-    // Jeśli wygrałem i stawiałem na Heads(0) -> Wypadło Heads
-    // Jeśli przegrałem i stawiałem na Heads(0) -> Wypadło Tails
-    // Ogólnie: (Win ? Moje : Przeciwne)
-    let finalSide: 'heads' | 'tails';
-
-    if (isWin) {
-      finalSide = selectedSide.value; // Wypadło to co wybrałem
     } else {
-      finalSide = selectedSide.value === 'heads' ? 'tails' : 'heads'; // Wypadło przeciwne
+      // === TRYB PRODUKCYJNY - API ===
+      // 1. Mapowanie wyboru na backend (Heads=0, Tails=1)
+      const betValue = selectedSide.value === 'heads' ? 0 : 1;
+
+      // 2. Zapytanie do API
+      const res = await fetch(`${API}/api/games/play-coin-flip`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({
+          betAmount: betAmount.value,
+          bet: betValue
+        })
+      });
+
+      if (!res.ok) throw new Error('Game Error');
+
+      const data = await res.json();
+      isWin = data.result === 'WIN';
+      gain = data.gain;
+
+      // 3. Ustalanie co wypadło (dedukcja)
+      if (isWin) {
+        finalSide = selectedSide.value; // Wypadło to co wybrałem
+      } else {
+        finalSide = selectedSide.value === 'heads' ? 'tails' : 'heads'; // Wypadło przeciwne
+      }
     }
 
-    // 4. Animacja
-    const ANIM_DURATION = 1500;
+    // 4. Animacja - dostosowujemy końcową pozycję do wyniku
+    const ANIM_DURATION = 2500;
+
+    // Dynamicznie ustawiamy końcową rotację animacji
+    const coinElement = document.querySelector('.coin');
+    if (coinElement) {
+      if (finalSide === 'heads') {
+        coinElement.style.setProperty('--final-rotation', '1440deg'); // 4 obroty = 0° (HEADS)
+      } else {
+        coinElement.style.setProperty('--final-rotation', '1620deg'); // 4.5 obrotu = 180° (TAILS)
+      }
+    }
+
     setTimeout(async () => {
       coinResult.value = finalSide; // To zatrzyma CSS na odpowiedniej stronie
 
-      // Odświeżamy balans z bazy
-      await auth.fetchBalance();
+      // Odświeżamy balans (tylko jeśli nie test)
+      if (!props.isTestMode && auth.fetchBalance) {
+        await auth.fetchBalance();
+      } else if (props.isTestMode) {
+        // W trybie testowym emitujemy zmianę balansu
+        emit('balanceChange', gain);
+      }
 
       if (isWin) {
         resultWon.value = true;
-        resultMessage.value = `VICTORY! ${finalSide.toUpperCase()}! (+$${gain})`;
+        resultMessage.value = `VICTORY! ${finalSide.toUpperCase()}! (+$${Math.abs(gain)})`;
+
+        // Confetti przy wygranej! 🎉
+        setTimeout(() => {
+          fireConfetti();
+        }, 300); // Małe opóźnienie żeby animacja monety się skończyła
       } else {
         resultWon.value = false;
         resultMessage.value = `DEFEAT! IT WAS ${finalSide.toUpperCase()}.`;
@@ -256,7 +330,7 @@ async function flipCoin() {
   } catch (error) {
     console.error(error);
     isFlipping.value = false;
-    resultMessage.value = 'Error connecting to server';
+    resultMessage.value = props.isTestMode ? 'Test mode error' : 'Error connecting to server';
   }
 }
 </script>
@@ -311,59 +385,129 @@ async function flipCoin() {
 
 /* --- COIN 3D ANIMATION --- */
 .coin-scene {
-  width: 120px; height: 120px;
-  perspective: 800px;
+  width: 120px;
+  height: 120px;
+  perspective: 1000px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .coin {
-  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #ffd700, #ffed4a, #f59e0b);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 1s ease-out; /* Smooth transition for final result */
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
 }
 
-/* Twarze monety */
-.coin-face {
-  position: absolute; inset: 0; border-radius: 50%;
-  backface-visibility: hidden; /* Ukryj tył */
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 900; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+/* Tylna strona cylindra */
+.coin::before {
+  background: #b8860b; /* Ciemniejszy złoty dla tylnej strony cylindra */
+  position: absolute;
+  border-radius: 50%;
+  content: '';
+  height: 120px;
+  width: 120px;
+  transform: translateZ(-12px); /* Grubość monety */
+  box-shadow: 0 0 20px rgba(184, 134, 11, 0.4);
 }
 
-/* HEADS: GOLD */
-.coin-front {
-  background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+/* Bok cylindra monety */
+.coin::after {
+  background: #b8860b; /* Jednolity ciemniejszy złoty kolor dla boku */
+  content: '';
+  left: 54px; /* (120px - 12px) / 2 */
+  position: absolute;
+  height: 120px;
+  width: 12px; /* Grubość monety */
+  z-index: -1;
+  transform: rotateY(-90deg);
+  transform-origin: 100% 50%;
+}
+
+/* HEADS - przednia strona */
+.heads {
+  background: linear-gradient(135deg, #ffd700, #ffed4a, #f59e0b);
+  position: absolute;
+  border-radius: 50%;
+  height: 120px;
+  width: 120px;
+  transform: translateZ(0.1px); /* Bardzo blisko powierzchni głównej */
+  border: 3px solid #b8860b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+      0 0 25px rgba(255, 215, 0, 0.8),
+      inset 0 0 20px rgba(255,255,255,0.2);
+}
+
+/* TAILS - tylna strona */
+.tails {
+  background: linear-gradient(135deg, #ffd700, #ffed4a, #f59e0b);
+  position: absolute;
+  border-radius: 50%;
+  height: 120px;
+  width: 120px;
+  transform: translateZ(-12.1px) rotateY(180deg); /* Na tylnej stronie cylindra + obrót */
+  border: 3px solid #b8860b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+      0 0 25px rgba(255, 215, 0, 0.8),
+      inset 0 0 20px rgba(255,255,255,0.2);
+}
+
+/* Litery na monetach */
+.coin-letter {
+  font-size: 3rem;
+  font-weight: 900;
+  text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+  z-index: 10;
+}
+
+.heads .coin-letter {
   color: #5c4002;
-  border: 4px solid #ffd700;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-  transform: rotateY(0deg); /* Domyślna pozycja */
 }
 
-/* TAILS: CYBER CYAN */
-.coin-back {
-  background: radial-gradient(circle at 30% 30%, #00ffff, #008b8b);
-  color: #003333;
-  border: 4px solid #00ffff;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-  transform: rotateY(180deg); /* Odwrócona o 180 stopni */
+.tails .coin-letter {
+  color: #5c4002;
 }
 
-/* Animacja Kręcenia */
+/* Animacja Kręcenia z dynamiczną końcową pozycją */
 .coin.flipping {
-  animation: spinCoin 1.5s linear infinite;
+  animation: spin3D 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Końcowe stany - nadpisują animację */
+/* Końcowe stany - animacja już kończy się w odpowiedniej pozycji */
 .coin.show-heads {
   animation: none;
-  transform: rotateY(0deg); /* Pokaż przód */
+  transform: rotateY(0deg); /* Pokaż HEADS */
 }
 .coin.show-tails {
   animation: none;
-  transform: rotateY(180deg); /* Pokaż tył */
+  transform: rotateY(180deg); /* Pokaż TAILS */
 }
 
-@keyframes spinCoin {
-  0% { transform: rotateY(0deg); }
-  100% { transform: rotateY(1800deg); } /* 5 pełnych obrotów */
+@keyframes spin3D {
+  0% {
+    transform: rotateY(0deg) rotateX(0deg);
+  }
+  25% {
+    transform: rotateY(450deg) rotateX(15deg);
+  }
+  50% {
+    transform: rotateY(900deg) rotateX(0deg);
+  }
+  75% {
+    transform: rotateY(calc(var(--final-rotation, 1440deg) - 270deg)) rotateX(-15deg);
+  }
+  100% {
+    transform: rotateY(var(--final-rotation, 1440deg)) rotateX(0deg);
+  }
 }
 </style>

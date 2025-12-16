@@ -207,12 +207,46 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import confetti from 'canvas-confetti'
 
 const props = defineProps({ balance: Number })
 const emit = defineEmits(['close', 'balanceChange'])
 
 const auth = useAuthStore()
 const API = import.meta.env.VITE_API_URL || ''
+
+// Funkcja confetti przy wygranej w minesweeper
+function fireMinesweeperConfetti() {
+  // Konfetti w kolorach związanych z kopalnią i diamentami
+  confetti({
+    particleCount: 100,
+    spread: 60,
+    origin: { y: 0.6 },
+    colors: ['#00f6ff', '#ffd700', '#c0c0c0', '#87ceeb', '#98fb98', '#dda0dd']
+  })
+
+  // Dodatkowy burst z lewej strony
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 60,
+      spread: 45,
+      origin: { x: 0.1, y: 0.7 },
+      colors: ['#00f6ff', '#ffd700', '#c0c0c0']
+    })
+  }, 200)
+
+  // Dodatkowy burst z prawej strony
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 120,
+      spread: 45,
+      origin: { x: 0.9, y: 0.7 },
+      colors: ['#87ceeb', '#98fb98', '#dda0dd']
+    })
+  }, 400)
+}
 
 // === STATE ===
 const betAmount = ref(10)
@@ -333,6 +367,12 @@ async function cashOut() {
 
     const winAmount = (betAmount.value * currentMultiplier.value).toFixed(2)
     lastResult.value = `💰 WON $${winAmount}`
+
+    // Confetti przy wygranej w minesweeper! 🎉
+    setTimeout(() => {
+      fireMinesweeperConfetti();
+    }, 300);
+
     await auth.fetchBalance()
   } catch (e) { console.error(e) } finally { isProcessing.value = false }
 }

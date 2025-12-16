@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth' // <--- 1. IMPORTUJEMY STORE
+import { useAuthStore } from '@/stores/auth'
 
 import HomeView from '@/views/HomeView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import AdminPanel from '../components/modals/AdminPanelModal.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -21,10 +22,8 @@ export const router = createRouter({
 
         {
             path: '/panel',
-            // 2. OZNACZAMY TĘ TRASĘ JAKO CHRONIONĄ
             meta: { requiresAuth: true },
             component: () => import('@/views/user/UserLayout.vue'),
-
             children: [
                 {
                     path: '',
@@ -65,11 +64,50 @@ export const router = createRouter({
             component: () => import('@/components/sections/LeaderboardSection.vue')
         },
 
+        // TRASA ADMINA
+        {
+            path: '/admin',
+            name: 'AdminPanel',
+            component: AdminPanel,
+            meta: { requiresAuth: true, requiresAdmin: true } //
+        },
+        {
+            path: '/legal/terms',
+            name: 'terms',
+            component: () => import('@/components/layout/footer/TermsView.vue')
+        },
+        {
+            path: '/legal/privacy',
+            name: 'privacy',
+            component: () => import('@/components/layout/footer/PrivacyView.vue')
+        },
+        {
+            path: '/legal/responsible-gaming',
+            name: 'responsible-gaming',
+            component: () => import('@/components/layout/footer/ResponsibleGamingView.vue')
+        },
+
+        // SUPPORT
+        {
+            path: '/support/faq',
+            name: 'faq',
+            component: () => import('@/components/layout/footer/FAQView.vue')
+        },
+        {
+            path: '/support/contact',
+            name: 'contact',
+            component: () => import('@/components/layout/footer/ContactView.vue')
+        },
+        {
+            path: '/support/affiliates',
+            name: 'affiliates',
+            component: () => import('@/components/layout/footer/AffiliatesView.vue')
+        },
         {
             path: '/:pathMatch(.*)*',
-            name: 'not-found',
+            name: 'not-found', //
             component: NotFoundView
-        }
+        },
     ]
 })
 
@@ -81,8 +119,21 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.meta.requiresAuth && !auth.isAuthenticated) {
-        next('/home')
-    } else {
-        next()
+        return next('/home')
     }
+
+    if (to.meta.requiresAdmin) {
+        // Jeśli rola użytkownika to NIE jest 'ADMIN'
+        if (auth.user?.role !== 'ADMIN') {
+            // Przekieruj na stronę 404 (NotFound), przekazując obecną ścieżkę jako parametr
+            // Dzięki temu URL zmieni się na taki, jaki wpisał użytkownik, ale wyświetli się błąd 404
+            return next({
+                name: 'not-found',
+                params: { pathMatch: to.path.substring(1).split('/') }
+            })
+        }
+    }
+
+    // Jeśli wszystko ok, idź dalej
+    next()
 })

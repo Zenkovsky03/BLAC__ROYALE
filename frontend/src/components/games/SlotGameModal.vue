@@ -179,9 +179,43 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import confetti from 'canvas-confetti'
 
 const props = defineProps({ balance: Number })
 const emit = defineEmits(['close', 'balanceChange'])
+
+// Funkcja confetti przy wygranej w slocie
+function fireSlotConfetti() {
+  // Kolorowe confetti dla wygranej w slocie
+  confetti({
+    particleCount: 120,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57']
+  })
+
+  // Dodatkowy burst z lewej strony
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: ['#ffd700', '#ff6b6b', '#4ecdc4']
+    })
+  }, 300)
+
+  // Dodatkowy burst z prawej strony
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: ['#45b7d1', '#96ceb4', '#feca57']
+    })
+  }, 600)
+}
 
 // --- STATE ---
 const betAmount = ref(10)
@@ -317,8 +351,18 @@ const spin = async () => {
 
     if (data.winAmount > data.bet) {
       lastResult.value = `🎉 BIG WIN! WYGRANA: $${data.winAmount}!`
+
+      // Confetti dla dużej wygranej! 🎉
+      setTimeout(() => {
+        fireSlotConfetti();
+      }, 500);
     } else if (data.winAmount > 0) {
       lastResult.value = `WYGRANA: $${data.winAmount}`
+
+      // Confetti dla zwykłej wygranej! 🎉
+      setTimeout(() => {
+        fireSlotConfetti();
+      }, 500);
     } else {
       lastResult.value = 'SPRÓBUJ PONOWNIE'
     }
@@ -341,24 +385,160 @@ onMounted(() => {
 
 <style scoped>
 /* STYLE BEZ ZMIAN */
-.custom-scrollbar::-webkit-scrollbar { width: 8px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(184, 79, 246, 0.3); border-radius: 10px; }
-.neon-text-glow { text-shadow: 0 0 15px rgba(184, 79, 246, 0.7); }
-.setting-group { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; }
-.setting-label { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #fff; text-transform: uppercase; font-size: 0.85rem; }
-.select-wrapper { position: relative; background: rgba(0,0,0,0.4); border-radius: 0.75rem; overflow: hidden; width: 100%; }
-.neon-border-blue { border: 1px solid rgba(0, 246, 255, 0.5); box-shadow: 0 0 15px rgba(0, 246, 255, 0.2) inset; }
-.setting-select { width: 100%; background: transparent; color: #fff; padding: 1rem; font-size: 1.1rem; font-weight: bold; outline: none; appearance: none; cursor: pointer; }
-.digital-readout .label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.5); display: block; text-align: center; }
-.digital-readout .value { font-family: monospace; font-size: 1.2rem; font-weight: 700; text-shadow: 0 0 10px currentColor; }
-.cyber-button-start { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2rem; font-weight: 800; text-transform: uppercase; border-radius: 0.75rem; background: linear-gradient(90deg, #00f6ff, #b84ff6); color: #0a0a0a; font-size: 1.2rem; box-shadow: 0 0 25px rgba(184, 79, 246, 0.5); transition: all 0.3s; }
-.cyber-button-start:not(:disabled):hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(184, 79, 246, 0.8); }
-.slot-machine-frame { position: relative; background: #111; padding: 10px; border-radius: 20px; border: 4px solid #b84ff6; box-shadow: 0 0 40px rgba(184, 79, 246, 0.3); width: 100%; max-width: 500px; }
-.slots-window { display: flex; height: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; }
-.reel { flex: 1; overflow: hidden; position: relative; background: linear-gradient(90deg, #000 0%, #1a1a1a 50%, #000 100%); }
-.reel-track { display: flex; flex-direction: column; }
-.slot-icon { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
-.winning-line { position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: rgba(255, 0, 0, 0.6); box-shadow: 0 0 10px red; transform: translateY(-50%); z-index: 10; pointer-events: none; }
-.slot-header-bar, .slot-footer-bar { height: 10px; background: linear-gradient(90deg, #333, #666, #333); border-radius: 5px; margin: 5px 0; }
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(184, 79, 246, 0.3);
+  border-radius: 10px;
+}
+
+.neon-text-glow {
+  text-shadow: 0 0 15px rgba(184, 79, 246, 0.7);
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.setting-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.select-wrapper {
+  position: relative;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+.neon-border-blue {
+  border: 1px solid rgba(0, 246, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 246, 255, 0.2) inset;
+}
+
+.setting-select {
+  width: 100%;
+  background: transparent;
+  color: #fff;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.digital-readout .label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  display: block;
+  text-align: center;
+}
+
+.digital-readout .value {
+  font-family: monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-shadow: 0 0 10px currentColor;
+}
+
+.cyber-button-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, #00f6ff, #b84ff6);
+  color: #0a0a0a;
+  font-size: 1.2rem;
+  box-shadow: 0 0 25px rgba(184, 79, 246, 0.5);
+  transition: all 0.3s;
+}
+
+.cyber-button-start:not(:disabled):hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 40px rgba(184, 79, 246, 0.8);
+}
+
+.slot-machine-frame {
+  position: relative;
+  background: #111;
+  padding: 10px;
+  border-radius: 20px;
+  border: 4px solid #b84ff6;
+  box-shadow: 0 0 40px rgba(184, 79, 246, 0.3);
+  width: 100%;
+  max-width: 500px;
+}
+
+.slots-window {
+  display: flex;
+  height: 300px;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.reel {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(90deg, #000 0%, #1a1a1a 50%, #000 100%);
+}
+
+.reel-track {
+  display: flex;
+  flex-direction: column;
+}
+
+.slot-icon {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+.winning-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 0, 0, 0.6);
+  box-shadow: 0 0 10px red;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.slot-header-bar, .slot-footer-bar {
+  height: 10px;
+  background: linear-gradient(90deg, #333, #666, #333);
+  border-radius: 5px;
+  margin: 5px 0;
+}
 </style>

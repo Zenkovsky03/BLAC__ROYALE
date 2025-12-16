@@ -15,9 +15,13 @@
               :balance="auth.balance ?? 0"
               @logout="auth.logout()"
               @open-wallet="showWalletSelection = true"
+              @open-panel="handlePanelClick"
           />
+
           <main class="flex flex-col gap-10 py-10 md:gap-16 md:py-16" v-if="auth.booted">
-            <HeroSection />
+
+            <HeroSection @playRandom="openRandomGame" />
+
             <GamesGrid  @gameClick="openGameModal"/>
           </main>
 
@@ -26,6 +30,11 @@
 
       <FooterComponent v-if="auth.booted" />
     </div>
+
+    <AdminPanelModal
+        v-if="showAdminPanel"
+        @close="showAdminPanel = false"
+    />
 
     <WalletSelectionModal
         v-if="showWalletSelection"
@@ -38,51 +47,21 @@
 
     <LoginModal v-if="showLogin" @close="showLogin = false" @login="onLoggedIn" />
     <RegisterModal v-if="showRegister" @close="showRegister = false" />
-
-    <AccountModal v-if="auth.isAuthenticated"/>
     <TransactionHistoryModal v-if="auth.isAuthenticated"/>
 
-    <SlotGameModal
-        v-if="showSlots"
-        :balance="auth.balance ?? 0"
-        @close="showSlots = false"
-        @balanceChange="handleBalanceChange"
-    />
-
-    <SliderGameModal
-        v-if="showSlider"
-        :balance="auth.balance ?? 0"
-        @close="showSlider = false"
-        @balanceChange="handleBalanceChange"
-    />
-
-    <MinesweeperGameModal
-        v-if="showMinesweeper"
-        :balance="auth.balance ?? 0"
-        @close="showMinesweeper = false"
-        @balanceChange="handleBalanceChange"
-    />
-
-    <CoinflipGameModal
-        v-if="showCoinflip"
-        :balance="auth.balance ?? 0"
-        @close="showCoinflip = false"
-        @balanceChange="handleBalanceChange"
-    />
-
-    <RouletteGameModal
-        v-if="showRoulette"
-        :balance="auth.balance ?? 0"
-        @close="showRoulette = false"
-        @balanceChange="handleBalanceChange"
-    />
+    <SlotGameModal v-if="showSlots" :balance="auth.balance ?? 0" @close="showSlots = false" @balanceChange="handleBalanceChange"/>
+    <SliderGameModal v-if="showSlider" :balance="auth.balance ?? 0" @close="showSlider = false" @balanceChange="handleBalanceChange"/>
+    <MinesweeperGameModal v-if="showMinesweeper" :balance="auth.balance ?? 0" @close="showMinesweeper = false" @balanceChange="handleBalanceChange"/>
+    <CoinflipGameModal v-if="showCoinflip" :balance="auth.balance ?? 0" @close="showCoinflip = false" @balanceChange="handleBalanceChange"/>
+    <RouletteGameModal v-if="showRoulette" :balance="auth.balance ?? 0" @close="showRoulette = false" @balanceChange="handleBalanceChange"/>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router' // <--- 1. IMPORT ROUTERA
 
 // Importy komponentów layoutu
 import HeaderComponent from '@/components/layout/HeaderComponent.vue'
@@ -96,9 +75,9 @@ import LoginModal from '@/components/modals/LoginModal.vue'
 import RegisterModal from '@/components/modals/RegisterModal.vue'
 import DepositModal from '@/components/modals/DepositModal.vue'
 import WithdrawModal from '@/components/modals/WithdrawModal.vue'
-import AccountModal from '@/components/modals/AccountModal.vue'
 import TransactionHistoryModal from '@/components/modals/TransactionHistoryModal.vue'
 import WalletSelectionModal from '@/components/modals/WalletSelectionModal.vue'
+import AdminPanelModal from '@/components/modals/AdminPanelModal.vue'
 
 // Importy Gier
 import SlotGameModal from '@/components/games/SlotGameModal.vue'
@@ -108,6 +87,7 @@ import CoinflipGameModal from '@/components/games/CoinflipGameModal.vue'
 import RouletteGameModal from '@/components/games/RouletteGameModal.vue'
 
 const auth = useAuthStore()
+const router = useRouter() // <--- 2. INICJALIZACJA ROUTERA
 
 // --- Stan Modali ---
 const showLogin = ref(false)
@@ -115,30 +95,37 @@ const showRegister = ref(false)
 const showWalletSelection = ref(false)
 const showDeposit = ref(false)
 const showWithdraw = ref(false)
+const showAdminPanel = ref(false)
+// showAccount usunięte, bo używamy przekierowania
 
-// Gry - zmienne widoczności
+// Gry
 const showMinesweeper = ref(false)
 const showSlider = ref(false)
 const showCoinflip = ref(false)
 const showRoulette = ref(false)
-const showSlots = ref(false) // 2. NOWA ZMIENNA
+const showSlots = ref(false)
 
-// --- Logika Portfela ---
-function openDeposit() {
-  showWalletSelection.value = false
-  showDeposit.value = true
-}
+const isAdmin = computed(() => {
+  return auth.user?.role === 'ADMIN'
+})
 
-function openWithdraw() {
-  showWalletSelection.value = false
-  showWithdraw.value = true
-}
-
-// --- Logika Startowa ---
-onMounted(async () => {
-  if (auth.isAuthenticated) {
-    await auth.fetchBalance()
+// --- LOGIKA PRZYCISKU PANELU ---
+function handlePanelClick() {
+  if (isAdmin.value) {
+    // ADMIN: Przekieruj na ścieżkę zdefiniowaną w routerze (/admin)
+    router.push('/admin')
+  } else {
+    // USER: Przekieruj na ścieżkę panelu użytkownika (/panel)
+    router.push('/panel')
   }
+}
+
+// Reszta funkcji bez zmian
+function openDeposit() { showWalletSelection.value = false; showDeposit.value = true }
+function openWithdraw() { showWalletSelection.value = false; showWithdraw.value = true }
+
+onMounted(async () => {
+  if (auth.isAuthenticated) await auth.fetchBalance()
 })
 
 async function onLoggedIn(payload: { token: string; user: any }) {
@@ -148,27 +135,34 @@ async function onLoggedIn(payload: { token: string; user: any }) {
 }
 
 function handleBalanceChange(amount: number) {
-  if (auth.balance !== null) {
-    auth.balance += amount
-  }
+  if (auth.balance !== null) auth.balance += amount
 }
 
-// --- Otwieranie Gier ---
 function openGameModal(game: { id: string, name: string }) {
-  // Blokada dla niezalogowanych
-  if (!auth.isAuthenticated) {
-    showLogin.value = true;
-    return;
-  }
-
-  // 3. LOGIKA OTWIERANIA
+  if (!auth.isAuthenticated) { showLogin.value = true; return; }
   if (game.id === 'minesweeper') showMinesweeper.value = true;
   if (game.id === 'slider') showSlider.value = true;
   if (game.id === 'coinflip') showCoinflip.value = true;
   if (game.id === 'roulette') showRoulette.value = true;
+  if (game.id === 'slots') showSlots.value = true;
+}
+// --- Funkcja Losowania Gry ---
+function openRandomGame() {
+  // 1. Definiujemy listę dostępnych gier (ID muszą pasować do tych w openGameModal)
+  const availableGames = [
+    { id: 'slots', name: 'Slots' },
+    { id: 'minesweeper', name: 'Minesweeper' },
+    { id: 'slider', name: 'Slider' },
+    { id: 'coinflip', name: 'Coin Flip' },
+    { id: 'roulette', name: 'Roulette' }
+  ];
 
-  if (game.id === 'slots') {
-    showSlots.value = true;
-  }
+  // 2. Losujemy indeks od 0 do liczby gier
+  const randomIndex = Math.floor(Math.random() * availableGames.length);
+  const randomGame = availableGames[randomIndex];
+
+  // 3. Otwieramy wylosowaną grę używając istniejącej funkcji
+  console.log("🎲 Wylosowano grę:", randomGame.name);
+  openGameModal(randomGame);
 }
 </script>

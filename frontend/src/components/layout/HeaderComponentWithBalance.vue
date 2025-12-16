@@ -1,16 +1,33 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue' // <--- 1. Import ref
 import { useAuthStore } from '@/stores/auth.js'
 import { useRouter } from 'vue-router'
 
-// Definiujemy zdarzenie, które emitujemy do rodzica (otwarcie modala)
-const emit = defineEmits(['open-wallet'])
+const emit = defineEmits(['open-wallet', 'open-panel'])
 
 const auth = useAuthStore()
 const router = useRouter()
+const isLoggingOut = ref(false) // <--- 2. Nowa zmienna stanu
 
-function handleLogout() {
+// Logika sprawdzania admina
+const isAdmin = computed(() => {
+  return auth.user?.role === 'ADMIN'
+})
+
+// --- POPRAWIONA FUNKCJA WYLOGOWANIA ---
+async function handleLogout() {
+  // 1. Włączamy tryb wylogowywania (zmienia wygląd przycisku)
+  isLoggingOut.value = true
+
+  // 2. Czekamy 1 sekundę (dla efektu animacji)
+  await new Promise(resolve => setTimeout(resolve, 1000))
+
+  // 3. Dopiero teraz czyścimy dane i przenosimy
   auth.logout()
   router.push('/home')
+
+  // (Opcjonalnie) Resetujemy stan, choć komponent i tak zniknie/przeładuje się
+  isLoggingOut.value = false
 }
 </script>
 
@@ -54,24 +71,37 @@ function handleLogout() {
 
       <div
           @click="$emit('open-wallet')"
-          class=" cursor-pointer select-none lg:block rounded-lg bg-[#1b1b1b] px-4 py-2 text-sm font-semibold text-white border border-white/10 transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_rgba(184,79,246,0.3)] hover:scale-105"
+          class="cursor-pointer select-none lg:block rounded-lg bg-[#1b1b1b] px-4 py-2 text-sm font-semibold text-white border border-white/10 transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_rgba(184,79,246,0.3)] hover:scale-105"
       >
         {{ auth.balance ?? 0 }}$
       </div>
 
-      <router-link
-          to="/panel"
-          class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-background-dark text-sm font-bold leading-normal tracking-[0.015em] transition-all duration-300 hover:scale-105 hover:shadow-glow-primary"
+      <button
+          @click="$emit('open-panel')"
+          class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 text-sm font-bold leading-normal tracking-[0.015em] transition-all duration-300 hover:scale-105 hover:shadow-glow-primary"
+          :class="isAdmin
+            ? 'bg-gradient-to-r from-[#b84ff6] to-[#7c3aed] text-white border border-[#b84ff6]/50'
+            : 'bg-primary text-background-dark'"
       >
-        <span class="material-symbols-outlined text-lg mr-2">person</span>
-        <span class="truncate">Panel</span>
-      </router-link>
+        <span class="material-symbols-outlined text-lg mr-2">
+          {{ isAdmin ? 'admin_panel_settings' : 'person' }}
+        </span>
+        <span class="truncate">
+          {{ isAdmin ? 'Admin' : 'Panel' }}
+        </span>
+      </button>
 
       <button
           @click="handleLogout"
-          class="flex items-center justify-center rounded-lg h-10 px-4 border border-red-500/50 text-red-500 text-sm font-bold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400"
+          :disabled="isLoggingOut"
+          class="flex items-center justify-center rounded-lg h-10 px-4 border border-red-500/50 text-red-500 text-sm font-bold transition-all duration-300 hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-red-500/5 min-w-[100px]"
       >
-        Logout
+        <span v-if="!isLoggingOut">Logout</span>
+
+        <span v-else class="flex items-center gap-2">
+          <span class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+          <span class="text-xs">Bye...</span>
+        </span>
       </button>
 
     </div>

@@ -6,9 +6,14 @@
       <div class="mb-8 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="text-4xl">🎚️</span>
-          <h2 class="text-3xl font-black uppercase tracking-wider text-white neon-text-glow">
-            Neon Slider
-          </h2>
+          <div class="flex flex-col">
+            <h2 class="text-3xl font-black uppercase tracking-wider text-white neon-text-glow">
+              Neon Slider
+            </h2>
+            <span v-if="isTestMode" class="text-xs text-yellow-400 font-mono uppercase tracking-wider">
+              🧪 TEST MODE
+            </span>
+          </div>
         </div>
         <button @click="$emit('close')" class="group rounded-full bg-white/5 p-2 transition-all hover:bg-red-500/20">
           <span class="material-symbols-outlined text-white/70 transition-colors group-hover:text-red-400">close</span>
@@ -53,7 +58,7 @@
                 <span>Min</span>
                 <span class="text-primary">{{ min }}</span>
               </div>
-              <input type="range" min="0" :max="max - 5" v-model.number="min" class="cyber-range" :disabled="isRolling" />
+              <input type="range" min="0" max="100" v-model.number="min" class="cyber-range" :disabled="isRolling" />
             </div>
 
             <div class="range-group relative z-10">
@@ -61,7 +66,7 @@
                 <span>Max</span>
                 <span class="text-primary">{{ max }}</span>
               </div>
-              <input type="range" :min="min + 5" max="100" v-model.number="max" class="cyber-range" :disabled="isRolling" />
+              <input type="range" min="0" max="100" v-model.number="max" class="cyber-range" :disabled="isRolling" />
             </div>
           </div>
 
@@ -161,10 +166,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import confetti from 'canvas-confetti'
 
-const props = defineProps({ balance: Number })
+const props = defineProps({
+  balance: Number,
+  isTestMode: { type: Boolean, default: false }
+})
 const emit = defineEmits(['close', 'balanceChange'])
 
 const auth = useAuthStore()
@@ -182,7 +191,7 @@ const resultPosition = ref(50) // Pozycja suwaka wyniku (0-100)
 // Computed
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
-const rangeSize = computed(() => max.value - min.value)
+const rangeSize = computed(() => Math.abs(max.value - min.value))
 const winChance = computed(() => rangeSize.value)
 
 // Estymacja mnożnika (Taka sama logika jak w poprawionym backendzie)
@@ -191,6 +200,54 @@ const estimatedMultiplier = computed(() => {
   const houseEdge = 0.98
   return ((100 / rangeSize.value) * houseEdge).toFixed(2)
 })
+
+// Watchers dla synchronizacji suwaków
+watch(max, (newMax) => {
+  // Gdy max zmniejsza się poniżej min, dostosuj min
+  if (newMax < min.value) {
+    min.value = newMax
+  }
+})
+
+watch(min, (newMin) => {
+  // Gdy min zwiększa się powyżej max, dostosuj max
+  if (newMin > max.value) {
+    max.value = newMin
+  }
+})
+
+// Funkcja confetti przy wygranej w sliderze
+function fireSliderConfetti() {
+  // Neonowe konfetti dla wygranej w sliderze
+  confetti({
+    particleCount: 150,
+    spread: 60,
+    origin: { y: 0.6 },
+    colors: ['#00f6ff', '#b84ff6', '#00d4ff', '#a855f7', '#3b82f6']
+  })
+
+  // Dodatkowy burst z lewej strony
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 60,
+      spread: 45,
+      origin: { x: 0.1, y: 0.7 },
+      colors: ['#00f6ff', '#b84ff6', '#00d4ff']
+    })
+  }, 250)
+
+  // Dodatkowy burst z prawej strony
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 120,
+      spread: 45,
+      origin: { x: 0.9, y: 0.7 },
+      colors: ['#b84ff6', '#a855f7', '#3b82f6']
+    })
+  }, 500)
+}
 
 // Logic
 async function playGame() {
@@ -207,43 +264,78 @@ async function playGame() {
   }, 50)
 
   try {
-    const res = await fetch(`${API}/api/games/play-slider`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}`
-      },
-      body: JSON.stringify({
-        bet: betAmount.value,
-        min: min.value,
-        max: max.value
-      })
-    })
+    let winningNumber, winAmount
 
-    const data = await res.json()
+    if (props.isTestMode) {
+      // === TRYB TESTOWY - SYMULACJA ===
+      // Symulacja opóźnienia serwera
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // Losowa liczba z zakresu 0-100
+      winningNumber = Math.floor(Math.random() * 101)
+
+      // Sprawdź czy trafił w zakres
+      const isInRange = winningNumber >= min.value && winningNumber <= max.value
+
+      if (isInRange) {
+        // Oblicz wygraną jak w backendzie
+        const houseEdge = 0.98
+        const multiplier = (100 / rangeSize.value) * houseEdge
+        winAmount = betAmount.value * multiplier
+      } else {
+        winAmount = 0
+      }
+    } else {
+      // === TRYB PRODUKCYJNY - API ===
+      const res = await fetch(`${API}/api/games/play-slider`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({
+          bet: betAmount.value,
+          min: min.value,
+          max: max.value
+        })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data.error || 'Game Error')
+
+      winningNumber = data.num
+      winAmount = data.winAmount
+    }
 
     // Zatrzymaj losową animację
     clearInterval(interval)
-
-    if (!res.ok) throw new Error(data.error || 'Game Error')
-
-    const winningNumber = data.num // Liczba z backendu
-    const winAmount = data.winAmount
 
     // Animacja do docelowej liczby
     resultPosition.value = winningNumber
 
     // Opóźnienie na pokazanie wyniku
     setTimeout(async () => {
-      // Pobierz stan konta z bazy (backend już zaktualizował)
-      await auth.fetchBalance()
+      // Odśwież balans
+      if (!props.isTestMode && auth.fetchBalance) {
+        await auth.fetchBalance()
+      } else if (props.isTestMode) {
+        // W trybie testowym emituj zmianę balansu
+        const gain = winAmount > 0 ? winAmount - betAmount.value : -betAmount.value
+        emit('balanceChange', gain)
+      }
 
       if (winAmount > 0) {
         isWin.value = true
-        lastResult.value = `HIT! ${winningNumber} is in range! WON $${winAmount}`
+        lastResult.value = `HIT! ${winningNumber} is in range! WON $${winAmount.toFixed(2)}`
+
+        // Confetti przy wygranej w sliderze! 🎉
+        setTimeout(() => {
+          fireSliderConfetti();
+        }, 200);
       } else {
         isWin.value = false
-        lastResult.value = `MISS. ${winningNumber} is outside.`
+        lastResult.value = `MISS. ${winningNumber} is outside range.`
       }
 
       isRolling.value = false
@@ -252,7 +344,7 @@ async function playGame() {
   } catch (error) {
     clearInterval(interval)
     console.error(error)
-    lastResult.value = 'Error connecting to server'
+    lastResult.value = props.isTestMode ? 'Test mode error' : 'Error connecting to server'
     isRolling.value = false
   }
 }
