@@ -1,8 +1,8 @@
 <template>
-  <div class="relative flex min-h-screen w-full flex-col bg-transparent font-display text-white dark group/design-root">
+  <div class="relative flex min-h-screen w-full flex-col bg-transparent font-display text-white dark group/design-root overflow-x-hidden">
     <div class="relative layout-container flex h-full grow flex-col">
       <div class="flex flex-1 justify-center">
-        <div class="layout-content-container flex w-full max-w-6xl flex-col">
+        <div class="layout-content-container flex w-full max-w-6xl flex-col px-4 md:px-6 lg:px-8">
 
           <HeaderComponent
               v-if="auth.booted && !auth.isAuthenticated"
@@ -18,11 +18,15 @@
               @open-panel="handlePanelClick"
           />
 
-          <main class="flex flex-col gap-10 py-10 md:gap-16 md:py-16" v-if="auth.booted">
+          <main class="flex flex-col gap-10 py-6 md:gap-16 md:py-16" v-if="auth.booted">
 
-            <HeroSection @playRandom="openRandomGame" />
+            <div class="w-full">
+              <HeroSection @playRandom="openRandomGame" />
+            </div>
 
-            <GamesGrid  @gameClick="openGameModal"/>
+            <div id="games" class="w-full">
+              <GamesGrid @gameClick="openGameModal"/>
+            </div>
           </main>
 
         </div>
@@ -31,20 +35,10 @@
       <FooterComponent v-if="auth.booted" />
     </div>
 
-    <AdminPanelModal
-        v-if="showAdminPanel"
-        @close="showAdminPanel = false"
-    />
-
-    <WalletSelectionModal
-        v-if="showWalletSelection"
-        @close="showWalletSelection = false"
-        @select-deposit="openDeposit"
-        @select-withdraw="openWithdraw"
-    />
+    <AdminPanelModal v-if="showAdminPanel" @close="showAdminPanel = false" />
+    <WalletSelectionModal v-if="showWalletSelection" @close="showWalletSelection = false" @select-deposit="openDeposit" @select-withdraw="openWithdraw" />
     <DepositModal v-if="showDeposit" @close="showDeposit = false"/>
     <WithdrawModal v-if="showWithdraw" @close="showWithdraw = false"/>
-
     <LoginModal v-if="showLogin" @close="showLogin = false" @login="onLoggedIn" />
     <RegisterModal v-if="showRegister" @close="showRegister = false" />
     <TransactionHistoryModal v-if="auth.isAuthenticated"/>
@@ -61,7 +55,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router' // <--- 1. IMPORT ROUTERA
+import { useRouter } from 'vue-router'
 
 // Importy komponentów layoutu
 import HeaderComponent from '@/components/layout/HeaderComponent.vue'
@@ -87,7 +81,7 @@ import CoinflipGameModal from '@/components/games/CoinflipGameModal.vue'
 import RouletteGameModal from '@/components/games/RouletteGameModal.vue'
 
 const auth = useAuthStore()
-const router = useRouter() // <--- 2. INICJALIZACJA ROUTERA
+const router = useRouter()
 
 // --- Stan Modali ---
 const showLogin = ref(false)
@@ -96,7 +90,6 @@ const showWalletSelection = ref(false)
 const showDeposit = ref(false)
 const showWithdraw = ref(false)
 const showAdminPanel = ref(false)
-// showAccount usunięte, bo używamy przekierowania
 
 // Gry
 const showMinesweeper = ref(false)
@@ -112,15 +105,12 @@ const isAdmin = computed(() => {
 // --- LOGIKA PRZYCISKU PANELU ---
 function handlePanelClick() {
   if (isAdmin.value) {
-    // ADMIN: Przekieruj na ścieżkę zdefiniowaną w routerze (/admin)
     router.push('/admin')
   } else {
-    // USER: Przekieruj na ścieżkę panelu użytkownika (/panel)
     router.push('/panel')
   }
 }
 
-// Reszta funkcji bez zmian
 function openDeposit() { showWalletSelection.value = false; showDeposit.value = true }
 function openWithdraw() { showWalletSelection.value = false; showWithdraw.value = true }
 
@@ -146,9 +136,8 @@ function openGameModal(game: { id: string, name: string }) {
   if (game.id === 'roulette') showRoulette.value = true;
   if (game.id === 'slots') showSlots.value = true;
 }
-// --- Funkcja Losowania Gry ---
+
 function openRandomGame() {
-  // 1. Definiujemy listę dostępnych gier (ID muszą pasować do tych w openGameModal)
   const availableGames = [
     { id: 'slots', name: 'Slots' },
     { id: 'minesweeper', name: 'Minesweeper' },
@@ -156,13 +145,8 @@ function openRandomGame() {
     { id: 'coinflip', name: 'Coin Flip' },
     { id: 'roulette', name: 'Roulette' }
   ];
-
-  // 2. Losujemy indeks od 0 do liczby gier
   const randomIndex = Math.floor(Math.random() * availableGames.length);
   const randomGame = availableGames[randomIndex];
-
-  // 3. Otwieramy wylosowaną grę używając istniejącej funkcji
-  console.log("🎲 Wylosowano grę:", randomGame.name);
   openGameModal(randomGame);
 }
 </script>

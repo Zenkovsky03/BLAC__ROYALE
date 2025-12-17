@@ -1,6 +1,17 @@
 <template>
-  <main class="flex flex-col gap-10 py-10 md:gap-16 md:py-16">
-    <section class="flex flex-col gap-8 px-4 sm:px-6 lg:px-8">
+  <main class="flex flex-col gap-10 py-10 md:gap-16 md:py-16 relative">
+
+    <div class="absolute top-4 left-4 md:top-8 md:left-8 z-10">
+      <router-link
+          to="/home"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/50 text-white/70 hover:text-white transition-all group"
+      >
+        <span class="material-symbols-outlined transition-transform group-hover:-translate-x-1">arrow_back</span>
+        <span class="text-sm font-bold uppercase tracking-wider">Back to casino</span>
+      </router-link>
+    </div>
+
+    <section class="flex flex-col gap-8 px-4 sm:px-6 lg:px-8 mt-12 md:mt-0">
 
       <div class="flex flex-col items-center gap-4 text-center">
         <h1 class="text-white text-4xl font-black leading-tight tracking-[-0.033em] md:text-6xl">
@@ -117,10 +128,9 @@ interface RankingPlayer {
 }
 
 const rankings = ref<RankingPlayer[]>([]);
-const currentPeriod = ref('all'); // Domyślnie 'all'
+const currentPeriod = ref('all');
 const isLoading = ref(false);
 
-// Funkcja pobierająca dane
 const fetchRanking = async (period: string) => {
   isLoading.value = true;
   currentPeriod.value = period;
@@ -154,7 +164,6 @@ const formatMoney = (value: string | number) => {
   return Number(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 };
 
-// --- Helpery do stylów (Złoto, Srebro, Brąz) ---
 const getRowClass = (index: number) => {
   if (index === 0) return 'bg-gradient-to-r from-yellow-500/20 via-transparent to-transparent shadow-glow-gold hover:bg-yellow-500/10';
   if (index === 1) return 'bg-gradient-to-r from-zinc-400/20 via-transparent to-transparent hover:bg-zinc-400/10';

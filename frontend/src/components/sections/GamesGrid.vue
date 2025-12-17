@@ -1,7 +1,7 @@
 <template>
   <section class="flex flex-col gap-8 px-4 sm:px-6 lg:px-8" id="games">
     <h2 class="text-white text-2xl font-bold leading-tight tracking-[-0.015em] px-4 pt-5 md:text-3xl">Enter the Arena</h2>
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <GameCard
           v-for="game in games"
           :key="game.id"
