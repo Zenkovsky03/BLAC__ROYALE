@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { protect } from '../Middleware/authMiddleware.ts';
 import { requireAdmin } from "../Middleware/adminMiddleware.ts";
 import { listUsers, patchUser, userDetails } from "../Controllers/adminController.ts";
-import {getWalletAdmin} from "../Controllers/userAdministrationController.ts";
 
 const AdminRouter = Router();
 
@@ -268,62 +267,5 @@ AdminRouter.get('/user-details/:id', protect, requireAdmin, userDetails);
  */
 AdminRouter.patch('/patch-user/:id', protect, requireAdmin, patchUser);
 
-/**
- * @swagger
- * /admin/wallet/{userId}:
- *   get:
- *     summary: Get wallet details of a specific user (Admin only)
- *     description: Retrieve wallet balance and transaction history for any user. Requires admin authentication.
- *     tags:
- *       - Admin
- *       - Wallet
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the user whose wallet to retrieve
- *     responses:
- *       200:
- *         description: Wallet retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 balance:
- *                   type: number
- *                   example: 1500.50
- *                 transactions:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                       amount:
- *                         type: number
- *                       type:
- *                         type: string
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *       403:
- *         description: Unauthorized - Admin access required
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: No wallet found.
- */
-AdminRouter.get('/admin/wallet/:userId', protect, requireAdmin, getWalletAdmin);
 
 export default AdminRouter;
