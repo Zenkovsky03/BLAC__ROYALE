@@ -9,7 +9,11 @@
             Cyber Slots
           </h2>
         </div>
-        <button @click="$emit('close')" class="group rounded-full bg-white/5 p-2 transition-all hover:bg-red-500/20">
+
+        <button
+            @click="$emit('close')"
+            class="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all hover:bg-red-500/20"
+        >
           <span class="material-symbols-outlined text-white/70 transition-colors group-hover:text-red-400">close</span>
         </button>
       </div>
@@ -180,9 +184,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import confetti from 'canvas-confetti'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({ balance: Number })
 const emit = defineEmits(['close', 'balanceChange'])
+
+const auth = useAuthStore()
 
 // Funkcja confetti przy wygranej w slocie
 function fireSlotConfetti() {
@@ -291,10 +298,13 @@ const spinReel = async (reelIndex, targetSymbol) => {
 
 // --- FUNKCJA SZUKAJĄCA TOKENA ---
 const findToken = () => {
+  // Jeśli używasz Pinia (useAuthStore), lepiej pobrać stamtąd:
+  if (auth.token) return auth.token;
+
+  // Fallback do localStorage
   let t = localStorage.getItem('auth_token');
   if (t) return t.replace(/^"|"$/g, '');
 
-  // 2. Fallbacki
   t = localStorage.getItem('token');
   if (t) return t;
 

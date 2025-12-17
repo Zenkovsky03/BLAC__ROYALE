@@ -104,6 +104,11 @@ export const router = createRouter({
             component: () => import('@/components/layout/footer/AffiliatesView.vue')
         },
         {
+            path: '/reset-password',
+            name: 'reset-password',
+            component: () => import('@/views//ResetPasswordView.vue')
+        },
+        {
             path: '/:pathMatch(.*)*',
             name: 'not-found', //
             component: NotFoundView

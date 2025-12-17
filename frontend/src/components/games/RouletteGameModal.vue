@@ -3,7 +3,7 @@
 
     <div class="relative my-8 flex max-h-[95vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border-2 border-primary/50 bg-[#0a0a0a]/95 p-6 shadow-[0_0_60px_-15px_rgba(184,79,246,0.6)] md:p-10">
 
-      <div class="mb-6 flex items-center justify-between">
+      <div class="mb-6 flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-3">
           <span class="text-4xl">🎡</span>
           <div class="flex flex-col">
@@ -15,14 +15,18 @@
             </span>
           </div>
         </div>
-        <button @click="$emit('close')" class="group rounded-full bg-white/5 p-2 transition-all hover:bg-red-500/20">
+
+        <button
+            @click="$emit('close')"
+            class="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all hover:bg-red-500/20"
+        >
           <span class="material-symbols-outlined text-white/70 transition-colors group-hover:text-red-400">close</span>
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-8 items-center">
+      <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-8 items-center pb-20">
 
-        <div class="w-full flex flex-col lg:flex-row gap-8 items-center justify-center">
+        <div class="w-full flex flex-col lg:flex-row gap-8 items-center justify-center flex-shrink-0">
 
           <div class="relative flex-shrink-0">
             <div class="absolute inset-0 rounded-full bg-primary/20 blur-[60px] animate-pulse"></div>
@@ -103,19 +107,19 @@
           </div>
         </div>
 
-        <div class="w-full max-w-4xl bg-black/40 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
+        <div class="w-full max-w-4xl bg-black/40 border border-white/10 rounded-2xl p-6 relative overflow-hidden flex-shrink-0">
           <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px]"></div>
 
           <div class="relative z-10 flex flex-col gap-4">
 
-            <div class="flex gap-4 justify-center mb-2">
-              <button @click="selectColor('red')" class="table-btn bg-red-900/40 border-red-600/50 hover:bg-red-600 text-red-100" :class="{ 'active': selectedColor === 'red' }">
+            <div class="flex flex-wrap gap-4 justify-center mb-2">
+              <button @click="selectColor('red')" class="table-btn bg-red-900/40 border-red-600/50 hover:bg-red-600 text-red-100 flex-grow md:flex-grow-0" :class="{ 'active': selectedColor === 'red' }">
                 🔴 RED (x2)
               </button>
-              <button @click="selectGreen()" class="table-btn bg-green-900/40 border-green-600/50 hover:bg-green-600 text-green-100" :class="{ 'active': selectedGreen }">
+              <button @click="selectGreen()" class="table-btn bg-green-900/40 border-green-600/50 hover:bg-green-600 text-green-100 flex-grow md:flex-grow-0" :class="{ 'active': selectedGreen }">
                 🟢 ZERO (x35)
               </button>
-              <button @click="selectColor('black')" class="table-btn bg-slate-800/60 border-slate-500/50 hover:bg-slate-700 text-slate-100" :class="{ 'active': selectedColor === 'black' }">
+              <button @click="selectColor('black')" class="table-btn bg-slate-800/60 border-slate-500/50 hover:bg-slate-700 text-slate-100 flex-grow md:flex-grow-0" :class="{ 'active': selectedColor === 'black' }">
                 ⚫ BLACK (x2)
               </button>
             </div>
@@ -138,7 +142,7 @@
           </div>
         </div>
 
-        <div class="w-full mt-4 border-t border-white/10 pt-6">
+        <div class="w-full mt-4 border-t border-white/10 pt-6 flex-shrink-0">
           <details class="group rounded-xl bg-white/5 border border-white/10 overflow-hidden transition-all open:border-primary/50 open:shadow-[0_0_20px_rgba(184,79,246,0.2)]">
             <summary class="flex cursor-pointer items-center justify-between p-4 font-bold text-white hover:bg-white/5 select-none transition-colors">
               <div class="flex items-center gap-2 text-lg uppercase tracking-wider">
@@ -191,12 +195,10 @@ const props = defineProps({
 const emit = defineEmits(['close', 'balanceChange'])
 
 const auth = useAuthStore()
-// Pobieramy URL API z pliku .env (lub domyślny pusty string dla proxy)
 const API_URL = import.meta.env.VITE_API_URL || ''
 
 // Funkcja confetti przy wygranej
 function fireConfetti() {
-  // Neonowe confetti dla wygranej w ruletce
   confetti({
     particleCount: 100,
     spread: 70,
@@ -204,7 +206,6 @@ function fireConfetti() {
     colors: ['#b84ff6', '#00f6ff', '#ff0055', '#00ff90', '#ffed4a']
   })
 
-  // Dodatkowy burst z lewej
   setTimeout(() => {
     confetti({
       particleCount: 50,
@@ -215,7 +216,6 @@ function fireConfetti() {
     })
   }, 200)
 
-  // Dodatkowy burst z prawej
   setTimeout(() => {
     confetti({
       particleCount: 50,
@@ -241,7 +241,6 @@ const pinJolt = ref(false)
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
 const isValidBet = computed(() => {
-  // Musi być wybrany (Numer LUB Kolor LUB Zielony) ORAZ (Stawka <= Balans)
   const isSelectionMade = selectedNumber.value !== null || selectedColor.value !== null || selectedGreen.value
   const hasEnoughMoney = betAmount.value <= (props.balance || 0)
   return isSelectionMade && hasEnoughMoney
@@ -250,21 +249,19 @@ const isValidBet = computed(() => {
 // --- CONFIG ---
 const segmentCount = 37
 const segmentAngle = 360 / segmentCount
-const wheelRadius = 200 // Zmniejszony promień (400px / 2)
+const wheelRadius = 200
 
-// Generowanie segmentów (0-36)
-// UWAGA: Kolejność w tablicy musi odpowiadać kolejności na kole (zgodnie z ruchem wskazówek zegara od 0)
-// Tutaj generujemy je numerycznie 0, 1, 2... co na kole HTML oznacza ułożenie po kolei.
+// Generowanie segmentów
 const segments = Array.from({ length: segmentCount }, (_, i) => {
   let color, label
   if (i === 0) {
-    color = '#00ff90' // 0 = Zielony
+    color = '#00ff90'
     label = '0'
   } else if ([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(i)) {
-    color = '#ff0055' // Czerwony
+    color = '#ff0055'
     label = i.toString()
   } else {
-    color = '#111111' // Czarny
+    color = '#111111'
     label = i.toString()
   }
   return { label, color }
@@ -291,13 +288,13 @@ function txtStyle(i) {
   return {
     position: 'absolute',
     left: '50%',
-    top: '15px', // Dostosowane do mniejszego koła
+    top: '15px',
     transform: `translate(-50%, 0)`,
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: '14px', // Nieco mniejsza czcionka dla mniejszego koła
+    fontSize: '14px',
     textAlign: 'center',
-    textShadow: '0 0 4px black, 0 0 8px rgba(0,0,0,0.8)', // Mocniejszy cień dla lepszej czytelności
+    textShadow: '0 0 4px black, 0 0 8px rgba(0,0,0,0.8)',
     zIndex: 10
   }
 }
@@ -333,7 +330,7 @@ function selectGreen() {
   selectedGreen.value = true; selectedNumber.value = null; selectedColor.value = null; lastResult.value = '';
 }
 
-// --- GŁÓWNA FUNKCJA SPIN (API) ---
+// --- GŁÓWNA FUNKCJA SPIN ---
 async function spin() {
   if (isSpinning.value || !isValidBet.value) return
 
@@ -345,66 +342,38 @@ async function spin() {
     let winningNumber, gain
 
     if (props.isTestMode) {
-      // === TRYB TESTOWY - SYMULACJA ===
-      // Symulacja opóźnienia serwera
       await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Losowy wynik (0-36)
       winningNumber = Math.floor(Math.random() * 37)
-
-      // Sprawdzamy czy wygraliśmy i obliczamy wygraną
       let isWin = false
 
       if (selectedNumber.value !== null) {
-        // Obstawiliśmy konkretną liczbę
         isWin = winningNumber === selectedNumber.value
-        if (isWin) {
-          gain = betAmount.value * 35 // Wygrana x35
-        } else {
-          gain = 0 // Przegrana
-        }
+        gain = isWin ? betAmount.value * 35 : 0
       } else if (selectedGreen.value) {
-        // Obstawiliśmy zielone (0)
         isWin = winningNumber === 0
-        if (isWin) {
-          gain = betAmount.value * 35 // Wygrana x35
-        } else {
-          gain = 0 // Przegrana
-        }
+        gain = isWin ? betAmount.value * 35 : 0
       } else if (selectedColor.value) {
-        // Obstawiliśmy kolor
         if (winningNumber === 0) {
-          // Zielone - zawsze przegrana dla kolorów
           isWin = false
           gain = 0
         } else {
-          // Sprawdzamy czy liczba jest czerwona czy czarna
           const isRed = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(winningNumber)
           const isBlack = !isRed && winningNumber !== 0
 
           if (selectedColor.value === 'red' && isRed) isWin = true
           if (selectedColor.value === 'black' && isBlack) isWin = true
-
-          if (isWin) {
-            gain = betAmount.value * 2 // Wygrana x2 dla kolorów
-          } else {
-            gain = 0 // Przegrana
-          }
+          gain = isWin ? betAmount.value * 2 : 0
         }
       }
-
     } else {
-      // === TRYB PRODUKCYJNY - API ===
-      // 1. PRZYGOTOWANIE DANYCH DLA BACKENDU
-      let colorToSend = -1; // Domyślnie brak koloru
+      let colorToSend = -1;
       if (selectedColor.value === 'red') colorToSend = 1;
       if (selectedColor.value === 'black') colorToSend = 0;
 
-      let numberToSend = -1; // Domyślnie brak liczby
+      let numberToSend = -1;
       if (selectedNumber.value !== null) numberToSend = selectedNumber.value;
-      if (selectedGreen.value) numberToSend = 0; // Zielony to liczba 0
+      if (selectedGreen.value) numberToSend = 0;
 
-      // 2. STRZAŁ DO API
       const res = await fetch(`${API_URL}/api/games/play-roulette`, {
         method: 'POST',
         headers: {
@@ -419,81 +388,50 @@ async function spin() {
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Server error');
 
-      if (!res.ok) {
-        throw new Error(data.message || 'Błąd serwera');
-      }
-
-      // Otrzymujemy wynik z bazy:
-      winningNumber = data.randomNumber; // np. 17
-      gain = data.gain; // np. 0 lub 500
+      winningNumber = data.randomNumber;
+      gain = data.gain;
     }
 
-    // 3. OBLICZANIE ANIMACJI
-    // Musimy znaleźć, gdzie na kole znajduje się 'winningNumber'.
-    // W naszej tablicy 'segments', index odpowiada liczbie (bo generujemy 0..36).
     const winningIndex = segments.findIndex(s => parseInt(s.label) === winningNumber);
-
-    // Obliczamy kąt obrotu.
-    // Chcemy, aby 'winningIndex' znalazł się na górze (pod strzałką).
-    // Kąt segmentu to index * segmentAngle.
-    // Koło kręci się w prawo (wartości ujemne w CSS rotate), więc musimy "cofnąć" o ten kąt.
-    const spins = 5; // Ilość pełnych obrotów dla efektu
+    const spins = 5;
     const baseRotation = spins * 360;
-
-    // Wzór: Pełne obroty + (360 - pozycja_wygrywająca)
-    // Dzięki temu, po odjęciu kąta, wygrywający segment wyląduje na godzinie 12:00
     const targetRotation = baseRotation + (360 - (winningIndex * segmentAngle));
-
-    // 4. URUCHOMIENIE ANIMACJI CSS
-    const duration = 4000; // 4 sekundy
+    const duration = 4000;
     const wheelEl = wheel.value;
 
     if (wheelEl) {
-      // Reset pozycji (bez animacji)
       wheelEl.style.transition = 'none';
       wheelEl.style.transform = `rotate(0deg)`;
-
-      // Wymuszenie przerysowania (reflow), żeby przeglądarka "zauważyła" reset
       void wheelEl.offsetWidth;
-
-      // Start właściwego kręcenia
       wheelEl.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
       wheelEl.style.transform = `rotate(${targetRotation}deg)`;
 
-      // 5. PO ZAKOŃCZENIU ANIMACJI
       setTimeout(async () => {
         isSpinning.value = false;
         pinJolt.value = false;
 
-        // Odświeżamy balans
         if (!props.isTestMode && auth.fetchBalance) {
           await auth.fetchBalance();
         } else if (props.isTestMode) {
-          // W trybie testowym emitujemy zmianę balansu
           const balanceChange = gain > 0 ? gain - betAmount.value : -betAmount.value;
           emit('balanceChange', balanceChange);
         }
 
         if (gain > 0) {
           lastResult.value = `VICTORY! Result: ${winningNumber}. YOU WON $${gain}!`;
-
-          // Confetti przy wygranej! 🎉
-          setTimeout(() => {
-            fireConfetti();
-          }, 300); // Małe opóźnienie żeby animacja koła się skończyła
+          setTimeout(() => { fireConfetti(); }, 300);
         } else {
           lastResult.value = `DEFEAT. Result: ${winningNumber}. You lost $${betAmount.value}.`;
         }
-      }, duration + 100); // +100ms marginesu
+      }, duration + 100);
     }
 
   } catch (error) {
     console.error(error);
     isSpinning.value = false;
     lastResult.value = props.isTestMode ? 'Test mode error' : 'Network Error. Try again.';
-
-    // W przypadku błędu odświeżamy balans (tylko jeśli nie test)
     if (!props.isTestMode && auth.fetchBalance) {
       await auth.fetchBalance();
     }
@@ -502,32 +440,24 @@ async function spin() {
 </script>
 
 <style scoped>
-/* --- CUSTOM SCROLLBAR --- */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(184, 79, 246, 0.3);
   border-radius: 10px;
 }
-
-/* --- NEON & GLOW --- */
 .neon-text-glow {
   text-shadow: 0 0 15px rgba(184, 79, 246, 0.7);
 }
-
 .neon-border-blue {
   border: 1px solid rgba(0, 246, 255, 0.5);
   box-shadow: 0 0 15px rgba(0, 246, 255, 0.2) inset;
 }
-
-/* --- ROULETTE WHEEL CSS --- */
 .neon-roulette-casing {
   width: 400px;
   height: 400px;
@@ -541,22 +471,17 @@ async function spin() {
   justify-content: center;
   overflow: hidden;
 }
-
 .neon-roulette-wheel {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   position: relative;
-  /* Transform controlled by JS */
 }
-
 .neon-roulette-center {
   width: 100%;
   height: 100%;
   position: absolute;
 }
-
-/* Pin (Strzałka) */
 .neon-roulette-pin {
   position: absolute;
   top: 10px;
@@ -565,52 +490,38 @@ async function spin() {
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-top: 20px solid #fff; /* Biała strzałka */
+  border-top: 20px solid #fff;
   transform: translateX(-50%);
   filter: drop-shadow(0 0 5px #fff);
   z-index: 50;
 }
-
 .neon-roulette-pin.jolt {
   animation: pinShake 0.1s infinite;
 }
-
 @keyframes pinShake {
-  0% {
-    transform: translateX(-50%) rotate(0deg);
-  }
-  25% {
-    transform: translateX(-50%) rotate(10deg);
-  }
-  75% {
-    transform: translateX(-50%) rotate(-10deg);
-  }
-  100% {
-    transform: translateX(-50%) rotate(0deg);
-  }
+  0% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-50%) rotate(10deg); }
+  75% { transform: translateX(-50%) rotate(-10deg); }
+  100% { transform: translateX(-50%) rotate(0deg); }
 }
-
 .neon-roulette-cap {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 70px;
-  height: 70px; /* Dopasowane do mniejszego koła */
+  height: 70px;
   background: #111;
-  border: 3px solid #b84ff6; /* Grubsza ramka */
+  border: 3px solid #b84ff6;
   border-radius: 50%;
-  box-shadow: 0 0 25px #b84ff6; /* Silniejszy blask */
+  box-shadow: 0 0 25px #b84ff6;
   z-index: 40;
 }
-
-/* --- CONTROLS --- */
 .setting-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .setting-label {
   display: flex;
   align-items: center;
@@ -620,14 +531,12 @@ async function spin() {
   text-transform: uppercase;
   font-size: 0.85rem;
 }
-
 .select-wrapper {
   position: relative;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 0.75rem;
   overflow: hidden;
 }
-
 .setting-select {
   width: 100%;
   background: transparent;
@@ -639,7 +548,6 @@ async function spin() {
   appearance: none;
   cursor: pointer;
 }
-
 .digital-readout .label {
   font-size: 0.6rem;
   font-weight: 700;
@@ -647,14 +555,12 @@ async function spin() {
   display: block;
   text-align: center;
 }
-
 .digital-readout .value {
   font-family: monospace;
   font-size: 1.2rem;
   font-weight: 700;
   text-shadow: 0 0 10px currentColor;
 }
-
 .cyber-button-start {
   display: flex;
   align-items: center;
@@ -670,13 +576,10 @@ async function spin() {
   box-shadow: 0 0 25px rgba(184, 79, 246, 0.5);
   transition: all 0.3s;
 }
-
 .cyber-button-start:not(:disabled):hover {
   transform: scale(1.02);
   box-shadow: 0 0 40px rgba(184, 79, 246, 0.8);
 }
-
-/* --- TABLE HUD --- */
 .table-btn {
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
@@ -686,13 +589,11 @@ async function spin() {
   text-transform: uppercase;
   font-size: 0.8rem;
 }
-
 .table-btn.active {
   box-shadow: 0 0 15px currentColor;
   transform: scale(1.05);
   border-color: white;
 }
-
 .number-btn {
   height: 40px;
   border-radius: 4px;
@@ -700,11 +601,9 @@ async function spin() {
   border: 1px solid;
   transition: all 0.1s;
 }
-
 .number-btn:hover {
   transform: translateY(-2px);
 }
-
 .number-btn.active {
   background: #fff !important;
   color: #000 !important;

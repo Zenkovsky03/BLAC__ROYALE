@@ -3,7 +3,7 @@
 
     <div class="relative my-8 flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border-2 border-primary/50 bg-[#0a0a0a]/95 p-6 shadow-[0_0_60px_-15px_rgba(184,79,246,0.6)] md:p-10">
 
-      <div class="mb-8 flex items-center justify-between">
+      <div class="mb-8 flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-3">
           <span class="text-4xl">💣</span>
           <div class="flex flex-col">
@@ -13,12 +13,16 @@
             <span class="text-xs text-primary font-bold tracking-[0.2em] uppercase">Provably Fair</span>
           </div>
         </div>
-        <button @click="$emit('close')" class="group rounded-full bg-white/5 p-2 transition-all hover:bg-red-500/20">
+
+        <button
+            @click="$emit('close')"
+            class="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all hover:bg-red-500/20"
+        >
           <span class="material-symbols-outlined text-white/70 transition-colors group-hover:text-red-400">close</span>
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-10">
 
         <div v-if="!gameStarted" class="flex flex-col gap-8 animate-in fade-in zoom-in duration-300">
 
@@ -205,11 +209,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import {ref, computed} from 'vue'
+import {useAuthStore} from '@/stores/auth'
 import confetti from 'canvas-confetti'
 
-const props = defineProps({ balance: Number })
+const props = defineProps({balance: Number})
 const emit = defineEmits(['close', 'balanceChange'])
 
 const auth = useAuthStore()
@@ -221,7 +225,7 @@ function fireMinesweeperConfetti() {
   confetti({
     particleCount: 100,
     spread: 60,
-    origin: { y: 0.6 },
+    origin: {y: 0.6},
     colors: ['#00f6ff', '#ffd700', '#c0c0c0', '#87ceeb', '#98fb98', '#dda0dd']
   })
 
@@ -231,7 +235,7 @@ function fireMinesweeperConfetti() {
       particleCount: 50,
       angle: 60,
       spread: 45,
-      origin: { x: 0.1, y: 0.7 },
+      origin: {x: 0.1, y: 0.7},
       colors: ['#00f6ff', '#ffd700', '#c0c0c0']
     })
   }, 200)
@@ -242,7 +246,7 @@ function fireMinesweeperConfetti() {
       particleCount: 50,
       angle: 120,
       spread: 45,
-      origin: { x: 0.9, y: 0.7 },
+      origin: {x: 0.9, y: 0.7},
       colors: ['#87ceeb', '#98fb98', '#dda0dd']
     })
   }, 400)
@@ -279,9 +283,9 @@ const gridStyle = computed(() => ({
 function parseMapString(mapStr) {
   if (!mapStr) return []
   return mapStr.split('').map(char => {
-    if (char === '?') return { revealed: false, isBomb: false }
-    if (char === '.') return { revealed: true, isBomb: true } // Tylko przy przegranej
-    return { revealed: true, isBomb: false } // Cyfra = Bezpieczne
+    if (char === '?') return {revealed: false, isBomb: false}
+    if (char === '.') return {revealed: true, isBomb: true} // Tylko przy przegranej
+    return {revealed: true, isBomb: false} // Cyfra = Bezpieczne
   })
 }
 
@@ -309,8 +313,8 @@ async function startGame() {
   try {
     const res = await fetch(`${API}/api/Sapper/start-sapper`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
-      body: JSON.stringify({ bombsCount: bombs.value, betAmount: betAmount.value, mapSize: gridSize.value })
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}`},
+      body: JSON.stringify({bombsCount: bombs.value, betAmount: betAmount.value, mapSize: gridSize.value})
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message)
@@ -320,7 +324,11 @@ async function startGame() {
     gameOver.value = false
     currentMultiplier.value = 1.0
     await auth.fetchBalance()
-  } catch (e) { console.error(e) } finally { isProcessing.value = false }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    isProcessing.value = false
+  }
 }
 
 async function revealCell(index) {
@@ -332,8 +340,8 @@ async function revealCell(index) {
   try {
     const res = await fetch(`${API}/api/Sapper/play-sapper`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
-      body: JSON.stringify({ X: row, Y: col })
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}`},
+      body: JSON.stringify({X: row, Y: col})
     })
     const data = await res.json()
 
@@ -348,7 +356,11 @@ async function revealCell(index) {
     } else {
       if (data.multiplier) currentMultiplier.value = data.multiplier
     }
-  } catch (e) { console.error(e) } finally { isProcessing.value = false }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    isProcessing.value = false
+  }
 }
 
 async function cashOut() {
@@ -357,7 +369,7 @@ async function cashOut() {
   try {
     const res = await fetch(`${API}/api/Sapper/resign-sapper`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` }
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}`}
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message)
@@ -374,7 +386,11 @@ async function cashOut() {
     }, 300);
 
     await auth.fetchBalance()
-  } catch (e) { console.error(e) } finally { isProcessing.value = false }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    isProcessing.value = false
+  }
 }
 
 function resetGame() {
@@ -388,41 +404,122 @@ function resetGame() {
 
 <style scoped>
 /* --- SCROLLBAR --- */
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(184, 79, 246, 0.3); border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(184, 79, 246, 0.3);
+  border-radius: 10px;
+}
 
 /* --- NEON & UTILS --- */
-.neon-text-glow { text-shadow: 0 0 15px rgba(184, 79, 246, 0.7); }
-.text-shadow-green { text-shadow: 0 0 15px rgba(34, 197, 94, 0.8); }
-.text-shadow-red { text-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
+.neon-text-glow {
+  text-shadow: 0 0 15px rgba(184, 79, 246, 0.7);
+}
 
-.neon-border-blue { border: 1px solid rgba(0, 246, 255, 0.5); box-shadow: 0 0 10px rgba(0, 246, 255, 0.1) inset; }
-.neon-border-red { border: 1px solid rgba(239, 68, 68, 0.5); box-shadow: 0 0 10px rgba(239, 68, 68, 0.1) inset; }
+.text-shadow-green {
+  text-shadow: 0 0 15px rgba(34, 197, 94, 0.8);
+}
+
+.text-shadow-red {
+  text-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+}
+
+.neon-border-blue {
+  border: 1px solid rgba(0, 246, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 246, 255, 0.1) inset;
+}
+
+.neon-border-red {
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.1) inset;
+}
 
 /* --- INPUTS --- */
-.setting-group { display: flex; flex-direction: column; gap: 0.5rem; }
-.setting-label { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #fff; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
-.select-wrapper { position: relative; background: rgba(0,0,0,0.6); border-radius: 0.5rem; overflow: hidden; }
-.setting-select { width: 100%; background: transparent; color: #fff; padding: 0.8rem; font-weight: bold; outline: none; appearance: none; cursor: pointer; }
-.select-wrapper::after { content: '▼'; position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); pointer-events: none; color: #fff; font-size: 0.7rem; }
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.setting-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.select-wrapper {
+  position: relative;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.setting-select {
+  width: 100%;
+  background: transparent;
+  color: #fff;
+  padding: 0.8rem;
+  font-weight: bold;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #fff;
+  font-size: 0.7rem;
+}
 
 /* --- HUD --- */
-.digital-readout { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.digital-readout .label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 2px; }
-.digital-readout .value { font-family: monospace; font-weight: 700; }
+.digital-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.digital-readout .label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+
+.digital-readout .value {
+  font-family: monospace;
+  font-weight: 700;
+}
 
 /* --- GRID --- */
 .game-board-container {
   padding: 1rem;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 1rem;
 }
+
 .minesweeper-grid {
   display: grid;
   width: 100%;
   aspect-ratio: 1; /* Kwadratowa plansza */
 }
+
 .minesweeper-cell {
   width: 100%;
   height: 100%;
@@ -432,17 +529,35 @@ function resetGame() {
 }
 
 /* --- ANIMACJE IKON --- */
-.diamond-anim { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-.bomb-anim { animation: shake 0.5s ease-in-out; }
+.diamond-anim {
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bomb-anim {
+  animation: shake 0.5s ease-in-out;
+}
 
 @keyframes popIn {
-  0% { transform: scale(0); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
+
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px) rotate(-5deg); }
-  75% { transform: translateX(5px) rotate(5deg); }
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px) rotate(-5deg);
+  }
+  75% {
+    transform: translateX(5px) rotate(5deg);
+  }
 }
 
 /* --- BUTTONS --- */
@@ -456,7 +571,11 @@ function resetGame() {
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
-.cyber-button-start:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 30px rgba(184, 79, 246, 0.7); }
+
+.cyber-button-start:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(184, 79, 246, 0.7);
+}
 
 .cyber-button-cashout {
   background: linear-gradient(135deg, #22c55e, #15803d);
@@ -465,22 +584,39 @@ function resetGame() {
   box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
   transition: all 0.2s;
 }
-.cyber-button-cashout:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 25px rgba(34, 197, 94, 0.5); }
+
+.cyber-button-cashout:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.5);
+}
 
 .cyber-button-reset {
   background: transparent;
-  border: 2px solid rgba(255,255,255,0.2);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   color: white;
   font-weight: bold;
   border-radius: 0.5rem;
   transition: all 0.2s;
 }
-.cyber-button-reset:hover { border-color: white; background: rgba(255,255,255,0.05); }
 
-.pulse-green-btn { animation: pulse-green-shadow 2s infinite; }
+.cyber-button-reset:hover {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pulse-green-btn {
+  animation: pulse-green-shadow 2s infinite;
+}
+
 @keyframes pulse-green-shadow {
-  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
 }
 </style>

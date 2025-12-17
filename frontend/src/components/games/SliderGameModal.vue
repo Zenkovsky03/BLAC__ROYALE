@@ -15,7 +15,11 @@
             </span>
           </div>
         </div>
-        <button @click="$emit('close')" class="group rounded-full bg-white/5 p-2 transition-all hover:bg-red-500/20">
+
+        <button
+            @click="$emit('close')"
+            class="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all hover:bg-red-500/20"
+        >
           <span class="material-symbols-outlined text-white/70 transition-colors group-hover:text-red-400">close</span>
         </button>
       </div>

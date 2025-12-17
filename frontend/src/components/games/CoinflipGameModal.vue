@@ -15,7 +15,11 @@
             </span>
           </div>
         </div>
-        <button @click="$emit('close')" class="group rounded-full bg-white/5 p-2 transition-all hover:bg-red-500/20">
+
+        <button
+            @click="$emit('close')"
+            class="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-all hover:bg-red-500/20"
+        >
           <span class="material-symbols-outlined text-white/70 transition-colors group-hover:text-red-400">close</span>
         </button>
       </div>
@@ -80,11 +84,9 @@
 
             <div class="coin-scene">
               <div class="coin" :class="{ 'flipping': isFlipping, 'show-heads': coinResult === 'heads', 'show-tails': coinResult === 'tails' }">
-                <!-- Główna powierzchnia monety (HEADS) -->
                 <div class="heads">
                   <span class="coin-letter">H</span>
                 </div>
-                <!-- Tylna powierzchnia (TAILS) -->
                 <div class="tails">
                   <span class="coin-letter">T</span>
                 </div>
@@ -197,7 +199,6 @@ const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
 // Funkcja confetti przy wygranej
 function fireConfetti() {
-  // Złote confetti dla wygranej w coinflip
   confetti({
     particleCount: 100,
     spread: 70,
@@ -205,7 +206,6 @@ function fireConfetti() {
     colors: ['#FFD700', '#FFA500', '#FF8C00', '#DAA520', '#B8860B']
   })
 
-  // Dodatkowy burst z góry
   setTimeout(() => {
     confetti({
       particleCount: 50,
@@ -230,7 +230,6 @@ function fireConfetti() {
 async function flipCoin() {
   if (isFlipping.value) return
 
-  // Walidacja środków
   if (betAmount.value > (props.balance || 0)) {
     alert("Niewystarczające środki!")
     return
@@ -246,8 +245,7 @@ async function flipCoin() {
     let finalSide: 'heads' | 'tails'
 
     if (props.isTestMode) {
-      // === TRYB TESTOWY - SYMULACJA ===
-      // Losowy wynik (50/50)
+      // === TRYB TESTOWY ===
       const randomResult = Math.random() < 0.5
       const coinLanded = randomResult ? 'heads' : 'tails'
 
@@ -256,11 +254,9 @@ async function flipCoin() {
       finalSide = coinLanded
 
     } else {
-      // === TRYB PRODUKCYJNY - API ===
-      // 1. Mapowanie wyboru na backend (Heads=0, Tails=1)
+      // === API ===
       const betValue = selectedSide.value === 'heads' ? 0 : 1;
 
-      // 2. Zapytanie do API
       const res = await fetch(`${API}/api/games/play-coin-flip`, {
         method: 'POST',
         headers: {
@@ -279,52 +275,45 @@ async function flipCoin() {
       isWin = data.result === 'WIN';
       gain = data.gain;
 
-      // 3. Ustalanie co wypadło (dedukcja)
       if (isWin) {
-        finalSide = selectedSide.value; // Wypadło to co wybrałem
+        finalSide = selectedSide.value;
       } else {
-        finalSide = selectedSide.value === 'heads' ? 'tails' : 'heads'; // Wypadło przeciwne
+        finalSide = selectedSide.value === 'heads' ? 'tails' : 'heads';
       }
     }
 
-    // 4. Animacja - dostosowujemy końcową pozycję do wyniku
+    // Ustawienie rotacji CSS
     const ANIM_DURATION = 2500;
-
-    // Dynamicznie ustawiamy końcową rotację animacji
     const coinElement = document.querySelector('.coin');
     if (coinElement) {
       if (finalSide === 'heads') {
-        coinElement.style.setProperty('--final-rotation', '1440deg'); // 4 obroty = 0° (HEADS)
+        coinElement.style.setProperty('--final-rotation', '1440deg'); // 4 obroty (HEADS)
       } else {
-        coinElement.style.setProperty('--final-rotation', '1620deg'); // 4.5 obrotu = 180° (TAILS)
+        coinElement.style.setProperty('--final-rotation', '1620deg'); // 4.5 obrotu (TAILS)
       }
     }
 
+    // POPRAWKA 2: Zakończenie animacji i odblokowanie przycisku
     setTimeout(async () => {
-      coinResult.value = finalSide; // To zatrzyma CSS na odpowiedniej stronie
-
-      // Odświeżamy balans (tylko jeśli nie test)
-      if (!props.isTestMode && auth.fetchBalance) {
-        await auth.fetchBalance();
-      } else if (props.isTestMode) {
-        // W trybie testowym emitujemy zmianę balansu
-        emit('balanceChange', gain);
-      }
+      coinResult.value = finalSide;
+      isFlipping.value = false; // <--- ODBLOKOWANIE PRZYCISKU NATYCHMIAST
 
       if (isWin) {
         resultWon.value = true;
         resultMessage.value = `VICTORY! ${finalSide.toUpperCase()}! (+$${Math.abs(gain)})`;
-
-        // Confetti przy wygranej! 🎉
-        setTimeout(() => {
-          fireConfetti();
-        }, 300); // Małe opóźnienie żeby animacja monety się skończyła
+        setTimeout(() => { fireConfetti(); }, 300);
       } else {
         resultWon.value = false;
         resultMessage.value = `DEFEAT! IT WAS ${finalSide.toUpperCase()}.`;
       }
 
-      isFlipping.value = false;
+      // Aktualizacja balansu w tle (nie blokuje interfejsu)
+      if (!props.isTestMode) {
+        auth.fetchBalance();
+      } else if (props.isTestMode) {
+        emit('balanceChange', gain);
+      }
+
     }, ANIM_DURATION);
 
   } catch (error) {
@@ -336,15 +325,13 @@ async function flipCoin() {
 </script>
 
 <style scoped>
-/* --- CUSTOM SCROLLBAR --- */
+/* STYLE BEZ ZMIAN */
 .custom-scrollbar::-webkit-scrollbar { width: 8px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(184, 79, 246, 0.3); border-radius: 10px; }
 
-/* --- NEON TEXT --- */
 .neon-text-glow { text-shadow: 0 0 15px rgba(184, 79, 246, 0.7); }
 
-/* --- INPUT STYLES --- */
 .setting-group { display: flex; flex-direction: column; gap: 0.5rem; }
 .setting-label {
   display: flex; align-items: center; gap: 0.5rem;
@@ -358,7 +345,6 @@ async function flipCoin() {
   font-size: 1.1rem; font-weight: bold; font-family: monospace; outline: none; appearance: none; cursor: pointer;
 }
 
-/* --- SIDE BUTTONS --- */
 .side-btn {
   position: relative;
   height: 100px;
@@ -370,11 +356,9 @@ async function flipCoin() {
 }
 .side-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
 
-/* --- DIGITAL READOUT --- */
 .digital-readout .label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); }
 .digital-readout .value { font-family: monospace; font-size: 1.2rem; font-weight: 700; text-shadow: 0 0 10px currentColor; }
 
-/* --- MAIN BUTTON --- */
 .cyber-button-start {
   display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2rem;
   font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 0.75rem;
@@ -383,7 +367,6 @@ async function flipCoin() {
 }
 .cyber-button-start:not(:disabled):hover { transform: scale(1.02) translateY(-2px); box-shadow: 0 0 40px rgba(184, 79, 246, 0.8); }
 
-/* --- COIN 3D ANIMATION --- */
 .coin-scene {
   width: 120px;
   height: 120px;
@@ -403,39 +386,36 @@ async function flipCoin() {
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
 }
 
-/* Tylna strona cylindra */
 .coin::before {
-  background: #b8860b; /* Ciemniejszy złoty dla tylnej strony cylindra */
+  background: #b8860b;
   position: absolute;
   border-radius: 50%;
   content: '';
   height: 120px;
   width: 120px;
-  transform: translateZ(-12px); /* Grubość monety */
+  transform: translateZ(-12px);
   box-shadow: 0 0 20px rgba(184, 134, 11, 0.4);
 }
 
-/* Bok cylindra monety */
 .coin::after {
-  background: #b8860b; /* Jednolity ciemniejszy złoty kolor dla boku */
+  background: #b8860b;
   content: '';
-  left: 54px; /* (120px - 12px) / 2 */
+  left: 54px;
   position: absolute;
   height: 120px;
-  width: 12px; /* Grubość monety */
+  width: 12px;
   z-index: -1;
   transform: rotateY(-90deg);
   transform-origin: 100% 50%;
 }
 
-/* HEADS - przednia strona */
 .heads {
   background: linear-gradient(135deg, #ffd700, #ffed4a, #f59e0b);
   position: absolute;
   border-radius: 50%;
   height: 120px;
   width: 120px;
-  transform: translateZ(0.1px); /* Bardzo blisko powierzchni głównej */
+  transform: translateZ(0.1px);
   border: 3px solid #b8860b;
   display: flex;
   align-items: center;
@@ -445,14 +425,13 @@ async function flipCoin() {
       inset 0 0 20px rgba(255,255,255,0.2);
 }
 
-/* TAILS - tylna strona */
 .tails {
   background: linear-gradient(135deg, #ffd700, #ffed4a, #f59e0b);
   position: absolute;
   border-radius: 50%;
   height: 120px;
   width: 120px;
-  transform: translateZ(-12.1px) rotateY(180deg); /* Na tylnej stronie cylindra + obrót */
+  transform: translateZ(-12.1px) rotateY(180deg);
   border: 3px solid #b8860b;
   display: flex;
   align-items: center;
@@ -462,7 +441,6 @@ async function flipCoin() {
       inset 0 0 20px rgba(255,255,255,0.2);
 }
 
-/* Litery na monetach */
 .coin-letter {
   font-size: 3rem;
   font-weight: 900;
@@ -470,44 +448,19 @@ async function flipCoin() {
   z-index: 10;
 }
 
-.heads .coin-letter {
-  color: #5c4002;
-}
+.heads .coin-letter { color: #5c4002; }
+.tails .coin-letter { color: #5c4002; }
 
-.tails .coin-letter {
-  color: #5c4002;
-}
+.coin.flipping { animation: spin3D 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
 
-/* Animacja Kręcenia z dynamiczną końcową pozycją */
-.coin.flipping {
-  animation: spin3D 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-/* Końcowe stany - animacja już kończy się w odpowiedniej pozycji */
-.coin.show-heads {
-  animation: none;
-  transform: rotateY(0deg); /* Pokaż HEADS */
-}
-.coin.show-tails {
-  animation: none;
-  transform: rotateY(180deg); /* Pokaż TAILS */
-}
+.coin.show-heads { animation: none; transform: rotateY(0deg); }
+.coin.show-tails { animation: none; transform: rotateY(180deg); }
 
 @keyframes spin3D {
-  0% {
-    transform: rotateY(0deg) rotateX(0deg);
-  }
-  25% {
-    transform: rotateY(450deg) rotateX(15deg);
-  }
-  50% {
-    transform: rotateY(900deg) rotateX(0deg);
-  }
-  75% {
-    transform: rotateY(calc(var(--final-rotation, 1440deg) - 270deg)) rotateX(-15deg);
-  }
-  100% {
-    transform: rotateY(var(--final-rotation, 1440deg)) rotateX(0deg);
-  }
+  0% { transform: rotateY(0deg) rotateX(0deg); }
+  25% { transform: rotateY(450deg) rotateX(15deg); }
+  50% { transform: rotateY(900deg) rotateX(0deg); }
+  75% { transform: rotateY(calc(var(--final-rotation, 1440deg) - 270deg)) rotateX(-15deg); }
+  100% { transform: rotateY(var(--final-rotation, 1440deg)) rotateX(0deg); }
 }
 </style>
