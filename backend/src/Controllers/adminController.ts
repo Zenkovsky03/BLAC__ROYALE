@@ -81,6 +81,7 @@ export const userDetails = async (req: AuthRequest, res: any) =>
                     select: {
                         id: true,
                         balance: true,
+                        transactions: true,
                     },
                 },
                 _count: {

@@ -267,4 +267,5 @@ AdminRouter.get('/user-details/:id', protect, requireAdmin, userDetails);
  */
 AdminRouter.patch('/patch-user/:id', protect, requireAdmin, patchUser);
 
+
 export default AdminRouter;
