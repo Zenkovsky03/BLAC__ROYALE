@@ -26,7 +26,7 @@ export const profile = async (req: AuthRequest, res: Response) => {
 };
 
 export async function register(req: Request, res: Response) {
-    const {email, password, username, dateOfBirth} = req.body;
+    const {email, password, username, dateOfBirth , name , surname} = req.body;
 
     try {
         if (!email || typeof email !== 'string') {
@@ -64,15 +64,16 @@ export async function register(req: Request, res: Response) {
         // Create a new user
         const newUser = await prisma.user.create({
             data: {
+                name : name || "",
+                surname: surname || "",
                 email: email,
                 hashedPassword: hashedPassword,
                 username: username,
                 wallet: {create: {}},
                 dateOfBirth: new Date(dateOfBirth),
-                role: 'NORMAL' // Domyślna rola
+                role: 'NORMAL' // Default role
             },
-            // ZMIANA: Dodano role: true
-            select: {email: true, createdAt: true, username: true, role: true},
+            select: {email: true, name: true, surname: true, createdAt: true, username: true, role: true},
         });
 
         res.status(201).json({newUser});

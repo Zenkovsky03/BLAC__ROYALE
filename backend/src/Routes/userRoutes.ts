@@ -62,7 +62,7 @@ UserRouter.get('/profile', protect, profile )
  * /api/users/register:
  *   post:
  *     summary: Register a new user
- *     description: Creates a new user account with email, password, username, and date of birth. Users must be at least 18 years old. A wallet is automatically created for the new user.
+ *     description: Creates a new user account with the provided credentials and personal information. Users must be at least 18 years old to register. A wallet with zero balance is automatically created for each new user. Name and surname are optional fields and will default to empty strings if not provided.
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -79,23 +79,34 @@ UserRouter.get('/profile', protect, profile )
  *               email:
  *                 type: string
  *                 format: email
+ *                 description: Valid email address that will be used for login and must be unique in the system
  *                 example: user@example.com
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
+ *                 description: Password that will be securely hashed using bcrypt with 12 salt rounds
  *                 example: SecurePass123!
  *               username:
  *                 type: string
+ *                 description: Unique username for the user
  *                 example: johndoe
  *               dateOfBirth:
  *                 type: string
  *                 format: date
+ *                 description: User's date of birth in ISO format (YYYY-MM-DD). User must be at least 18 years old based on the current date
  *                 example: 2000-01-15
- *                 description: User must be at least 18 years old
+ *               name:
+ *                 type: string
+ *                 description: User's first name (optional, defaults to empty string)
+ *                 example: John
+ *               surname:
+ *                 type: string
+ *                 description: User's last name (optional, defaults to empty string)
+ *                 example: Doe
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User account successfully created with default NORMAL role and associated wallet
  *         content:
  *           application/json:
  *             schema:
@@ -106,13 +117,26 @@ UserRouter.get('/profile', protect, profile )
  *                   properties:
  *                     email:
  *                       type: string
+ *                       example: user@example.com
  *                     username:
  *                       type: string
+ *                       example: johndoe
+ *                     name:
+ *                       type: string
+ *                       example: John
+ *                     surname:
+ *                       type: string
+ *                       example: Doe
+ *                     role:
+ *                       type: string
+ *                       enum: [NORMAL]
+ *                       example: NORMAL
  *                     createdAt:
  *                       type: string
  *                       format: date-time
+ *                       example: 2024-01-15T10:30:00.000Z
  *       400:
- *         description: Invalid input, email already in use, or user too young
+ *         description: Bad request - Invalid input data, email already registered, user under 18 years old, or missing required fields
  *         content:
  *           application/json:
  *             schema:
@@ -124,8 +148,25 @@ UserRouter.get('/profile', protect, profile )
  *                 error:
  *                   type: string
  *                   example: Invalid email format
+ *             examples:
+ *               emailInUse:
+ *                 summary: Email already registered
+ *                 value:
+ *                   message: Email already in use.
+ *               invalidEmail:
+ *                 summary: Invalid email format
+ *                 value:
+ *                   error: Invalid email format
+ *               tooYoung:
+ *                 summary: User under 18 years old
+ *                 value:
+ *                   message: You are too young.
+ *               missingEmail:
+ *                 summary: Email field missing
+ *                 value:
+ *                   error: Email is required
  *       500:
- *         description: Registration failed
+ *         description: Internal server error during registration process
  *         content:
  *           application/json:
  *             schema:

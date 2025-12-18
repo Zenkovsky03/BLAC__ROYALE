@@ -299,7 +299,7 @@ const deleteUser = async () => {
   if(!confirm("Irreversible action. Delete user?")) return;
   try {
     const token = auth.token; // Zmiana na auth.token
-    const res = await fetch(`${API_URL}/api/users/delete-user`, {
+    const res = await fetch(`${API_URL}/api/admin/delete-user/${selectedUser.value.id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ userId: selectedUser.value.id })
