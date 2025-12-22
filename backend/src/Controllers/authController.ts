@@ -84,7 +84,7 @@ export async function register(req: Request, res: Response) {
 }
 
 export async function login(req: Request, res: Response) {
-    const {email, password} = req.body;
+    const {email, password , rememberMe} = req.body;
 
     try {
         // Tu pobieramy całą instancję, żeby sprawdzić hasło (hashedPassword jest potrzebne)
@@ -98,11 +98,13 @@ export async function login(req: Request, res: Response) {
             return res.status(401).json({message: 'Invalid credentials.'});
         }
 
+        const expiresIn = rememberMe ? '30d' : '3h';
+
         // JWT token
         const token = jwt.sign(
             {userId: user.id, email: user.email},
             process.env.JWT_SECRET as string,
-            {expiresIn: '2h'}
+            {expiresIn: expiresIn}
         );
 
         // Tu pobieramy dane do odesłania na frontend
