@@ -1,6 +1,7 @@
 import {  UserRole } from '@prisma/client';
 import {prisma} from "../../prisma/prismaSingleton.ts";
 import type {AuthRequest} from "../Middleware/authMiddleware.ts";
+import type {Response} from "express";
 
 export const listUsers = async (req: AuthRequest, res: any) =>
 {
@@ -32,6 +33,8 @@ export const listUsers = async (req: AuthRequest, res: any) =>
                     id: true,
                     email: true,
                     username: true,
+                    name: true,
+                    surname: true,
                     role: true,
                     createdAt: true,
                     _count: {
@@ -74,6 +77,8 @@ export const userDetails = async (req: AuthRequest, res: any) =>
                 id: true,
                 email: true,
                 username: true,
+                name: true,
+                surname: true,
                 dateOfBirth: true,
                 role: true,
                 createdAt: true,
@@ -159,6 +164,26 @@ export const patchUser = async (req: AuthRequest, res: any) =>
     }
 }
 
+export const deleteUserAdmin = async (req: AuthRequest, res: Response) =>
+{
+    try {
+        const userId =  req.params.id!;
+        const user = await prisma.user.findUnique({where: {id: userId}});
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        await prisma.user.delete({where: {id: userId}});
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
 // Validation helpers
 const validateUpdateUser = (body: any) => {
     const errors: string[] = [];
@@ -185,6 +210,22 @@ const validateUpdateUser = (body: any) => {
             errors.push('Surname must be a string');
         } else {
             data.surname = body.surname;
+        }
+    }
+
+    if (body.username !== undefined) {
+        if (typeof body.username !== 'string') {
+            errors.push('Username must be a string');
+        } else {
+            data.username = body.username;
+        }
+    }
+
+    if (body.email !== undefined) {
+        if (typeof body.email !== 'string') {
+            errors.push('Email must be a string');
+        } else {
+            data.email = body.email;
         }
     }
 

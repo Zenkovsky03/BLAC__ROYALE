@@ -1,28 +1,32 @@
 <template>
-  <div class="relative flex min-h-screen w-full flex-col bg-transparent font-display text-white dark group/design-root">
+  <div class="relative flex min-h-screen w-full flex-col bg-transparent font-display text-white dark group/design-root overflow-x-hidden">
     <div class="relative layout-container flex h-full grow flex-col">
       <div class="flex flex-1 justify-center">
-        <div class="layout-content-container flex w-full max-w-6xl flex-col">
+        <div class="layout-content-container flex w-full max-w-6xl flex-col px-4 md:px-6 lg:px-8">
 
-          <!-- HEADER DLA GOŚCIA -->
           <HeaderComponent
               v-if="auth.booted && !auth.isAuthenticated"
               @open-login="showLogin = true"
               @open-register="showRegister = true"
           />
 
-          <!-- HEADER DLA ZALOGOWANEGO -->
           <HeaderComponentWithBalance
               v-if="auth.booted && auth.isAuthenticated"
               :balance="auth.balance ?? 0"
-              @logout="onLogout"
+              @logout="auth.logout()"
+              @open-wallet="showWalletSelection = true"
+              @open-panel="handlePanelClick"
           />
 
-          <!-- Main content -->
-          <main class="flex flex-col gap-10 py-10 md:gap-16 md:py-16" v-if="auth.booted">
-            <HeroSection />
-            <GamesGrid  @gameClick="openGameModal"/>
-            <LeaderboardSection />
+          <main class="flex flex-col gap-10 py-6 md:gap-16 md:py-16" v-if="auth.booted">
+
+            <div class="w-full">
+              <HeroSection @playRandom="openRandomGame" />
+            </div>
+
+            <div id="games" class="w-full">
+              <GamesGrid @gameClick="openGameModal"/>
+            </div>
           </main>
 
         </div>
@@ -31,55 +35,86 @@
       <FooterComponent v-if="auth.booted" />
     </div>
 
-    <!-- Modals -->
+    <AdminPanelModal v-if="showAdminPanel" @close="showAdminPanel = false" />
+    <WalletSelectionModal v-if="showWalletSelection" @close="showWalletSelection = false" @select-deposit="openDeposit" @select-withdraw="openWithdraw" />
+    <DepositModal v-if="showDeposit" @close="showDeposit = false"/>
+    <WithdrawModal v-if="showWithdraw" @close="showWithdraw = false"/>
     <LoginModal v-if="showLogin" @close="showLogin = false" @login="onLoggedIn" />
     <RegisterModal v-if="showRegister" @close="showRegister = false" />
-
-    <DepositModal v-if="auth.isAuthenticated"/>
-    <WithdrawModal v-if="auth.isAuthenticated"/>
-    <AccountModal v-if="auth.isAuthenticated"/>
     <TransactionHistoryModal v-if="auth.isAuthenticated"/>
-    <SlotGameModal />
-    <CoinflipGameModal
-      v-if="showCoinflip"
-      :balance="auth.balance ?? 0"
-      @close="showCoinflip = false"
-      @balanceChange="handleBalanceChange"
-    />
-    <MinesweeperGameModal
-        v-if="showMinesweeper"
-        :balance="auth.balance ?? 0"
-        @close="showMinesweeper = false"
-        @balanceChange="handleBalanceChange"
-    />
+
+    <SlotGameModal v-if="showSlots" :balance="auth.balance ?? 0" @close="showSlots = false" @balanceChange="handleBalanceChange"/>
+    <SliderGameModal v-if="showSlider" :balance="auth.balance ?? 0" @close="showSlider = false" @balanceChange="handleBalanceChange"/>
+    <MinesweeperGameModal v-if="showMinesweeper" :balance="auth.balance ?? 0" @close="showMinesweeper = false" @balanceChange="handleBalanceChange"/>
+    <CoinflipGameModal v-if="showCoinflip" :balance="auth.balance ?? 0" @close="showCoinflip = false" @balanceChange="handleBalanceChange"/>
+    <RouletteGameModal v-if="showRoulette" :balance="auth.balance ?? 0" @close="showRoulette = false" @balanceChange="handleBalanceChange"/>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+
+// Importy komponentów layoutu
 import HeaderComponent from '@/components/layout/HeaderComponent.vue'
 import HeaderComponentWithBalance from '@/components/layout/HeaderComponentWithBalance.vue'
-import LoginModal from '@/components/modals/LoginModal.vue'
-import RegisterModal from '@/components/modals/RegisterModal.vue'
+import FooterComponent from '@/components/layout/FooterComponent.vue'
 import HeroSection from '@/components/sections/HeroSection.vue'
 import GamesGrid from '@/components/sections/GamesGrid.vue'
-import LeaderboardSection from '@/components/sections/LeaderboardSection.vue'
-import FooterComponent from '@/components/layout/FooterComponent.vue'
+
+// Importy Modali
+import LoginModal from '@/components/modals/LoginModal.vue'
+import RegisterModal from '@/components/modals/RegisterModal.vue'
 import DepositModal from '@/components/modals/DepositModal.vue'
 import WithdrawModal from '@/components/modals/WithdrawModal.vue'
-import AccountModal from '@/components/modals/AccountModal.vue'
 import TransactionHistoryModal from '@/components/modals/TransactionHistoryModal.vue'
+import WalletSelectionModal from '@/components/modals/WalletSelectionModal.vue'
+import AdminPanelModal from '@/components/modals/AdminPanelModal.vue'
+
+// Importy Gier
 import SlotGameModal from '@/components/games/SlotGameModal.vue'
 import MinesweeperGameModal from '@/components/games/MinesweeperGameModal.vue'
+import SliderGameModal from '@/components/games/SliderGameModal.vue'
 import CoinflipGameModal from '@/components/games/CoinflipGameModal.vue'
+import RouletteGameModal from '@/components/games/RouletteGameModal.vue'
+
 const auth = useAuthStore()
+const router = useRouter()
+
+// --- Stan Modali ---
 const showLogin = ref(false)
 const showRegister = ref(false)
+const showWalletSelection = ref(false)
+const showDeposit = ref(false)
+const showWithdraw = ref(false)
+const showAdminPanel = ref(false)
+
+// Gry
 const showMinesweeper = ref(false)
+const showSlider = ref(false)
 const showCoinflip = ref(false)
+const showRoulette = ref(false)
+const showSlots = ref(false)
+
+const isAdmin = computed(() => {
+  return auth.user?.role === 'ADMIN'
+})
+
+// --- LOGIKA PRZYCISKU PANELU ---
+function handlePanelClick() {
+  if (isAdmin.value) {
+    router.push('/admin')
+  } else {
+    router.push('/panel')
+  }
+}
+
+function openDeposit() { showWalletSelection.value = false; showDeposit.value = true }
+function openWithdraw() { showWalletSelection.value = false; showWithdraw.value = true }
+
 onMounted(async () => {
-  auth.hydrateFromStorage()
   if (auth.isAuthenticated) await auth.fetchBalance()
 })
 
@@ -89,27 +124,29 @@ async function onLoggedIn(payload: { token: string; user: any }) {
   showLogin.value = false
 }
 
-function onLogout() {
-  auth.logout()
+function handleBalanceChange(amount: number) {
+  if (auth.balance !== null) auth.balance += amount
 }
 
-async function handleBalanceChange(amount: number) {
-  // UWAGA: Ta implementacja jest mockowa.
-  // W tym mocku, zmieniamy saldo w Pinia Store i odświeżamy
-  if (auth.balance !== null) {
-    auth.balance += amount
-  }
-}
 function openGameModal(game: { id: string, name: string }) {
-  if (!auth.isAuthenticated) {
-    showLogin.value = true;
-    return;
-  }
-  if (game.id === 'minesweeper') {
-    showMinesweeper.value = true;
-  }
-  if (game.id === 'coinflip') {
-    showCoinflip.value = true;
-  }
+  if (!auth.isAuthenticated) { showLogin.value = true; return; }
+  if (game.id === 'minesweeper') showMinesweeper.value = true;
+  if (game.id === 'slider') showSlider.value = true;
+  if (game.id === 'coinflip') showCoinflip.value = true;
+  if (game.id === 'roulette') showRoulette.value = true;
+  if (game.id === 'slots') showSlots.value = true;
+}
+
+function openRandomGame() {
+  const availableGames = [
+    { id: 'slots', name: 'Slots' },
+    { id: 'minesweeper', name: 'Minesweeper' },
+    { id: 'slider', name: 'Slider' },
+    { id: 'coinflip', name: 'Coin Flip' },
+    { id: 'roulette', name: 'Roulette' }
+  ];
+  const randomIndex = Math.floor(Math.random() * availableGames.length);
+  const randomGame = availableGames[randomIndex];
+  openGameModal(randomGame);
 }
 </script>

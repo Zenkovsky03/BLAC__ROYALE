@@ -6,6 +6,8 @@ import {prisma} from "../../prisma/prismaSingleton.ts";
 
 
 //GET
+// W pliku Controllers/walletController.ts
+
 export async function getWallet(req: AuthRequest, res: Response)
 {
     const userId = req.userId!;
@@ -14,16 +16,26 @@ export async function getWallet(req: AuthRequest, res: Response)
     {
         const wallet = await prisma.wallet.findUnique(
             {
-                where: {userId}
-                ,select: {balance: true , transactions: true}
+                where: {userId},
+                select: {
+                    balance: true,
+                    transactions: {
+                        orderBy: { timestamp: 'desc' },
+                        take: 5
+                    }
+                }
             });
 
-        res.status(200).json(wallet); // Respond with the wallet
+        if (!wallet) {
+            return res.status(200).json({ balance: 0, transactions: [] });
+        }
+
+        res.status(200).json(wallet);
     }
     catch (error)
     {
         console.error(error);
-        res.status(500).json({message: 'No wallet found.'});
+        res.status(500).json({message: 'No wallet found'});
     }
 }
 

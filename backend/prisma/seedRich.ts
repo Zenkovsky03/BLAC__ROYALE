@@ -4,266 +4,226 @@ import bcrypt from 'bcryptjs';
 import dotenv from "dotenv";
 
 const prisma = new PrismaClient();
+dotenv.config({ path: './.env'});
 
-dotenv.config();
+// Helper function to generate random date within range
+function randomDate(start: Date, end: Date): Date {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+// Helper function to generate random integer
+function randomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Helper function to generate random decimal
+function randomDecimal(min: number, max: number, decimals: number = 2): number {
+    const value = Math.random() * (max - min) + min;
+    return Number(value.toFixed(decimals));
+}
 
 async function main() {
-    console.log('Starting database seeding...');
+    console.log('🎰 Starting comprehensive casino database seeding...\n');
 
-    // Admin user credentials
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
+    // ============================================
+    // 1. CREATE ADMIN USER
+    // ============================================
+    console.log('👑 Creating admin user...');
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@casino.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'AdminPass123!';
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const hashedAdminPassword = await bcrypt.hash(adminPassword, 12);
 
-    // Check if admin already exists
     const existingAdmin = await prisma.user.findUnique({
         where: { email: adminEmail },
     });
 
+    let admin;
     if (existingAdmin) {
-        console.log(`Admin user already exists: ${adminEmail}`);
+        console.log(`   ℹ️  Admin already exists: ${adminEmail}`);
         await prisma.user.update({
             where: { email: adminEmail },
             data: { role: UserRole.ADMIN },
         });
-        console.log('✅ Ensured admin role is set.');
+        console.log('   ✅ Ensured admin role is set.\n');
     } else {
-        // Create admin user with wallet
-        await prisma.user.create({
+        admin = await prisma.user.create({
             data: {
                 email: adminEmail,
                 username: adminUsername,
-                name: 'Admin',
-                surname: 'User',
-                dateOfBirth: new Date('1990-01-01'),
-                hashedPassword,
+                name: 'Casino',
+                surname: 'Administrator',
+                dateOfBirth: new Date('1985-01-01'),
+                hashedPassword: hashedAdminPassword,
                 role: UserRole.ADMIN,
-                banned: false,
                 wallet: {
                     create: {
-                        balance: 10000.00,
+                        balance: 50000.00,
                         transactions: {
-                            create: [
-                                {
-                                    amount: 10000.00,
-                                    type: TransactionType.DEPOSIT,
-                                    timestamp: new Date(),
-                                },
-                            ],
+                            create: {
+                                amount: 50000.00,
+                                type: TransactionType.DEPOSIT,
+                                timestamp: new Date(),
+                            },
                         },
                     },
                 },
             },
         });
 
-        console.log(`✅ Admin user created successfully!`);
-        console.log(`   Email: ${adminEmail}`);
-        console.log(`   Password: ${adminPassword}`);
-        console.log(`   Username: ${adminUsername}`);
+        console.log('   ✅ Admin user created successfully!');
+        console.log(`   📧 Email: ${admin.email}`);
+        console.log(`   🔑 Password: ${adminPassword}`);
+        console.log(`   👤 Username: ${admin.username}\n`);
     }
 
-    // Create Games
-    const games = [
-        {
-            name: 'Sapper',
-            description: 'Classic minesweeper game with betting mechanics',
-            isActive: true,
-        },
-        {
-            name: 'Dice Roll',
-            description: 'Roll the dice and win based on your prediction',
-            isActive: true,
-        },
-        {
-            name: 'Blackjack',
-            description: 'Classic card game - get as close to 21 as possible',
-            isActive: true,
-        },
-        {
-            name: 'Roulette',
-            description: 'Spin the wheel and bet on your lucky number',
-            isActive: false, // Coming soon
-        },
-    ];
+    // ============================================
+    // 2. CREATE REALISTIC TEST USERS
+    // ============================================
+    console.log('👥 Creating test users...');
 
-    for (const gameData of games) {
-        const exists = await prisma.game.findUnique({
-            where: { name: gameData.name },
-        });
-
-        if (!exists) {
-            await prisma.game.create({ data: gameData });
-            console.log(`✅ Game created: ${gameData.name}`);
-        }
-    }
-
-    // Create test users with diverse transaction histories
     const testUsers = [
         {
-            email: 'user1@example.com',
+            email: 'john.winner@example.com',
             username: 'lucky_john',
             name: 'John',
-            surname: 'Doe',
-            dateOfBirth: new Date('1995-03-15'),
-            balance: 1250.00,
-            transactions: [
-                { amount: 500.00, type: TransactionType.DEPOSIT, daysAgo: 30 },
-                { amount: 100.00, type: TransactionType.BET, daysAgo: 25 },
-                { amount: 200.00, type: TransactionType.WIN, daysAgo: 25 },
-                { amount: 50.00, type: TransactionType.BET, daysAgo: 20 },
-                { amount: 50.00, type: TransactionType.LOST, daysAgo: 20 },
-                { amount: 500.00, type: TransactionType.DEPOSIT, daysAgo: 15 },
-                { amount: 200.00, type: TransactionType.BET, daysAgo: 10 },
-                { amount: 400.00, type: TransactionType.WIN, daysAgo: 10 },
-            ],
+            surname: 'Winner',
+            dateOfBirth: new Date('1990-03-15'),
+            balance: 2500.00,
+            password: 'User123!',
         },
         {
-            email: 'user2@example.com',
-            username: 'jane_winner',
-            name: 'Jane',
-            surname: 'Smith',
-            dateOfBirth: new Date('1992-07-22'),
-            balance: 2750.00,
-            transactions: [
-                { amount: 1000.00, type: TransactionType.DEPOSIT, daysAgo: 60 },
-                { amount: 250.00, type: TransactionType.BET, daysAgo: 55 },
-                { amount: 500.00, type: TransactionType.WIN, daysAgo: 55 },
-                { amount: 100.00, type: TransactionType.BET, daysAgo: 50 },
-                { amount: 100.00, type: TransactionType.LOST, daysAgo: 50 },
-                { amount: 1000.00, type: TransactionType.DEPOSIT, daysAgo: 40 },
-                { amount: 300.00, type: TransactionType.BET, daysAgo: 35 },
-                { amount: 750.00, type: TransactionType.WIN, daysAgo: 35 },
-                { amount: 150.00, type: TransactionType.BET, daysAgo: 30 },
-                { amount: 450.00, type: TransactionType.WIN, daysAgo: 30 },
-                { amount: 500.00, type: TransactionType.WITHDRAWAL, daysAgo: 25 },
-            ],
-        },
-        {
-            email: 'user3@example.com',
-            username: 'bob_gambler',
-            name: 'Bob',
-            surname: 'Johnson',
-            dateOfBirth: new Date('1988-11-30'),
-            balance: 75.00,
-            transactions: [
-                { amount: 1000.00, type: TransactionType.DEPOSIT, daysAgo: 45 },
-                { amount: 200.00, type: TransactionType.BET, daysAgo: 44 },
-                { amount: 200.00, type: TransactionType.LOST, daysAgo: 44 },
-                { amount: 300.00, type: TransactionType.BET, daysAgo: 43 },
-                { amount: 300.00, type: TransactionType.LOST, daysAgo: 43 },
-                { amount: 500.00, type: TransactionType.DEPOSIT, daysAgo: 40 },
-                { amount: 150.00, type: TransactionType.BET, daysAgo: 38 },
-                { amount: 225.00, type: TransactionType.WIN, daysAgo: 38 },
-                { amount: 400.00, type: TransactionType.BET, daysAgo: 35 },
-                { amount: 400.00, type: TransactionType.LOST, daysAgo: 35 },
-                { amount: 250.00, type: TransactionType.BET, daysAgo: 30 },
-                { amount: 250.00, type: TransactionType.LOST, daysAgo: 30 },
-            ],
-        },
-        {
-            email: 'user4@example.com',
-            username: 'sarah_pro',
+            email: 'sarah.player@example.com',
+            username: 'sarah_plays',
             name: 'Sarah',
-            surname: 'Williams',
-            dateOfBirth: new Date('1990-05-18'),
-            balance: 5420.00,
-            transactions: [
-                { amount: 2000.00, type: TransactionType.DEPOSIT, daysAgo: 90 },
-                { amount: 500.00, type: TransactionType.BET, daysAgo: 85 },
-                { amount: 1000.00, type: TransactionType.WIN, daysAgo: 85 },
-                { amount: 300.00, type: TransactionType.BET, daysAgo: 80 },
-                { amount: 600.00, type: TransactionType.WIN, daysAgo: 80 },
-                { amount: 1000.00, type: TransactionType.DEPOSIT, daysAgo: 70 },
-                { amount: 400.00, type: TransactionType.BET, daysAgo: 65 },
-                { amount: 800.00, type: TransactionType.WIN, daysAgo: 65 },
-                { amount: 1000.00, type: TransactionType.WITHDRAWAL, daysAgo: 60 },
-                { amount: 1500.00, type: TransactionType.DEPOSIT, daysAgo: 50 },
-                { amount: 600.00, type: TransactionType.BET, daysAgo: 45 },
-                { amount: 1200.00, type: TransactionType.WIN, daysAgo: 45 },
-                { amount: 800.00, type: TransactionType.BET, daysAgo: 40 },
-                { amount: 1600.00, type: TransactionType.WIN, daysAgo: 40 },
-            ],
+            surname: 'Player',
+            dateOfBirth: new Date('1988-07-22'),
+            balance: 1800.00,
+            password: 'User123!',
         },
         {
-            email: 'user5@example.com',
-            username: 'mike_casual',
-            name: 'Michael',
+            email: 'mike.gambler@example.com',
+            username: 'mike_g',
+            name: 'Mike',
+            surname: 'Gambler',
+            dateOfBirth: new Date('1992-11-30'),
+            balance: 5000.00,
+            password: 'User123!',
+        },
+        {
+            email: 'emma.lucky@example.com',
+            username: 'lucky_emma',
+            name: 'Emma',
+            surname: 'Lucky',
+            dateOfBirth: new Date('1995-05-18'),
+            balance: 3200.00,
+            password: 'User123!',
+        },
+        {
+            email: 'david.smith@example.com',
+            username: 'dave_smith',
+            name: 'David',
+            surname: 'Smith',
+            dateOfBirth: new Date('1987-09-10'),
+            balance: 750.00,
+            password: 'User123!',
+        },
+        {
+            email: 'lisa.jones@example.com',
+            username: 'lisa_j',
+            name: 'Lisa',
+            surname: 'Jones',
+            dateOfBirth: new Date('1993-12-25'),
+            balance: 4500.00,
+            password: 'User123!',
+        },
+        {
+            email: 'tom.brown@example.com',
+            username: 'tom_b',
+            name: 'Tom',
             surname: 'Brown',
-            dateOfBirth: new Date('1993-09-12'),
-            balance: 380.00,
-            transactions: [
-                { amount: 200.00, type: TransactionType.DEPOSIT, daysAgo: 20 },
-                { amount: 50.00, type: TransactionType.BET, daysAgo: 18 },
-                { amount: 50.00, type: TransactionType.LOST, daysAgo: 18 },
-                { amount: 100.00, type: TransactionType.DEPOSIT, daysAgo: 15 },
-                { amount: 30.00, type: TransactionType.BET, daysAgo: 14 },
-                { amount: 60.00, type: TransactionType.WIN, daysAgo: 14 },
-                { amount: 200.00, type: TransactionType.DEPOSIT, daysAgo: 10 },
-            ],
+            dateOfBirth: new Date('1991-04-07'),
+            balance: 1200.00,
+            password: 'User123!',
         },
         {
-            email: 'user6@example.com',
-            username: 'emily_strategic',
-            name: 'Emily',
-            surname: 'Davis',
-            dateOfBirth: new Date('1991-02-28'),
-            balance: 1890.00,
-            transactions: [
-                { amount: 1000.00, type: TransactionType.DEPOSIT, daysAgo: 50 },
-                { amount: 200.00, type: TransactionType.BET, daysAgo: 48 },
-                { amount: 300.00, type: TransactionType.WIN, daysAgo: 48 },
-                { amount: 150.00, type: TransactionType.BET, daysAgo: 45 },
-                { amount: 225.00, type: TransactionType.WIN, daysAgo: 45 },
-                { amount: 100.00, type: TransactionType.BET, daysAgo: 40 },
-                { amount: 100.00, type: TransactionType.LOST, daysAgo: 40 },
-                { amount: 500.00, type: TransactionType.DEPOSIT, daysAgo: 35 },
-                { amount: 250.00, type: TransactionType.BET, daysAgo: 30 },
-                { amount: 500.00, type: TransactionType.WIN, daysAgo: 30 },
-                { amount: 180.00, type: TransactionType.BET, daysAgo: 25 },
-                { amount: 360.00, type: TransactionType.WIN, daysAgo: 25 },
-            ],
+            email: 'anna.white@example.com',
+            username: 'anna_w',
+            name: 'Anna',
+            surname: 'White',
+            dateOfBirth: new Date('1989-08-14'),
+            balance: 6000.00,
+            password: 'User123!',
         },
         {
-            email: 'user7@example.com',
-            username: 'alex_risky',
-            name: 'Alex',
-            surname: 'Martinez',
-            dateOfBirth: new Date('1994-12-05'),
-            balance: 125.00,
-            transactions: [
-                { amount: 500.00, type: TransactionType.DEPOSIT, daysAgo: 30 },
-                { amount: 100.00, type: TransactionType.BET, daysAgo: 29 },
-                { amount: 100.00, type: TransactionType.LOST, daysAgo: 29 },
-                { amount: 150.00, type: TransactionType.BET, daysAgo: 28 },
-                { amount: 150.00, type: TransactionType.LOST, daysAgo: 28 },
-                { amount: 200.00, type: TransactionType.DEPOSIT, daysAgo: 25 },
-                { amount: 100.00, type: TransactionType.BET, daysAgo: 23 },
-                { amount: 150.00, type: TransactionType.WIN, daysAgo: 23 },
-                { amount: 75.00, type: TransactionType.BET, daysAgo: 20 },
-                { amount: 75.00, type: TransactionType.LOST, daysAgo: 20 },
-                { amount: 200.00, type: TransactionType.BET, daysAgo: 18 },
-                { amount: 200.00, type: TransactionType.LOST, daysAgo: 18 },
-            ],
+            email: 'chris.green@example.com',
+            username: 'chris_green',
+            name: 'Chris',
+            surname: 'Green',
+            dateOfBirth: new Date('1994-02-28'),
+            balance: 950.00,
+            password: 'User123!',
         },
         {
-            email: 'user8@example.com',
-            username: 'chris_newbie',
-            name: 'Christopher',
+            email: 'rachel.black@example.com',
+            username: 'rachel_b',
+            name: 'Rachel',
+            surname: 'Black',
+            dateOfBirth: new Date('1990-06-19'),
+            balance: 3800.00,
+            password: 'User123!',
+        },
+        {
+            email: 'kevin.gray@example.com',
+            username: 'kevin_gray',
+            name: 'Kevin',
+            surname: 'Gray',
+            dateOfBirth: new Date('1986-10-05'),
+            balance: 2100.00,
+            password: 'User123!',
+        },
+        {
+            email: 'maria.lopez@example.com',
+            username: 'maria_l',
+            name: 'Maria',
+            surname: 'Lopez',
+            dateOfBirth: new Date('1992-01-12'),
+            balance: 5500.00,
+            password: 'User123!',
+        },
+        {
+            email: 'james.wilson@example.com',
+            username: 'james_w',
+            name: 'James',
             surname: 'Wilson',
-            dateOfBirth: new Date('1996-04-20'),
-            balance: 450.00,
-            transactions: [
-                { amount: 500.00, type: TransactionType.DEPOSIT, daysAgo: 5 },
-                { amount: 50.00, type: TransactionType.BET, daysAgo: 4 },
-                { amount: 75.00, type: TransactionType.WIN, daysAgo: 4 },
-                { amount: 25.00, type: TransactionType.BET, daysAgo: 3 },
-                { amount: 25.00, type: TransactionType.LOST, daysAgo: 3 },
-            ],
+            dateOfBirth: new Date('1988-11-23'),
+            balance: 1500.00,
+            password: 'User123!',
+        },
+        {
+            email: 'sophia.moore@example.com',
+            username: 'sophia_m',
+            name: 'Sophia',
+            surname: 'Moore',
+            dateOfBirth: new Date('1996-03-08'),
+            balance: 4200.00,
+            password: 'User123!',
+        },
+        {
+            email: 'robert.taylor@example.com',
+            username: 'rob_taylor',
+            name: 'Robert',
+            surname: 'Taylor',
+            dateOfBirth: new Date('1985-07-16'),
+            balance: 800.00,
+            password: 'User123!',
         },
     ];
+
+    const createdUsers = [];
+    const hashedTestPassword = await bcrypt.hash('User123!', 12);
 
     for (const userData of testUsers) {
         const exists = await prisma.user.findUnique({
@@ -271,87 +231,302 @@ async function main() {
         });
 
         if (!exists) {
-            // Calculate timestamps for transactions
-            const transactionsData = userData.transactions.map((tx) => {
-                const date = new Date();
-                date.setDate(date.getDate() - tx.daysAgo);
-                return {
-                    amount: tx.amount,
-                    type: tx.type,
-                    timestamp: date,
-                };
-            });
-
-            await prisma.user.create({
+            const user = await prisma.user.create({
                 data: {
                     email: userData.email,
                     username: userData.username,
                     name: userData.name,
                     surname: userData.surname,
                     dateOfBirth: userData.dateOfBirth,
-                    hashedPassword: await bcrypt.hash('Password123!', 10),
+                    hashedPassword: hashedTestPassword,
                     role: UserRole.NORMAL,
-                    banned: false,
                     wallet: {
                         create: {
                             balance: userData.balance,
-                            transactions: {
-                                create: transactionsData,
-                            },
                         },
                     },
                 },
             });
-            console.log(`✅ Test user created: ${userData.email} (${userData.username})`);
+            createdUsers.push(user);
+            console.log(`   ✅ Created user: ${userData.username} (${userData.email})`);
+        } else {
+            createdUsers.push(exists);
+            console.log(`   ℹ️  User already exists: ${userData.email}`);
         }
     }
 
-    // Create one banned user for testing admin functionality
-    const bannedUserEmail = 'banned@example.com';
-    const bannedExists = await prisma.user.findUnique({
-        where: { email: bannedUserEmail },
-    });
+    console.log(`\n   📊 Total users in system: ${createdUsers.length + 1} (including admin)\n`);
 
-    if (!bannedExists) {
-        await prisma.user.create({
+    // ============================================
+    // 3. CREATE REALISTIC TRANSACTION HISTORY
+    // ============================================
+    console.log('💰 Generating transaction history...');
+
+    const now = new Date();
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    let totalTransactions = 0;
+
+    for (const user of createdUsers) {
+        const wallet = await prisma.wallet.findUnique({
+            where: { userId: user.id },
+        });
+
+        if (!wallet) continue;
+
+        // Initial deposit transaction
+        await prisma.transaction.create({
             data: {
-                email: bannedUserEmail,
-                username: 'banned_user',
-                name: 'Banned',
-                surname: 'User',
-                dateOfBirth: new Date('1989-08-15'),
-                hashedPassword: await bcrypt.hash('Password123!', 10),
-                role: UserRole.NORMAL,
-                banned: true,
-                wallet: {
-                    create: {
-                        balance: 0.00,
-                        transactions: {
-                            create: [
-                                {
-                                    amount: 100.00,
-                                    type: TransactionType.DEPOSIT,
-                                    timestamp: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-                                },
-                            ],
-                        },
-                    },
-                },
+                walletId: wallet.id,
+                amount: wallet.balance,
+                type: TransactionType.DEPOSIT,
+                timestamp: randomDate(oneMonthAgo, oneWeekAgo),
             },
         });
-        console.log(`✅ Banned test user created: ${bannedUserEmail}`);
+        totalTransactions++;
+
+        // Generate random game transactions
+        const numTransactions = randomInt(10, 30);
+
+        for (let i = 0; i < numTransactions; i++) {
+            const transactionDate = randomDate(oneWeekAgo, now);
+
+
+            // More losses than wins for realistic casino odds
+            const weights = [0.35, 0.50, 0.15]; // 35% wins, 50% losses, 15% bets
+            const random = Math.random();
+            let type: TransactionType;
+            if (random < weights[0]!) {
+                type = TransactionType.WIN;
+            } else if (random < weights[0]! + weights[1]!) {
+                type = TransactionType.LOST;
+            } else {
+                type = TransactionType.BET;
+            }
+
+            let amount;
+            if (type === TransactionType.WIN) {
+                amount = randomDecimal(50, 1000);
+            } else if (type === TransactionType.LOST) {
+                amount = randomDecimal(10, 500);
+            } else {
+                amount = randomDecimal(10, 200);
+            }
+
+            await prisma.transaction.create({
+                data: {
+                    walletId: wallet.id,
+                    amount,
+                    type,
+                    timestamp: transactionDate,
+                },
+            });
+            totalTransactions++;
+        }
+
+        // Add some deposits and withdrawals
+        if (Math.random() > 0.5) {
+            await prisma.transaction.create({
+                data: {
+                    walletId: wallet.id,
+                    amount: randomDecimal(100, 1000),
+                    type: TransactionType.DEPOSIT,
+                    timestamp: randomDate(oneWeekAgo, now),
+                },
+            });
+            totalTransactions++;
+        }
+
+        if (Math.random() > 0.7) {
+            await prisma.transaction.create({
+                data: {
+                    walletId: wallet.id,
+                    amount: randomDecimal(50, 500),
+                    type: TransactionType.WITHDRAWAL,
+                    timestamp: randomDate(oneWeekAgo, now),
+                },
+            });
+            totalTransactions++;
+        }
     }
 
-    console.log('\n✅ Database seeding completed!');
-    console.log('\n📊 Summary:');
-    console.log(`   - Admin users: 1`);
-    console.log(`   - Regular users: ${testUsers.length}`);
-    console.log(`   - Banned users: 1`);
-    console.log(`   - Games: ${games.length}`);
-    console.log('\n🔑 Login credentials for testing:');
-    console.log(`   Admin: ${adminEmail} / ${adminPassword}`);
-    console.log(`   Users: user1@example.com - user8@example.com / Password123!`);
+    console.log(`   ✅ Generated ${totalTransactions} transactions\n`);
+
+    // ============================================
+    // 4. CREATE ACTIVE SAPPER GAMES
+    // ============================================
+    console.log('💣 Creating active Sapper games...');
+
+    const sapperUsers = createdUsers.slice(0, 5); // First 5 users have active games
+    let sapperGames = 0;
+
+    for (const user of sapperUsers) {
+        // Create a game that follows the rules from sapperController
+        const mapSize = randomInt(3, 8);
+        const totalCells = mapSize * mapSize;
+        const maxBombs = totalCells - 1;
+        const bombsCount = randomInt(2, Math.min(maxBombs, Math.floor(totalCells * 0.3)));
+
+        // Generate realistic map using the same logic as controller
+        const mapData = generateSapperMap(mapSize, bombsCount);
+
+        // Create realistic mask with some revealed cells
+        const revealedCells = randomInt(1, Math.floor(totalCells * 0.4));
+        const mask = Array(totalCells).fill('0');
+
+        // Reveal safe cells only
+        let revealed = 0;
+        while (revealed < revealedCells) {
+            const index = randomInt(0, totalCells - 1);
+            if (mask[index] === '0' && mapData[index] !== '.') {
+                mask[index] = '1';
+                revealed++;
+            }
+        }
+
+        const betAmount = randomDecimal(10, 200);
+
+        // Calculate realistic multiplier based on revealed safe cells
+        const totalBombs = mapData.split('').filter(c => c === '.').length;
+        let winMultiplayer = 1;
+
+        // Calculate multiplier for each revealed cell
+        for (let i = 0; i < revealed; i++) {
+            const remainingUnknown = totalCells - i;
+            const remainingSafe = remainingUnknown - totalBombs;
+            const probability = remainingSafe / remainingUnknown;
+            const houseEdge = 0.99;
+            winMultiplayer *= (1 / probability) * houseEdge;
+        }
+
+        await prisma.sapperMap.create({
+            data: {
+                userId: user.id,
+                n: mapSize,
+                map: mapData,
+                mask: mask.join(''),
+                bet: betAmount,
+                winMultiplayer: Number(winMultiplayer.toFixed(4)),
+            },
+        });
+
+        sapperGames++;
+        console.log(`   ✅ Created Sapper game for ${user.username} (${mapSize}x${mapSize}, ${bombsCount} bombs)`);
+    }
+
+    console.log(`\n   📊 Total active Sapper games: ${sapperGames}\n`);
+
+    // ============================================
+    // 5. CREATE PASSWORD RESET TOKENS (SOME EXPIRED)
+    // ============================================
+    console.log('🔑 Creating password reset tokens...');
+
+    const resetUsers = createdUsers.slice(5, 8); // 3 users with reset tokens
+    let resetTokens = 0;
+
+    for (const user of resetUsers) {
+        const isExpired = Math.random() > 0.5;
+        const expiresAt = isExpired
+            ? new Date(Date.now() - 3600000) // 1 hour ago (expired)
+            : new Date(Date.now() + 3600000); // 1 hour from now (valid)
+
+        const token = Math.random().toString(36).substring(2, 18);
+        const hashedToken = await bcrypt.hash(token, 10);
+
+        await prisma.passwordReset.create({
+            data: {
+                userId: user.id,
+                token: hashedToken,
+                expiresAt,
+            },
+        });
+
+        resetTokens++;
+        console.log(`   ✅ Created ${isExpired ? 'expired' : 'valid'} reset token for ${user.username}`);
+    }
+
+    console.log(`\n   📊 Total reset tokens: ${resetTokens}\n`);
+
+    // ============================================
+    // FINAL SUMMARY
+    // ============================================
+    console.log('════════════════════════════════════════════════════════');
+    console.log('                    SEEDING COMPLETE                     ');
+    console.log('════════════════════════════════════════════════════════');
+    console.log(`👑 Admin Users:              1`);
+    console.log(`👥 Normal Users:             ${createdUsers.length}`);
+    console.log(`💰 Total Transactions:       ${totalTransactions}`);
+    console.log(`💣 Active Sapper Games:      ${sapperGames}`);
+    console.log(`🔑 Password Reset Tokens:    ${resetTokens}`);
+    console.log('════════════════════════════════════════════════════════');
+    console.log('\n📝 Test Credentials:');
+    console.log(`   Admin:  ${adminEmail} / ${adminPassword}`);
+    console.log(`   Users:  any user email / User123!`);
+    console.log('════════════════════════════════════════════════════════\n');
 }
+
+// ============================================
+// HELPER FUNCTIONS (from sapperController)
+// ============================================
+
+function generateSapperMap(size: number, bombs: number): string {
+    const totalCells = size * size;
+    const initialMap = Array(totalCells).fill('0');
+
+    let bombsPlaced = 0;
+    while (bombsPlaced < bombs) {
+        const randomIndex = getRandomIntInclusive(0, initialMap.length - 1);
+        if (initialMap[randomIndex] !== '.') {
+            initialMap[randomIndex] = '.';
+            bombsPlaced++;
+        }
+    }
+
+    const map2D: string[][] = [];
+    for (let i = 0; i < size; i++) {
+        map2D.push(initialMap.slice(i * size, (i + 1) * size));
+    }
+
+    for (let i = 0; i < map2D.length; i++) {
+        const currentRow = map2D[i];
+        if (!currentRow) continue;
+
+        for (let j = 0; j < currentRow.length; j++) {
+            if (currentRow[j] !== '.') {
+                let count = 0;
+                const maxRow = map2D.length - 1;
+                const maxCol = currentRow.length - 1;
+
+                const prevRow = map2D[i - 1];
+                const nextRow = map2D[i + 1];
+
+                if (i > 0 && j > 0 && prevRow && prevRow[j - 1] === '.') count++;
+                if (i > 0 && prevRow && prevRow[j] === '.') count++;
+                if (j > 0 && currentRow[j - 1] === '.') count++;
+                if (i > 0 && j < maxCol && prevRow && prevRow[j + 1] === '.') count++;
+                if (i < maxRow && j > 0 && nextRow && nextRow[j - 1] === '.') count++;
+                if (i < maxRow && nextRow && nextRow[j] === '.') count++;
+                if (j < maxCol && currentRow[j + 1] === '.') count++;
+                if (i < maxRow && j < maxCol && nextRow && nextRow[j + 1] === '.') count++;
+                currentRow[j] = count.toString();
+            }
+        }
+    }
+    return map2D.map(row => row.join('')).join('');
+}
+
+function getRandomIntInclusive(min: number, max: number): number {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// ============================================
+// RUN SEED
+// ============================================
 
 main()
     .catch((e) => {
@@ -360,4 +535,5 @@ main()
     })
     .finally(async () => {
         await prisma.$disconnect();
+        console.log('👋 Database connection closed.');
     });

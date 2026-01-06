@@ -58,7 +58,7 @@ model Transaction {
   timestamp DateTime @default(now())
 
   walletId String
-  wallet   Wallet @relation(fields: [walletId], references: [id])
+  wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
   amount Decimal         @db.Decimal(10, 2)
   type   TransactionType // DEPOSIT | WITHDRAWAL | LOST | WIN | BET
@@ -88,7 +88,7 @@ model SapperMap {
   winMultiplayer Float
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PasswordReset {
