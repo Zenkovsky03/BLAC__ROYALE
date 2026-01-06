@@ -1,6 +1,11 @@
 import type { Response} from "express";
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 import {prisma} from "../../prisma/prismaSingleton.ts";
+import {walletService} from "../Services/walletService.ts";
+import {GameType} from "@prisma/client";
+
+const game = GameType.SAPPER
+
 
 //POST
 export async function resignSapper(req: AuthRequest, res: Response)
@@ -11,20 +16,13 @@ export async function resignSapper(req: AuthRequest, res: Response)
     try
     {
         const map = await prisma.sapperMap.findFirst({ where: { userId } });
-        if (map === null)
-        {
-            return res.status(404).json({ message: 'No map found for user.' });
-        }
 
-        let win = map.bet * map.winMultiplayer;
+        if (map === null) {return res.status(404).json({ message: 'No map found for user.' });}
 
-        await prisma.wallet.update({
-            where: {userId},
-            data: { balance: {increment: win } , transactions: {create: {amount: win , type: "WIN"}}},
-        })
+        let winAmount = map.bet * map.winMultiplayer;
+        await walletService.recordWin(userId, winAmount , game)
 
         await destroyMap(userId);
-
         // Zwracamy map.map (string), aby frontend mógł go wyświetlić
         return res.json({ message: 'Game ended.', map: { ...map, map: map.map } });
     }
@@ -121,10 +119,7 @@ export async function startSapper(req: AuthRequest, res: Response)
 
     try
     {
-        await prisma.wallet.update({
-            where: {userId},
-            data: { balance: {decrement: betAmount } , transactions: {create: {amount: betAmount , type: "BET"}}},
-        })
+        await walletService.placeBet(userId, betAmount, game);
 
         if (mapSize * mapSize - 1 <= bombsCount)
         {

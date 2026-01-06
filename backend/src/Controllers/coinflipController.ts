@@ -1,6 +1,8 @@
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
-import {prisma} from "../../prisma/prismaSingleton.ts";
+import {walletService} from "../Services/walletService.ts";
+import {GameType} from "@prisma/client";
 
+const game = GameType.COINFLIP
 
 export const PlayCoinFlip = async (req: AuthRequest, res: any, ) =>
 {
@@ -8,36 +10,19 @@ export const PlayCoinFlip = async (req: AuthRequest, res: any, ) =>
     const userId = req.userId!;
 
     const winMultiplayer = 2;
-
     let gain = 0;
 
     try
     {
-        await prisma.wallet.update({
-            where: {userId},
-            data: {balance: {decrement: betAmount}},
-        })
-
+        await walletService.placeBet(userId, betAmount, game)
         const randomNumber = Math.trunc(Math.random() * 100)
-
         if(randomNumber % 2 == bet)
         {
             gain = betAmount * winMultiplayer;
-            await prisma.wallet.update({
-                where: {userId},
-                data: { balance: {increment: gain } , transactions: {create: {amount: gain - betAmount, type: "WIN"}}},
-            })
+            await walletService.recordWin(userId, gain , game)
             return res.status(200).json( { gain  , result: "WIN" } );
         }
-        else
-        {
-            await prisma.wallet.update({
-                where: {userId},
-                data: { transactions: {create: {amount: betAmount , type: "LOST"}}},
-            })
-            return res.status(200).json( { gain , result: "LOST"} );
-        }
-
+        else {return res.status(200).json( { gain , result: "LOST"} );}
     }
     catch (error)
     {
@@ -45,11 +30,3 @@ export const PlayCoinFlip = async (req: AuthRequest, res: any, ) =>
         res.status(500).json({message: 'No games found.'});
     }
 }
-
-/* Just for documentation
-enum CoinSides
-{
-    Heads = 0,
-    Tails = 1,
-}
-*/
