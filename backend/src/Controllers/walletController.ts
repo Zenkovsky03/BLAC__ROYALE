@@ -1,12 +1,8 @@
 import type { Response} from "express";
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
-
 import {prisma} from "../../prisma/prismaSingleton.ts";
+import {walletService} from "../Services/walletService.ts";
 
-
-
-//GET
-// W pliku Controllers/walletController.ts
 
 export async function getWallet(req: AuthRequest, res: Response)
 {
@@ -48,12 +44,19 @@ export async function deposit(req: AuthRequest, res: Response)
         return res.status(400).json({message: 'Deposited amount must be grater than 0.'});
 
     try {
-        const updatedWallet = await prisma.wallet.update(
-            {
-                where: {userId},
-                data: {balance: {increment: amount} , transactions: {create: {amount: amount, type: "DEPOSIT"}}},
-                select: {balance: true , transactions: {select: {amount: true, type: true , timestamp: true}}}
-            })
+        await walletService.deposit(userId, amount)
+
+        const updatedWallet =  await prisma.wallet.findUnique({
+            where: {userId},
+            select: {
+                balance: true,
+                transactions: {
+                    select: {amount: true, type: true, timestamp: true},
+                    orderBy: {timestamp: 'desc'},
+                    take: 5
+                }
+            }
+        });
 
         res.status(200).json(updatedWallet); // Respond with updated wallet
     }
@@ -71,13 +74,19 @@ export async function withdraw(req: AuthRequest, res: Response)
 
     try
     {
-        const updatedWallet = await prisma.wallet.update(
-            {
-                where: {userId},
-                data: {balance: {decrement: amount} , transactions: {create: {amount: amount, type: "WITHDRAWAL"}}},
-                select: {balance: true , transactions: {select: {amount: true, type: true , timestamp: true}} }
-            })
+        await walletService.withdraw(userId, amount)
 
+        const updatedWallet = await prisma.wallet.findUnique({
+            where: {userId},
+            select: {
+                balance: true,
+                transactions: {
+                    select: {amount: true, type: true, timestamp: true},
+                    orderBy: {timestamp: 'desc'},
+                    take: 5
+                }
+            }
+        });
 
         res.status(200).json(updatedWallet); // Respond with updated wallet
     }

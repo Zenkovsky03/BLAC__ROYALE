@@ -1,17 +1,18 @@
 import type {AuthRequest} from "../Middleware/authMiddleware.ts";
 import type {Response} from "express";
+import {GameType} from "@prisma/client";
+import {walletService} from "../Services/walletService.ts";
 
-import {prisma} from "../../prisma/prismaSingleton.ts";
+const game = GameType.SLIDER
 
 export async function sliderPlay(req: AuthRequest, res: Response)
 {
+    const {bet , min , max} = req.body;
+    const userId = String(req.userId!);
+
     try
     {
-        // 1. Walidacja danych wejściowych
-        const {bet , min , max} = req.body;
-        const userId = String(req.userId!); // Zakładamy, że Auth middleware zapewnia userId
-
-        if (bet <= 0) // Zmienione na <= 0, żeby nie można było grać za darmo
+        if (bet <= 0)
             return res.status(400).json({error: 'Invalid bet amount'});
 
         if (min < 0 || max > 100 || min >= max)
@@ -20,26 +21,12 @@ export async function sliderPlay(req: AuthRequest, res: Response)
         if (!Number.isInteger(min) || !Number.isInteger(max))
             return res.status(400).json({error: 'Range must be integers'});
 
-        if (!userId)
-            return res.status(400).json({error: 'User ID missing'});
-
-        // 2. Sprawdzenie czy użytkownik istnieje
-        const user = await prisma.user.findUnique({where: {id: userId}});
-        if (!user)
-            return res.status(404).json({error: 'User not found'});
-
-        // Opcjonalnie: Tu powinieneś sprawdzić czy user ma wystarczające środki (balance >= bet)
-        // Ale zakładamy, że obsłuży to logika bazy danych lub frontend
-
-        // --- TU ZACZYNA SIĘ NOWA LOGIKA (WKLEJONY FRAGMENT) ---
 
         const num = getRandomInt(0, 100);
-        const rangeSize = max - min;
-        const winChance = rangeSize; // Szansa w % (dla zakresu 0-100)
+        const winChance = max - min;
 
         // OBLICZANIE MNOŻNIKA (Standard Kasynowy)
-        // House Edge (Przewaga kasyna) = 2% (czyli RTP 98%)
-        const houseEdge = 0.98;
+        const houseEdge = 0.99;
         let multiplier = 0;
 
         if (winChance > 0) {
@@ -51,33 +38,13 @@ export async function sliderPlay(req: AuthRequest, res: Response)
 
         let winAmount = 0;
 
-        // Sprawdzenie wygranej (inclusive - czyli włącznie z min i max)
-        if (num >= min && num <= max) {
-            // WYGRANA
+
+        await walletService.placeBet(userId, bet , game)
+        if (num >= min && num <= max) //WIN
+        {
             winAmount = Number((bet * multiplier).toFixed(2));
-
-            await prisma.wallet.update({
-                where: {userId},
-                data: {
-                    // UWAGA: W Twoim starym kodzie nie odejmowałeś stawki przed if-em.
-                    // Dlatego tutaj musimy dodać ZYSK NETTO (wygrana - stawka).
-                    // Jeśli dodamy całe winAmount, gracz dostanie "darmową" stawkę z powrotem + wygraną.
-                    balance: { increment: winAmount - bet },
-                    transactions: { create: { amount: winAmount - bet, type: "WIN" }}
-                },
-            });
-        } else {
-            // PRZEGRANA
-            await prisma.wallet.update({
-                where: {userId},
-                data: {
-                    balance: { decrement: bet },
-                    transactions: { create: { amount: bet, type: "LOST" }}
-                },
-            });
+            await walletService.recordWin(userId, winAmount , game)
         }
-
-        // --- KONIEC NOWEJ LOGIKI ---
 
         return res.json({
             num,
@@ -90,7 +57,7 @@ export async function sliderPlay(req: AuthRequest, res: Response)
     catch (error)
     {
         console.error("Slider Error:", error);
-        res.status(500).json({error: 'Spin failed'});
+        res.status(500).json({error: 'Bet failed'});
     }
 }
 

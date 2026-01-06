@@ -1,7 +1,9 @@
 import type { Response} from "express";
 import type { AuthRequest } from '../Middleware/authMiddleware.ts';
-import {prisma} from "../../prisma/prismaSingleton.ts";
+import {walletService} from "../Services/walletService.ts";
+import {GameType} from "@prisma/client";
 
+const game = GameType.ROULETTE
 
 //POST
 export async function PlayRoulette(req: AuthRequest, res: Response)
@@ -17,10 +19,7 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
         let winMultiplayer = 1;
         let WinScenario = 0;
 
-        await prisma.wallet.update({
-            where: {userId},
-            data: {balance: {decrement: betAmount}},
-        })
+        await walletService.placeBet(userId, betAmount, game)
         const randomNumber = Math.trunc(Math.random() * 100)%37
 
         if (randomNumber == number)
@@ -33,24 +32,13 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
             winMultiplayer = winMultiplayer * ColWinMulti;
             WinScenario += 2;
         }
-
         let gain = 0;
-
         if (winMultiplayer != 1)
         {
             gain = betAmount * winMultiplayer;
-            await prisma.wallet.update({
-                where: {userId},
-                data: { balance: {increment: gain } , transactions: {create: {amount: (betAmount * winMultiplayer) - betAmount, type: "WIN"}}},
-            })
+            await walletService.recordWin(userId, gain, game)
             return res.status(200).json( { gain , winMultiplayer , WinScenario  , randomNumber} );
         }
-
-        await prisma.wallet.update({
-            where: {userId},
-            data: {transactions: {create: {amount: betAmount , type: "LOST"}}},
-        })
-
         res.status(200).json( { gain , winMultiplayer , WinScenario  , randomNumber} );
     }
     catch (error)
@@ -59,13 +47,3 @@ export async function PlayRoulette(req: AuthRequest, res: Response)
         res.status(500).json({message: 'Failed playing the game.'});
     }
 }
-
-/* Just for documentation
-enum WinScenarios
-{
-    LOOSE,
-    NUMBER_WIN,
-    COLOR_WIN,
-    BOTH_WIN,
-}
-*/

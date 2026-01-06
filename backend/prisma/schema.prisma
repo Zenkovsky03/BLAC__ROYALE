@@ -61,14 +61,17 @@ model Transaction {
   wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
   amount Decimal         @db.Decimal(10, 2)
-  type   TransactionType // DEPOSIT | WITHDRAWAL | LOST | WIN | BET
+  type   TransactionType
+
+  game GameType?
 }
 
-model Game {
-  id          String  @id @default(uuid())
-  name        String  @unique
-  description String?
-  isActive    Boolean @default(true)
+enum GameType {
+  COINFLIP
+  SAPPER
+  ROULETTE
+  SLIDER
+  SLOTS
 }
 
 enum TransactionType {

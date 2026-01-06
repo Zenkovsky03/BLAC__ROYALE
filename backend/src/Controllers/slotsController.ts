@@ -1,7 +1,9 @@
 import type {AuthRequest} from "../Middleware/authMiddleware.ts";
 import type {Response} from "express";
+import {walletService} from "../Services/walletService.ts";
+import {GameType} from "@prisma/client";
 
-import {prisma} from "../../prisma/prismaSingleton.ts";
+const game = GameType.SLOTS
 
 const SYMBOLS = {
     CHERRY: { id: 1, weight: 100, payout: { 3: 2 } },
@@ -24,10 +26,6 @@ export async function slotsSpin(req: AuthRequest, res: Response) {
         const {bet} = req.body;
         const userId = String(req.userId!);
 
-        const user = await prisma.user.findUnique({where: {id: userId}});
-
-        if (!user)
-            return res.status(404).json({error: 'User not found'});
 
         // Generate reels
         const reels: SymbolKey[] = [
@@ -38,20 +36,11 @@ export async function slotsSpin(req: AuthRequest, res: Response) {
 
         const winAmount = calculateWin(reels, bet);
 
+        await walletService.placeBet(userId, bet , game);
 
         if ( winAmount - bet > 0)
         {
-            await prisma.wallet.update({
-                where: {userId},
-                data: { balance: {increment: winAmount - bet } , transactions: {create: {amount: winAmount - bet, type: "WIN"}}},
-            })
-        }
-        else
-        {
-            await prisma.wallet.update({
-                where: {userId},
-                data: { balance: {increment: winAmount - bet } , transactions: {create: {amount: winAmount - bet, type: "LOST"}}},
-            })
+            await walletService.recordWin(userId, winAmount , game);
         }
 
         return res.json({
