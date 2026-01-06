@@ -4,10 +4,6 @@ import type { AuthRequest } from '../Middleware/authMiddleware.ts';
 import {prisma} from "../../prisma/prismaSingleton.ts";
 
 
-
-//GET
-// W pliku Controllers/walletController.ts
-
 export async function getWallet(req: AuthRequest, res: Response)
 {
     const userId = req.userId!;
