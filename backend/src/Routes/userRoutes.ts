@@ -182,7 +182,7 @@ UserRouter.post('/register', register);
  * /api/users/login:
  *   post:
  *     summary: Login user
- *     description: Authenticates a user and returns a JWT token valid for 2 hours
+ *     description: Authenticates a user and returns a JWT token. Token is valid for 2 hours by default, or 30 days if rememberMe is true.
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -202,6 +202,10 @@ UserRouter.post('/register', register);
  *                 type: string
  *                 format: password
  *                 example: SecurePass123!
+ *               rememberMe:
+ *                 type: boolean
+ *                 example: false
+ *                 description: If true, token will be valid for 30 days instead of 3 hours
  *     responses:
  *       200:
  *         description: Login successful
@@ -213,17 +217,23 @@ UserRouter.post('/register', register);
  *                 token:
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                   description: JWT token valid for 2 hours
+ *                   description: JWT token (valid for 2 hours or 30 days depending on rememberMe)
  *                 loggedInUser:
  *                   type: object
  *                   properties:
  *                     email:
  *                       type: string
+ *                       example: user@example.com
  *                     username:
  *                       type: string
+ *                       example: johndoe
  *                     createdAt:
  *                       type: string
  *                       format: date-time
+ *                       example: 2024-01-15T10:30:00.000Z
+ *                     role:
+ *                       type: string
+ *                       example: NORMAL
  *       401:
  *         description: Invalid credentials
  *         content:
