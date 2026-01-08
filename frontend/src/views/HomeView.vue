@@ -103,6 +103,7 @@ const isAdmin = computed(() => {
 })
 
 // --- LOGIKA PRZYCISKU PANELU ---
+
 function handlePanelClick() {
   if (isAdmin.value) {
     router.push('/admin')
