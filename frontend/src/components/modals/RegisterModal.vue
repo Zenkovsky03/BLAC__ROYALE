@@ -6,171 +6,149 @@
         @click="!loading && $emit('close')"
     ></div>
 
-    <div class="relative w-full max-w-md scale-100 transform overflow-hidden rounded-2xl border border-primary/50 bg-[#0a0a0a] p-8 shadow-[0_0_50px_rgba(184,79,246,0.2)] transition-all">
+    <div class="relative w-full max-w-lg overflow-hidden rounded-2xl border border-primary/50 bg-[#0a0a0a] p-6 shadow-[0_0_50px_rgba(184,79,246,0.2)] transition-all">
 
       <button
           @click="$emit('close')"
           :disabled="loading"
-          class="absolute right-4 top-4 text-white/30 transition-colors hover:text-white disabled:opacity-0"
+          class="absolute right-4 top-4 text-white/30 transition-colors hover:text-white disabled:opacity-0 z-10"
       >
         <span class="material-symbols-outlined">close</span>
       </button>
 
-      <div class="mb-6 text-center">
-        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 shadow-[0_0_20px_rgba(184,79,246,0.4)]">
-          <span class="material-symbols-outlined text-3xl text-primary">person_add</span>
+      <div class="mb-5 text-center">
+        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 shadow-[0_0_20px_rgba(184,79,246,0.4)]">
+          <span class="material-symbols-outlined text-2xl text-primary">person_add</span>
         </div>
-
-        <h2 class="text-2xl font-black uppercase tracking-widest text-white neon-text">
+        <h2 class="text-xl font-black uppercase tracking-widest text-white neon-text">
           Create Account
         </h2>
-        <p class="mt-2 text-sm text-secondary/80">Join the elite players club</p>
+        <p class="text-xs text-secondary/80">Join the elite players club</p>
       </div>
 
-      <form @submit.prevent="handleRegister" class="space-y-4">
+      <form @submit.prevent="handleRegister" class="space-y-3">
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="text-xs font-bold uppercase tracking-wider text-primary">First Name</label>
-            <div class="relative group">
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <span class="material-symbols-outlined text-white/50 group-focus-within:text-primary transition-colors text-xl">
-                  badge
-                </span>
-              </div>
-              <input
-                  v-model="name"
-                  type="text"
-                  placeholder="John"
-                  class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)]"
-              />
-            </div>
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-bold uppercase tracking-wider text-primary">Last Name</label>
-            <div class="relative group">
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <span class="material-symbols-outlined text-white/50 group-focus-within:text-primary transition-colors text-xl">
-                  badge
-                </span>
-              </div>
-              <input
-                  v-model="surname"
-                  type="text"
-                  placeholder="Doe"
-                  class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)]"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <label class="text-xs font-bold uppercase tracking-wider text-primary">Username</label>
-          <div class="relative group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-white/50 group-focus-within:text-primary transition-colors text-xl">
-                account_circle
-              </span>
-            </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-primary">First Name</label>
             <input
-                v-model="username"
+                v-model="name"
+                @input="validateName"
                 type="text"
-                required
-                placeholder="CyberPlayer_01"
-                class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-4 text-white placeholder-white/20 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)]"
+                placeholder="John"
+                class="w-full rounded-lg border bg-black/50 py-2.5 px-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:shadow-[0_0_15px_rgba(184,79,246,0.3)]"
+                :class="errors.name ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary'"
             />
           </div>
-        </div>
-
-        <div class="space-y-2">
-          <label class="text-xs font-bold uppercase tracking-wider text-primary">Email Address</label>
-          <div class="relative group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-white/50 group-focus-within:text-primary transition-colors text-xl">
-                mail
-              </span>
-            </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-primary">Last Name</label>
             <input
-                v-model="email"
-                type="email"
-                required
-                placeholder="user@example.com"
-                class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-4 text-white placeholder-white/20 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)]"
+                v-model="surname"
+                @input="validateSurname"
+                type="text"
+                placeholder="Doe"
+                class="w-full rounded-lg border bg-black/50 py-2.5 px-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:shadow-[0_0_15px_rgba(184,79,246,0.3)]"
+                :class="errors.surname ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary'"
             />
           </div>
         </div>
 
-        <div class="space-y-2">
-          <label class="text-xs font-bold uppercase tracking-wider text-primary">Date of Birth</label>
-          <div class="relative group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-white/50 group-focus-within:text-primary transition-colors text-xl">
-                calendar_month
-              </span>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-primary">Username</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-base">account_circle</span>
+              <input
+                  v-model="username"
+                  @input="validateUsername"
+                  type="text"
+                  placeholder="Player1"
+                  class="w-full rounded-lg border bg-black/50 py-2.5 pl-9 pr-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:shadow-[0_0_15px_rgba(184,79,246,0.3)]"
+                  :class="errors.username ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary'"
+              />
             </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-primary">Date of Birth</label>
             <input
                 v-model="dateOfBirth"
+                @input="validateAge"
                 type="date"
-                required
-                class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-4 text-white placeholder-white/50 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)] appearance-none"
+                class="w-full rounded-lg border bg-black/50 py-2.5 px-3 text-sm text-white placeholder-white/50 outline-none transition-all focus:shadow-[0_0_15px_rgba(184,79,246,0.3)] appearance-none"
+                :class="errors.dateOfBirth ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary'"
             />
           </div>
         </div>
 
-        <div class="space-y-2">
-          <label class="text-xs font-bold uppercase tracking-wider text-primary">Password</label>
+        <div class="space-y-1">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-primary">Email Address</label>
           <div class="relative group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-white/50 group-focus-within:text-primary transition-colors text-xl">
-                lock
-              </span>
-            </div>
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-base">mail</span>
             <input
-                v-model="password"
-                type="password"
-                required
-                placeholder="••••••••"
-                class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-4 text-white placeholder-white/20 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)]"
+                v-model="email"
+                @input="validateEmail"
+                type="email"
+                placeholder="user@example.com"
+                class="w-full rounded-lg border bg-black/50 py-2.5 pl-9 pr-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:shadow-[0_0_15px_rgba(184,79,246,0.3)]"
+                :class="errors.email ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary'"
             />
           </div>
+          <p v-if="errors.email" class="text-[10px] text-red-400 font-bold ml-1">{{ errors.email }}</p>
         </div>
 
-        <div class="space-y-2">
-          <label class="text-xs font-bold uppercase tracking-wider text-primary">Confirm Password</label>
-          <div class="relative group">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-primary">Password</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-base">lock</span>
+              <input
+                  v-model="password"
+                  @input="validatePassword"
+                  type="password"
+                  placeholder="******"
+                  class="w-full rounded-lg border bg-black/50 py-2.5 pl-9 pr-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:shadow-[0_0_15px_rgba(184,79,246,0.3)]"
+                  :class="errors.password ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary'"
+              />
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-primary">Confirm</label>
+            <div class="relative group">
               <span
-                  class="material-symbols-outlined transition-colors text-xl"
-                  :class="(confirmPassword && password === confirmPassword) ? 'text-green-400' : 'text-white/50 group-focus-within:text-primary'"
+                  class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base transition-colors"
+                  :class="(confirmPassword && !errors.confirmPassword) ? 'text-green-400' : 'text-white/30'"
               >
-                {{ (confirmPassword && password === confirmPassword) ? 'check_circle' : 'lock_reset' }}
+                {{ (confirmPassword && !errors.confirmPassword) ? 'check_circle' : 'lock_reset' }}
               </span>
+              <input
+                  v-model="confirmPassword"
+                  @input="validateConfirmPassword"
+                  type="password"
+                  placeholder="Repeat"
+                  class="w-full rounded-lg border bg-black/50 py-2.5 pl-9 pr-3 text-sm text-white placeholder-white/20 outline-none transition-all focus:shadow-[0_0_15px_rgba(184,79,246,0.3)]"
+                  :class="errors.confirmPassword ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-primary'"
+              />
             </div>
-            <input
-                v-model="confirmPassword"
-                type="password"
-                required
-                placeholder="Repeat password"
-                class="w-full rounded-xl border border-white/10 bg-black/50 py-3 pl-12 pr-4 text-white placeholder-white/20 outline-none transition-all focus:border-primary focus:shadow-[0_0_20px_rgba(184,79,246,0.3)]"
-            />
           </div>
         </div>
 
-        <div v-if="errorMessage" class="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-center text-xs font-bold text-red-400 animate-pulse">
-          {{ errorMessage }}
+        <div v-if="hasErrors || globalError" class="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-center">
+          <p class="text-[10px] font-bold text-red-400">
+            {{ globalError || getFirstError }}
+          </p>
         </div>
 
         <button
             type="submit"
-            :disabled="loading || password !== confirmPassword"
-            class="group relative mt-2 w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-purple-600 py-4 font-bold uppercase tracking-widest text-white transition-all hover:shadow-[0_0_30px_rgba(184,79,246,0.6)] hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="loading || hasErrors || !isFormFilled"
+            class="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-purple-600 py-3.5 font-bold uppercase tracking-widest text-white transition-all hover:shadow-[0_0_30px_rgba(184,79,246,0.6)] hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         >
-          <span v-if="!loading" class="relative z-10 flex items-center justify-center gap-2">
-            Register Account
-            <span class="material-symbols-outlined">rocket_launch</span>
+          <span v-if="!loading" class="relative z-10 flex items-center justify-center gap-2 text-sm">
+            Create Account
+            <span class="material-symbols-outlined text-lg">rocket_launch</span>
           </span>
-          <span v-else class="relative z-10 flex items-center justify-center gap-2">
-            <span class="animate-spin material-symbols-outlined">sync</span>
+          <span v-else class="relative z-10 flex items-center justify-center gap-2 text-sm">
+            <span class="animate-spin material-symbols-outlined text-lg">sync</span>
             Creating...
           </span>
         </button>
@@ -181,10 +159,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useAuthStore } from '@/stores/auth.js'
+import { ref, reactive, computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
-// Pola formularza
+const emit = defineEmits(['close'])
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const auth = useAuthStore()
+
+// --- DANE FORMULARZA ---
 const name = ref('')
 const surname = ref('')
 const username = ref('')
@@ -193,49 +175,78 @@ const dateOfBirth = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
-// Stan UI
+// --- STAN ---
 const loading = ref(false)
-const errorMessage = ref('')
+const globalError = ref('')
 
-const emit = defineEmits(['close'])
-const API = import.meta.env.VITE_API_URL || ''
-const auth = useAuthStore()
+// --- WALIDACJA ---
+const errors = reactive({
+  name: '',
+  surname: '',
+  username: '',
+  email: '',
+  dateOfBirth: '',
+  password: '',
+  confirmPassword: ''
+})
 
-// Obliczanie wieku
-function getAge(dateString: string) {
-  const today = new Date();
-  const birthDate = new Date(dateString);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return age;
+// Czy są jakiekolwiek błędy?
+const hasErrors = computed(() => Object.values(errors).some(msg => msg.length > 0))
+
+// Czy wszystkie pola są wypełnione?
+const isFormFilled = computed(() =>
+    name.value && surname.value && username.value && email.value &&
+    dateOfBirth.value && password.value && confirmPassword.value
+)
+
+// Pobierz pierwszy błąd do wyświetlenia
+const getFirstError = computed(() => Object.values(errors).find(msg => msg.length > 0) || '')
+
+// --- FUNKCJE SPRAWDZAJĄCE (uruchamiane przy pisaniu) ---
+
+const validateName = () => {
+  errors.name = name.value.trim().length >= 2 ? '' : 'Name too short'
+}
+const validateSurname = () => {
+  errors.surname = surname.value.trim().length >= 2 ? '' : 'Surname too short'
+}
+const validateUsername = () => {
+  errors.username = username.value.trim().length >= 3 ? '' : 'Username min 3 chars'
+}
+const validateEmail = () => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  errors.email = re.test(email.value) ? '' : 'Invalid email format'
+}
+const validateAge = () => {
+  if (!dateOfBirth.value) return
+  const today = new Date()
+  const birthDate = new Date(dateOfBirth.value)
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const m = today.getMonth() - birthDate.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--
+  errors.dateOfBirth = age >= 18 ? '' : 'Must be 18+'
+}
+const validatePassword = () => {
+  errors.password = password.value.length >= 6 ? '' : 'Password min 6 chars'
+  if (confirmPassword.value) validateConfirmPassword()
+}
+const validateConfirmPassword = () => {
+  errors.confirmPassword = password.value === confirmPassword.value ? '' : 'Passwords do not match'
 }
 
+// --- REJESTRACJA ---
 async function handleRegister() {
-  errorMessage.value = '';
+  // Ostatnie sprawdzenie
+  validateName(); validateSurname(); validateUsername(); validateEmail();
+  validateAge(); validatePassword(); validateConfirmPassword();
 
-  if (!email.value || !password.value || !dateOfBirth.value || !username.value) {
-    errorMessage.value = 'Please fill in all required fields.'
-    return
-  }
-
-  if (password.value !== confirmPassword.value) {
-    errorMessage.value = 'Passwords do not match.'
-    return
-  }
-
-  // WERYFIKACJA WIEKU (18+)
-  const age = getAge(dateOfBirth.value);
-  if (age < 18) {
-    errorMessage.value = 'You must be at least 18 years old to register.';
-    return;
-  }
+  if (hasErrors.value || !isFormFilled.value) return
 
   loading.value = true
+  globalError.value = ''
+
   try {
-    const isoDate = new Date(dateOfBirth.value).toISOString();
+    const isoDate = new Date(dateOfBirth.value).toISOString()
 
     const res = await fetch(`${API}/api/users/register`, {
       method: 'POST',
@@ -245,8 +256,8 @@ async function handleRegister() {
         username: username.value,
         password: password.value,
         dateOfBirth: isoDate,
-        name: name.value || undefined,
-        surname: surname.value || undefined
+        name: name.value,
+        surname: surname.value
       })
     })
 
@@ -257,7 +268,6 @@ async function handleRegister() {
     }
 
     const user = data.loggedInUser || data.newUser
-
     if (data.token && user) {
       auth.loginSuccess(data.token, user)
       await auth.fetchBalance()
@@ -265,7 +275,7 @@ async function handleRegister() {
 
     emit('close')
   } catch (e: any) {
-    errorMessage.value = e.message || 'Registration error.'
+    globalError.value = e.message || 'Server error'
   } finally {
     loading.value = false
   }
@@ -277,7 +287,7 @@ async function handleRegister() {
   text-shadow: 0 0 10px rgba(184, 79, 246, 0.6);
 }
 
-/* Stylizacja inputa daty dla ciemnego motywu */
+/* Kalendarz w trybie ciemnym */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.6;

@@ -30,14 +30,30 @@
 
           <div class="grid grid-cols-2 gap-4 items-end">
             <div class="setting-group w-full">
-              <label class="setting-label"><span class="material-symbols-outlined text-sm">payments</span> Bet Amount:</label>
-              <div class="select-wrapper neon-border-blue">
-                <select v-model="betAmount" class="setting-select" :disabled="isRolling">
-                  <option :value="10">$10</option>
-                  <option :value="25">$25</option>
-                  <option :value="50">$50</option>
-                  <option :value="100">$100</option>
-                </select>
+              <label class="setting-label">
+                <span class="material-symbols-outlined text-sm">payments</span> Bet Amount:
+              </label>
+              <div class="relative group">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-mono">$</span>
+
+                <input
+                    v-model.number="betAmount"
+                    type="number"
+                    min="0.01"
+                    :max="props.balance"
+                    :disabled="isRolling"
+                    class="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-8 pr-16 text-white font-bold font-mono outline-none focus:border-[#00f6ff] focus:shadow-[0_0_15px_rgba(0,246,255,0.2)] transition-all placeholder-white/20"
+                    placeholder="0.00"
+                    @input="validateInput"
+                >
+
+                <button
+                    @click="betAmount = Math.floor(props.balance || 0)"
+                    :disabled="isRolling"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-[#00f6ff] uppercase transition-colors"
+                >
+                  MAX
+                </button>
               </div>
             </div>
 
@@ -47,28 +63,31 @@
             </div>
           </div>
 
-          <div class="rounded-xl bg-white/5 p-6 border border-white/10 space-y-6 relative overflow-hidden">
-            <div class="absolute inset-0 opacity-10 pointer-events-none"
-                 :style="{ background: `linear-gradient(90deg, transparent ${min}%, #00f6ff ${min}%, #00f6ff ${max}%, transparent ${max}%)` }">
-            </div>
+          <div class="rounded-xl bg-white/5 p-6 border border-white/10 space-y-4 relative">
 
-            <div class="flex justify-between items-end mb-2 relative z-10">
+            <div class="flex justify-between items-end mb-2">
               <label class="setting-label text-primary">Define Winning Range</label>
-              <div class="text-xs text-secondary/70 uppercase tracking-widest">Range: {{ min }} - {{ max }}</div>
+              <div class="text-xs text-secondary/70 uppercase tracking-widest font-mono">Range: {{ min }} - {{ max }}</div>
             </div>
 
-            <div class="range-group relative z-10">
-              <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-white/50 mb-1">
-                <span>Min</span>
-                <span class="text-primary">{{ min }}</span>
+            <div class="range-group">
+              <div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-white/50 mb-1">
+                <span>Min Start</span>
+                <span class="text-primary">{{ min }}%</span>
               </div>
               <input type="range" min="0" max="100" v-model.number="min" class="cyber-range" :disabled="isRolling" />
             </div>
 
-            <div class="range-group relative z-10">
-              <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-white/50 mb-1">
-                <span>Max</span>
-                <span class="text-primary">{{ max }}</span>
+            <div class="relative h-3 w-auto mx-2.5 bg-[#111] rounded-full overflow-hidden border border-white/10 shadow-inner">
+              <div class="absolute top-0 bottom-0 bg-[#00f6ff] shadow-[0_0_10px_#00f6ff] transition-all duration-100 ease-linear opacity-80"
+                   :style="{ left: `${min}%`, right: `${100 - max}%` }">
+              </div>
+            </div>
+
+            <div class="range-group">
+              <div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-white/50 mb-1">
+                <span>Max End</span>
+                <span class="text-primary">{{ max }}%</span>
               </div>
               <input type="range" min="0" max="100" v-model.number="max" class="cyber-range" :disabled="isRolling" />
             </div>
@@ -89,49 +108,53 @@
             </div>
           </div>
 
-          <div class="w-full relative py-6 px-2 bg-black rounded-xl border border-white/20">
-            <div class="absolute top-1/2 left-2 right-2 h-2 -translate-y-1/2 bg-[#222] rounded-full overflow-hidden">
+          <div class="w-full relative py-8 px-2 bg-black rounded-xl border border-white/20">
+            <div class="absolute top-1/2 left-2.5 right-2.5 h-3 -translate-y-1/2 bg-[#222] rounded-full overflow-hidden">
               <div class="h-full bg-primary/30"
-                   :style="{ marginLeft: `${min}%`, width: `${max - min}%` }"></div>
+                   :style="{ marginLeft: `${min}%`, marginRight: `${100 - max}%` }"></div>
             </div>
 
-            <div class="absolute top-1/2 -translate-y-1/2 transition-all duration-700 ease-out"
-                 :style="{ left: `${resultPosition}%` }">
-              <div class="relative -translate-x-1/2">
-                <div class="w-1 h-8 bg-white shadow-[0_0_15px_white]"></div>
-                <div class="absolute -top-8 left-1/2 -translate-x-1/2 text-xl font-black"
-                     :class="isWin ? 'text-green-400' : 'text-white'">
-                  {{ Math.round(resultPosition) }}
+            <div class="absolute top-1/2 -translate-y-1/2 left-2.5 right-2.5 h-full pointer-events-none">
+              <div class="absolute top-1/2 -translate-y-1/2 transition-all duration-1000 cubic-bezier(0.25, 1, 0.5, 1)"
+                   :style="{ left: `${resultPosition}%` }">
+                <div class="relative -translate-x-1/2 flex flex-col items-center">
+
+                  <div class="w-1.5 h-8 bg-white shadow-[0_0_15px_white,0_0_30px_white] rounded-full z-20"></div>
+
+                  <div class="absolute w-4 h-8 bg-white/20 blur-md rounded-full"></div>
+
                 </div>
               </div>
             </div>
 
-            <div class="flex justify-between mt-6 text-xs font-mono text-white/30">
+            <div class="flex justify-between mt-6 text-xs font-mono text-white/30 px-2 select-none">
               <span>0</span>
+              <span>25</span>
+              <span>50</span>
+              <span>75</span>
               <span>100</span>
             </div>
           </div>
 
-          <div v-if="lastResult" class="text-center animate-in fade-in zoom-in duration-300">
+          <div v-if="lastResult" class="text-center animate-in fade-in zoom-in duration-300 min-h-[32px]">
             <div class="text-xl font-black uppercase tracking-widest"
                  :class="isWin ? 'text-green-400 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]' : 'text-red-500'">
               {{ lastResult }}
             </div>
           </div>
-
-          <div class="flex flex-col items-center gap-2">
-            <button
-                @click="playGame"
-                :disabled="isRolling || betAmount > (props.balance || 0)"
-                class="cyber-button-start w-full"
-                :class="{ 'grayscale opacity-50 cursor-not-allowed': isRolling || betAmount > (props.balance || 0) }"
-            >
-              {{ isRolling ? 'ROLLING...' : 'ROLL DICE' }}
-            </button>
-            <div v-if="betAmount > (props.balance || 0)" class="text-red-500 font-bold uppercase tracking-wider text-sm animate-pulse">
-              Insufficient Funds!
-            </div>
+          <div v-else class="min-h-[32px]"></div> <div class="flex flex-col items-center gap-2">
+          <button
+              @click="playGame"
+              :disabled="isRolling || betAmount > (props.balance || 0)"
+              class="cyber-button-start w-full"
+              :class="{ 'grayscale opacity-50 cursor-not-allowed': isRolling || betAmount > (props.balance || 0) }"
+          >
+            {{ isRolling ? 'ROLLING...' : 'ROLL DICE' }}
+          </button>
+          <div v-if="betAmount > (props.balance || 0)" class="text-red-500 font-bold uppercase tracking-wider text-sm animate-pulse">
+            Insufficient Funds!
           </div>
+        </div>
 
         </div>
 
@@ -198,31 +221,31 @@ const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 const rangeSize = computed(() => Math.abs(max.value - min.value))
 const winChance = computed(() => rangeSize.value)
 
-// Estymacja mnożnika (Taka sama logika jak w poprawionym backendzie)
 const estimatedMultiplier = computed(() => {
   if (rangeSize.value === 0) return 0
   const houseEdge = 0.98
   return ((100 / rangeSize.value) * houseEdge).toFixed(2)
 })
 
-// Watchers dla synchronizacji suwaków
-watch(max, (newMax) => {
-  // Gdy max zmniejsza się poniżej min, dostosuj min
-  if (newMax < min.value) {
-    min.value = newMax
+// Walidacja inputa
+function validateInput(e) {
+  const target = e.target;
+  const value = parseFloat(target.value);
+  if (value < 0) {
+    betAmount.value = 0;
   }
+}
+
+// Watchers
+watch(max, (newMax) => {
+  if (newMax < min.value) min.value = newMax
 })
 
 watch(min, (newMin) => {
-  // Gdy min zwiększa się powyżej max, dostosuj max
-  if (newMin > max.value) {
-    max.value = newMin
-  }
+  if (newMin > max.value) max.value = newMin
 })
 
-// Funkcja confetti przy wygranej w sliderze
 function fireSliderConfetti() {
-  // Neonowe konfetti dla wygranej w sliderze
   confetti({
     particleCount: 150,
     spread: 60,
@@ -230,18 +253,6 @@ function fireSliderConfetti() {
     colors: ['#00f6ff', '#b84ff6', '#00d4ff', '#a855f7', '#3b82f6']
   })
 
-  // Dodatkowy burst z lewej strony
-  setTimeout(() => {
-    confetti({
-      particleCount: 60,
-      angle: 60,
-      spread: 45,
-      origin: { x: 0.1, y: 0.7 },
-      colors: ['#00f6ff', '#b84ff6', '#00d4ff']
-    })
-  }, 250)
-
-  // Dodatkowy burst z prawej strony
   setTimeout(() => {
     confetti({
       particleCount: 60,
@@ -250,19 +261,26 @@ function fireSliderConfetti() {
       origin: { x: 0.9, y: 0.7 },
       colors: ['#b84ff6', '#a855f7', '#3b82f6']
     })
-  }, 500)
+  }, 250)
 }
 
 // Logic
 async function playGame() {
   if (isRolling.value) return
-  if (betAmount.value > (props.balance || 0)) return
+  if (betAmount.value <= 0 || isNaN(betAmount.value)) {
+    alert("Please enter a valid bet amount!");
+    return;
+  }
+  if (betAmount.value > (props.balance || 0)) {
+    alert("Insufficient funds!");
+    return;
+  }
 
   isRolling.value = true
   lastResult.value = ''
   isWin.value = false
 
-  // Efekt "szukania" wyniku przed zatrzymaniem
+  // Animacja losowania przed otrzymaniem wyniku
   const interval = setInterval(() => {
     resultPosition.value = Math.random() * 100
   }, 50)
@@ -271,18 +289,11 @@ async function playGame() {
     let winningNumber, winAmount
 
     if (props.isTestMode) {
-      // === TRYB TESTOWY - SYMULACJA ===
-      // Symulacja opóźnienia serwera
       await new Promise(resolve => setTimeout(resolve, 800))
-
-      // Losowa liczba z zakresu 0-100
       winningNumber = Math.floor(Math.random() * 101)
-
-      // Sprawdź czy trafił w zakres
       const isInRange = winningNumber >= min.value && winningNumber <= max.value
 
       if (isInRange) {
-        // Oblicz wygraną jak w backendzie
         const houseEdge = 0.98
         const multiplier = (100 / rangeSize.value) * houseEdge
         winAmount = betAmount.value * multiplier
@@ -290,7 +301,6 @@ async function playGame() {
         winAmount = 0
       }
     } else {
-      // === TRYB PRODUKCYJNY - API ===
       const res = await fetch(`${API}/api/games/play-slider`, {
         method: 'POST',
         headers: {
@@ -305,26 +315,22 @@ async function playGame() {
       })
 
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.error || 'Game Error')
 
       winningNumber = data.num
       winAmount = data.winAmount
     }
 
-    // Zatrzymaj losową animację
     clearInterval(interval)
 
-    // Animacja do docelowej liczby
+    // Ustawienie ostatecznego wyniku - CSS cubic-bezier zrobi płynny "zjazd"
     resultPosition.value = winningNumber
 
-    // Opóźnienie na pokazanie wyniku
+    // Czekamy na koniec animacji (1000ms = duration w CSS)
     setTimeout(async () => {
-      // Odśwież balans
       if (!props.isTestMode && auth.fetchBalance) {
         await auth.fetchBalance()
       } else if (props.isTestMode) {
-        // W trybie testowym emituj zmianę balansu
         const gain = winAmount > 0 ? winAmount - betAmount.value : -betAmount.value
         emit('balanceChange', gain)
       }
@@ -332,18 +338,14 @@ async function playGame() {
       if (winAmount > 0) {
         isWin.value = true
         lastResult.value = `HIT! ${winningNumber} is in range! WON $${winAmount.toFixed(2)}`
-
-        // Confetti przy wygranej w sliderze! 🎉
-        setTimeout(() => {
-          fireSliderConfetti();
-        }, 200);
+        setTimeout(() => { fireSliderConfetti(); }, 200);
       } else {
         isWin.value = false
         lastResult.value = `MISS. ${winningNumber} is outside range.`
       }
 
       isRolling.value = false
-    }, 500)
+    }, 1000) // Czas zgrany z animacją CSS
 
   } catch (error) {
     clearInterval(interval)
@@ -351,12 +353,6 @@ async function playGame() {
     lastResult.value = props.isTestMode ? 'Test mode error' : 'Error connecting to server'
     isRolling.value = false
   }
-}
-
-function resetGame() {
-  lastResult.value = ''
-  isWin.value = false
-  resultPosition.value = 50
 }
 </script>
 
@@ -380,7 +376,7 @@ function resetGame() {
   width: 20px;
   height: 20px;
   background: #00f6ff;
-  border-radius: 2px;
+  border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 0 10px #00f6ff;
   border: 2px solid white;

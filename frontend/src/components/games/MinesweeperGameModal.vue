@@ -27,15 +27,32 @@
         <div v-if="!gameStarted" class="flex flex-col gap-8 animate-in fade-in zoom-in duration-300">
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
             <div class="setting-group">
-              <label class="setting-label"><span class="material-symbols-outlined text-sm">payments</span> Bet Amount:</label>
-              <div class="select-wrapper neon-border-blue">
-                <select v-model="betAmount" class="setting-select">
-                  <option :value="10">$10</option>
-                  <option :value="25">$25</option>
-                  <option :value="50">$50</option>
-                  <option :value="100">$100</option>
-                </select>
+              <label class="setting-label">
+                <span class="material-symbols-outlined text-sm">payments</span> Bet Amount:
+              </label>
+              <div class="relative group">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-mono">$</span>
+
+                <input
+                    v-model.number="betAmount"
+                    type="number"
+                    min="0.01"
+                    :max="props.balance"
+                    :disabled="gameStarted || isProcessing"
+                    class="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-8 pr-16 text-white font-bold font-mono outline-none focus:border-[#00f6ff] focus:shadow-[0_0_15px_rgba(0,246,255,0.2)] transition-all placeholder-white/20"
+                    placeholder="0.00"
+                    @input="validateInput"
+                >
+
+                <button
+                    @click="betAmount = Math.floor(props.balance || 0)"
+                    :disabled="gameStarted || isProcessing"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-yellow-400 uppercase transition-colors"
+                >
+                  MAX
+                </button>
               </div>
             </div>
 
@@ -221,7 +238,6 @@ const API = import.meta.env.VITE_API_URL || ''
 
 // Funkcja confetti przy wygranej w minesweeper
 function fireMinesweeperConfetti() {
-  // Konfetti w kolorach związanych z kopalnią i diamentami
   confetti({
     particleCount: 100,
     spread: 60,
@@ -229,7 +245,6 @@ function fireMinesweeperConfetti() {
     colors: ['#00f6ff', '#ffd700', '#c0c0c0', '#87ceeb', '#98fb98', '#dda0dd']
   })
 
-  // Dodatkowy burst z lewej strony
   setTimeout(() => {
     confetti({
       particleCount: 50,
@@ -240,7 +255,6 @@ function fireMinesweeperConfetti() {
     })
   }, 200)
 
-  // Dodatkowy burst z prawej strony
   setTimeout(() => {
     confetti({
       particleCount: 50,
@@ -269,14 +283,13 @@ const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 const bombOptions = computed(() => {
   const maxBombs = (gridSize.value * gridSize.value) - 1
   const options = []
-  // Ograniczamy wybór bomb dla sensownej gry
   for (let i = 1; i <= Math.min(maxBombs, 24); i++) options.push(i)
   return options
 })
 
 const gridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${gridSize.value}, 1fr)`,
-  gap: '10px' // Stały odstęp
+  gap: '10px'
 }))
 
 // === HELPERS ===
@@ -284,8 +297,8 @@ function parseMapString(mapStr) {
   if (!mapStr) return []
   return mapStr.split('').map(char => {
     if (char === '?') return {revealed: false, isBomb: false}
-    if (char === '.') return {revealed: true, isBomb: true} // Tylko przy przegranej
-    return {revealed: true, isBomb: false} // Cyfra = Bezpieczne
+    if (char === '.') return {revealed: true, isBomb: true}
+    return {revealed: true, isBomb: false}
   })
 }
 
@@ -300,13 +313,31 @@ function getCellClasses(cell) {
     return `${base} bg-red-900/20 border-red-500/50 shadow-[inset_0_0_20px_rgba(239,68,68,0.4)]`
   }
 
-  // Safe cell (Diamond)
   return `${base} bg-cyan-900/10 border-cyan-500/50 shadow-[inset_0_0_20px_rgba(6,182,212,0.2)]`
+}
+
+// === WALIDACJA INPUTA ===
+function validateInput(e) {
+  const target = e.target;
+  const value = parseFloat(target.value);
+  if (value < 0) {
+    betAmount.value = 0;
+  }
 }
 
 // === LOGIC ===
 async function startGame() {
-  if (betAmount.value > (props.balance || 0)) return
+  // NOWA WALIDACJA
+  if (betAmount.value <= 0 || isNaN(betAmount.value)) {
+    alert("Please enter a valid bet amount!");
+    return;
+  }
+
+  if (betAmount.value > (props.balance || 0)) {
+    alert("Insufficient funds!");
+    return;
+  }
+
   isProcessing.value = true
   lastResult.value = ''
 
@@ -345,7 +376,6 @@ async function revealCell(index) {
     })
     const data = await res.json()
 
-    // Zawsze aktualizujemy mapę
     cells.value = parseMapString(data.map)
 
     if (data.message === 'Game lost.') {
@@ -380,7 +410,6 @@ async function cashOut() {
     const winAmount = (betAmount.value * currentMultiplier.value).toFixed(2)
     lastResult.value = `💰 WON $${winAmount}`
 
-    // Confetti przy wygranej w minesweeper! 🎉
     setTimeout(() => {
       fireMinesweeperConfetti();
     }, 300);

@@ -29,16 +29,31 @@
         <div class="flex flex-col gap-8">
 
           <div class="grid grid-cols-2 gap-4 items-end">
-            <div class="setting-group">
-              <label class="setting-label"><span class="material-symbols-outlined text-sm">payments</span> Bet Amount:</label>
-              <div class="select-wrapper neon-border-blue">
-                <select v-model="betAmount" class="setting-select" :disabled="isFlipping">
-                  <option :value="5">$5</option>
-                  <option :value="10">$10</option>
-                  <option :value="25">$25</option>
-                  <option :value="50">$50</option>
-                  <option :value="100">$100</option>
-                </select>
+            <div class="setting-group w-full">
+              <label class="setting-label">
+                <span class="material-symbols-outlined text-sm">payments</span> Bet Amount:
+              </label>
+              <div class="relative group">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-mono">$</span>
+
+                <input
+                    v-model.number="betAmount"
+                    type="number"
+                    min="0.01"
+                    :max="props.balance"
+                    :disabled="isFlipping"
+                    class="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-8 pr-16 text-white font-bold font-mono outline-none focus:border-[#00f6ff] focus:shadow-[0_0_15px_rgba(0,246,255,0.2)] transition-all placeholder-white/20"
+                    placeholder="0.00"
+                    @input="validateInput"
+                >
+
+                <button
+                    @click="betAmount = Math.floor(props.balance || 0)"
+                    :disabled="isFlipping"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-yellow-400 uppercase transition-colors"
+                >
+                  MAX
+                </button>
               </div>
             </div>
 
@@ -140,7 +155,7 @@
                 </div>
                 <div>
                   <h4 class="font-bold text-white mb-1">1. Place Your Bet</h4>
-                  <p class="text-sm">Select your wager amount from the dropdown menu.</p>
+                  <p class="text-sm">Enter your custom wager amount.</p>
                 </div>
               </div>
 
@@ -197,6 +212,15 @@ const coinResult = ref<'heads'|'tails'|null>(null)
 
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
+// --- WALIDACJA INPUTA ---
+function validateInput(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const value = parseFloat(target.value);
+  if (value < 0) {
+    betAmount.value = 0;
+  }
+}
+
 // Funkcja confetti przy wygranej
 function fireConfetti() {
   confetti({
@@ -230,8 +254,14 @@ function fireConfetti() {
 async function flipCoin() {
   if (isFlipping.value) return
 
+  // WALIDACJA PRZED GRĄ
+  if (betAmount.value <= 0 || isNaN(betAmount.value)) {
+    alert("Please enter a valid bet amount!")
+    return
+  }
+
   if (betAmount.value > (props.balance || 0)) {
-    alert("Niewystarczające środki!")
+    alert("Insufficient funds!")
     return
   }
 
@@ -286,17 +316,20 @@ async function flipCoin() {
     const ANIM_DURATION = 2500;
     const coinElement = document.querySelector('.coin');
     if (coinElement) {
+      // @ts-ignore
       if (finalSide === 'heads') {
+        // @ts-ignore
         coinElement.style.setProperty('--final-rotation', '1440deg'); // 4 obroty (HEADS)
       } else {
+        // @ts-ignore
         coinElement.style.setProperty('--final-rotation', '1620deg'); // 4.5 obrotu (TAILS)
       }
     }
 
-    // POPRAWKA 2: Zakończenie animacji i odblokowanie przycisku
+    // Zakończenie animacji i odblokowanie przycisku
     setTimeout(async () => {
       coinResult.value = finalSide;
-      isFlipping.value = false; // <--- ODBLOKOWANIE PRZYCISKU NATYCHMIAST
+      isFlipping.value = false;
 
       if (isWin) {
         resultWon.value = true;
@@ -307,7 +340,7 @@ async function flipCoin() {
         resultMessage.value = `DEFEAT! IT WAS ${finalSide.toUpperCase()}.`;
       }
 
-      // Aktualizacja balansu w tle (nie blokuje interfejsu)
+      // Aktualizacja balansu
       if (!props.isTestMode) {
         auth.fetchBalance();
       } else if (props.isTestMode) {

@@ -115,10 +115,11 @@
         </div>
 
         <div v-else-if="isProcessing" class="flex flex-col items-center justify-center py-10 space-y-6">
-          <div class="relative w-24 h-24">
+          <div class="relative w-24 h-24 flex items-center justify-center">
             <div class="absolute inset-0 rounded-full border-4 border-white/10"></div>
             <div class="absolute inset-0 rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
-            <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl text-white/50 animate-pulse">lock</span>
+
+            <span class="material-symbols-outlined text-3xl text-white/50 animate-pulse leading-none relative z-10">lock</span>
           </div>
           <div class="text-center">
             <h3 class="text-xl font-bold text-white mb-1">Processing Payment...</h3>
@@ -128,7 +129,7 @@
 
         <div v-else-if="isSuccess" class="flex flex-col items-center justify-center py-10 space-y-6 animate-in zoom-in duration-300">
           <div class="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center border-2 border-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
-            <span class="material-symbols-outlined text-5xl text-green-500">check</span>
+            <span class="material-symbols-outlined text-5xl text-green-500 leading-none">check</span>
           </div>
           <div class="text-center">
             <h3 class="text-2xl font-black text-white mb-1">Payment Successful!</h3>

@@ -22,15 +22,32 @@
         <div class="w-full flex flex-col items-center gap-8">
 
           <div class="grid grid-cols-2 gap-4 items-end w-full max-w-md">
-            <div class="setting-group">
-              <label class="setting-label"><span class="material-symbols-outlined text-sm">payments</span> Bet Amount:</label>
-              <div class="select-wrapper neon-border-blue">
-                <select v-model="betAmount" class="setting-select" :disabled="isSpinning">
-                  <option :value="10">$10</option>
-                  <option :value="25">$25</option>
-                  <option :value="50">$50</option>
-                  <option :value="100">$100</option>
-                </select>
+
+            <div class="setting-group w-full">
+              <label class="setting-label">
+                <span class="material-symbols-outlined text-sm">payments</span> Bet Amount:
+              </label>
+              <div class="relative group">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-mono">$</span>
+
+                <input
+                    v-model.number="betAmount"
+                    type="number"
+                    min="0.01"
+                    :max="props.balance"
+                    :disabled="isSpinning"
+                    class="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-8 pr-16 text-white font-bold font-mono outline-none focus:border-[#b84ff6] focus:shadow-[0_0_15px_rgba(184,79,246,0.2)] transition-all placeholder-white/20"
+                    placeholder="0.00"
+                    @input="validateInput"
+                >
+
+                <button
+                    @click="betAmount = Math.floor(props.balance || 0)"
+                    :disabled="isSpinning"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-[#b84ff6] uppercase transition-colors"
+                >
+                  MAX
+                </button>
               </div>
             </div>
 
@@ -102,7 +119,7 @@
             <summary class="flex cursor-pointer items-center justify-between p-4 font-bold text-white hover:bg-white/5 select-none transition-colors">
               <div class="flex items-center gap-2 text-lg uppercase tracking-wider">
                 <span class="material-symbols-outlined text-primary">info</span>
-                How to Play & Payouts
+                Rules & Payouts (Boosted Odds 🔥)
               </div>
               <span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
             </summary>
@@ -114,57 +131,76 @@
                   <div class="bg-primary/20 p-2 rounded-lg text-primary"><span class="material-symbols-outlined">payments</span></div>
                   <div>
                     <h4 class="font-bold text-white mb-1">1. Place Bet</h4>
-                    <p class="text-sm text-gray-400">Select your wager amount using the dropdown menu.</p>
+                    <p class="text-sm text-gray-400">Select your wager amount ($10 - $100+). Higher bets mean bigger potential wins.</p>
                   </div>
                 </div>
                 <div class="flex gap-4 items-start">
                   <div class="bg-green-400/20 p-2 rounded-lg text-green-400"><span class="material-symbols-outlined">casino</span></div>
                   <div>
                     <h4 class="font-bold text-white mb-1">2. Spin to Win</h4>
-                    <p class="text-sm text-gray-400">Match 3 symbols on the payline to win multiplied rewards.</p>
+                    <p class="text-sm text-gray-400">
+                      Match <strong class="text-white">2 or 3 symbols</strong> on the line!
+                      <br>
+                      <span class="text-green-400 font-bold text-xs uppercase tracking-wider">⚡ High Win Rate Active</span>
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 class="font-bold text-white mb-3 text-center uppercase tracking-widest text-xs border-b border-white/10 pb-2">Payout Table (3 Matches)</h4>
+                <h4 class="font-bold text-white mb-1 text-center uppercase tracking-widest text-xs border-b border-white/10 pb-2">
+                  Payout Multipliers (Max Win)
+                </h4>
+                <p class="text-center text-[10px] text-gray-500 mb-4 uppercase tracking-wider">
+                  3 Matches pays Max • 2 Matches pays partial
+                </p>
+
                 <div class="grid grid-cols-3 gap-2 text-sm text-center">
 
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-purple-500/30 flex flex-col items-center shadow-[0_0_10px_rgba(168,85,247,0.1)]">
                     <span class="text-2xl mb-1">7️⃣</span>
-                    <span class="font-bold text-purple-400">x50</span>
+                    <div class="flex flex-col">
+                      <span class="font-bold text-purple-400">x50</span>
+                      <span class="text-[10px] text-gray-500">2x: x10</span>
+                    </div>
                   </div>
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-yellow-500/30 flex flex-col items-center shadow-[0_0_10px_rgba(234,179,8,0.1)]">
                     <span class="text-2xl mb-1">⭐</span>
-                    <span class="font-bold text-yellow-400">x15</span>
+                    <div class="flex flex-col">
+                      <span class="font-bold text-yellow-400">x15</span>
+                      <span class="text-[10px] text-gray-500">2x: x5</span>
+                    </div>
                   </div>
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-cyan-500/30 flex flex-col items-center shadow-[0_0_10px_rgba(6,182,212,0.1)]">
                     <span class="text-2xl mb-1">🔔</span>
-                    <span class="font-bold text-cyan-400">x10</span>
+                    <div class="flex flex-col">
+                      <span class="font-bold text-cyan-400">x10</span>
+                      <span class="text-[10px] text-gray-500">2x: x3</span>
+                    </div>
                   </div>
 
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center opacity-80">
                     <span class="text-2xl mb-1">🍉</span>
                     <span class="font-bold text-white">x8</span>
                   </div>
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center opacity-80">
                     <span class="text-2xl mb-1">🫐</span>
                     <span class="font-bold text-white">x5</span>
                   </div>
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center opacity-80">
                     <span class="text-2xl mb-1">🍇</span>
                     <span class="font-bold text-white">x4</span>
                   </div>
 
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center opacity-60">
                     <span class="text-2xl mb-1">🍊</span>
                     <span class="font-bold text-white">x3</span>
                   </div>
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center opacity-60">
                     <span class="text-2xl mb-1">🍋</span>
                     <span class="font-bold text-white">x2</span>
                   </div>
-                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center">
+                  <div class="bg-white/5 p-2 rounded border border-white/5 flex flex-col items-center opacity-60">
                     <span class="text-2xl mb-1">🍒</span>
                     <span class="font-bold text-white">x2</span>
                   </div>
@@ -270,6 +306,15 @@ const initReels = () => {
   }
 }
 
+// --- WALIDACJA INPUTA ---
+function validateInput(e) {
+  const target = e.target;
+  const value = parseFloat(target.value);
+  if (value < 0) {
+    betAmount.value = 0;
+  }
+}
+
 // --- LOGIKA ANIMACJI ---
 const spinReel = async (reelIndex, targetSymbol) => {
   const reelRef = [reel1.value, reel2.value, reel3.value][reelIndex]
@@ -298,16 +343,11 @@ const spinReel = async (reelIndex, targetSymbol) => {
 
 // --- FUNKCJA SZUKAJĄCA TOKENA ---
 const findToken = () => {
-  // Jeśli używasz Pinia (useAuthStore), lepiej pobrać stamtąd:
   if (auth.token) return auth.token;
-
-  // Fallback do localStorage
   let t = localStorage.getItem('auth_token');
   if (t) return t.replace(/^"|"$/g, '');
-
   t = localStorage.getItem('token');
   if (t) return t;
-
   try {
     const userStr = localStorage.getItem('user') || localStorage.getItem('auth_user');
     if (userStr) {
@@ -317,13 +357,23 @@ const findToken = () => {
   } catch (e) {
     console.warn("Błąd parsowania User JSON");
   }
-
   return null;
 }
 
 // --- SPIN ---
 const spin = async () => {
-  if (isSpinning.value || props.balance < betAmount.value) return
+  if (isSpinning.value) return
+
+  // WALIDACJA
+  if (betAmount.value <= 0 || isNaN(betAmount.value)) {
+    alert("Please enter a valid bet amount!");
+    return;
+  }
+
+  if (betAmount.value > (props.balance || 0)) {
+    alert("Insufficient funds!");
+    return;
+  }
 
   isSpinning.value = true
   lastResult.value = ''
@@ -361,15 +411,11 @@ const spin = async () => {
 
     if (data.winAmount > data.bet) {
       lastResult.value = `🎉 BIG WIN! WYGRANA: $${data.winAmount}!`
-
-      // Confetti dla dużej wygranej! 🎉
       setTimeout(() => {
         fireSlotConfetti();
       }, 500);
     } else if (data.winAmount > 0) {
       lastResult.value = `WYGRANA: $${data.winAmount}`
-
-      // Confetti dla zwykłej wygranej! 🎉
       setTimeout(() => {
         fireSlotConfetti();
       }, 500);
