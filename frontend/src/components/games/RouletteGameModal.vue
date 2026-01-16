@@ -52,17 +52,35 @@
           <div class="flex flex-col gap-6 w-full max-w-md">
 
             <div class="grid grid-cols-2 gap-4 items-end">
+
               <div class="setting-group">
-                <label class="setting-label"><span class="material-symbols-outlined text-sm">payments</span> Bet Amount:</label>
-                <div class="select-wrapper neon-border-blue">
-                  <select v-model="betAmount" class="setting-select" :disabled="isSpinning">
-                    <option :value="10">$10</option>
-                    <option :value="25">$25</option>
-                    <option :value="50">$50</option>
-                    <option :value="100">$100</option>
-                  </select>
+                <label class="setting-label">
+                  <span class="material-symbols-outlined text-sm">payments</span> Bet Amount:
+                </label>
+                <div class="relative group">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-mono">$</span>
+
+                  <input
+                      v-model.number="betAmount"
+                      type="number"
+                      min="0.01"
+                      :max="props.balance"
+                      :disabled="isSpinning"
+                      class="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-8 pr-16 text-white font-bold font-mono outline-none focus:border-[#00f6ff] focus:shadow-[0_0_15px_rgba(0,246,255,0.2)] transition-all placeholder-white/20"
+                      placeholder="0.00"
+                      @input="validateInput"
+                  >
+
+                  <button
+                      @click="betAmount = Math.floor(props.balance || 0)"
+                      :disabled="isSpinning"
+                      class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-[#00f6ff] uppercase transition-colors"
+                  >
+                    MAX
+                  </button>
                 </div>
               </div>
+
               <div class="digital-readout bg-black/40 p-3 rounded-xl border border-white/10 h-[58px] flex justify-center">
                 <span class="label">BALANCE</span>
                 <span class="value text-green-400">${{ displayBalance }}</span>
@@ -246,6 +264,15 @@ const isValidBet = computed(() => {
   return isSelectionMade && hasEnoughMoney
 })
 
+// --- WALIDACJA INPUTA ---
+function validateInput(e) {
+  const target = e.target;
+  const value = parseFloat(target.value);
+  if (value < 0) {
+    betAmount.value = 0;
+  }
+}
+
 // --- CONFIG ---
 const segmentCount = 37
 const segmentAngle = 360 / segmentCount
@@ -332,7 +359,23 @@ function selectGreen() {
 
 // --- GŁÓWNA FUNKCJA SPIN ---
 async function spin() {
-  if (isSpinning.value || !isValidBet.value) return
+  if (isSpinning.value) return
+
+  // WALIDACJA INPUTA
+  if (betAmount.value <= 0 || isNaN(betAmount.value)) {
+    alert("Please enter a valid bet amount!");
+    return;
+  }
+
+  if (betAmount.value > (props.balance || 0)) {
+    alert("Insufficient funds!");
+    return;
+  }
+
+  if (!isValidBet.value) {
+    alert("Please select a bet (Color or Number)!");
+    return;
+  }
 
   isSpinning.value = true
   pinJolt.value = true

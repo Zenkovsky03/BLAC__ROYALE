@@ -6,15 +6,16 @@ import {GameType} from "@prisma/client";
 const game = GameType.SLOTS
 
 const SYMBOLS = {
-    CHERRY: { id: 1, weight: 100, payout: { 3: 2 } },
-    LEMON: { id: 2, weight: 100, payout: { 3: 2 } },
-    ORANGE: { id: 3, weight: 90, payout: { 3: 3 } },
-    PLUM: { id: 4, weight: 80, payout: { 3: 4 } },
-    GRAPE: { id: 5, weight: 70, payout: { 3: 5 } },
-    WATERMELON: { id: 6, weight: 60, payout: { 3: 8 } },
-    BELL: { id: 7, weight: 40, payout: { 3: 10 } },
-    STAR: { id: 8, weight: 20, payout: { 3: 15 } },
-    SEVEN: { id: 9, weight: 10, payout: { 3: 50 } }
+    // Dodałem wypłatę za 2 symbole (klucz "2" w payout)
+    CHERRY:     { id: 1, weight: 50, payout: { 3: 2, 2: 0.5 } }, // 0.5 oznacza zwrot połowy stawki za 2 wiśnie
+    LEMON:      { id: 2, weight: 50, payout: { 3: 2, 2: 0.5 } },
+    ORANGE:     { id: 3, weight: 45, payout: { 3: 3, 2: 1 } },   // Zwrot stawki za 2 pomarańcze
+    PLUM:       { id: 4, weight: 40, payout: { 3: 4, 2: 1 } },
+    GRAPE:      { id: 5, weight: 35, payout: { 3: 5, 2: 2 } },
+    WATERMELON: { id: 6, weight: 30, payout: { 3: 8, 2: 2 } },
+    BELL:       { id: 7, weight: 25, payout: { 3: 10, 2: 3 } },
+    STAR:       { id: 8, weight: 20, payout: { 3: 15, 2: 5 } },
+    SEVEN:      { id: 9, weight: 15, payout: { 3: 50, 2: 10 } }
 };
 
 type SymbolKey = keyof typeof SYMBOLS;

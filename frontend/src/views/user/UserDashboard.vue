@@ -88,27 +88,8 @@
               <p class="text-sm text-white/70">Enhance your account security by updating your password.</p>
             </div>
 
-            <div
-                class="group flex cursor-pointer flex-col gap-3 rounded-lg border border-white/10 bg-black/20 p-4 transition-all duration-300 hover:border-secondary hover:shadow-glow-secondary"
-                @click="handleNotificationsClick"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-secondary">notifications</span>
-                <h3 class="font-bold text-white">Notifications</h3>
-              </div>
-              <p class="text-sm text-white/70">Manage your communication preferences and alerts.</p>
-            </div>
 
-            <div
-                class="group flex cursor-pointer flex-col gap-3 rounded-lg border border-white/10 bg-black/20 p-4 transition-all duration-300 hover:border-secondary hover:shadow-glow-secondary"
-                @click="handleSecurityClick"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-secondary">security</span>
-                <h3 class="font-bold text-white">Security Settings</h3>
-              </div>
-              <p class="text-sm text-white/70">View and manage two-factor authentication and login history.</p>
-            </div>
+
 
           </div>
         </div>

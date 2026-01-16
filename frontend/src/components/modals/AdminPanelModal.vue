@@ -17,7 +17,7 @@
             <h1 class="text-4xl font-black uppercase tracking-wider text-white neon-text-purple">
               Admin Control
             </h1>
-            <p class="text-gray-400 text-sm tracking-widest uppercase">User Management System v3.1</p>
+            <p class="text-gray-400 text-sm tracking-widest uppercase">User Management System v3.5</p>
           </div>
         </div>
 
@@ -33,19 +33,27 @@
             >
           </div>
 
+          <button
+              @click="goHome"
+              class="p-3 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 transition-colors border border-transparent hover:border-blue-500/50"
+              title="Go to Home"
+          >
+            <span class="material-symbols-outlined">home</span>
+          </button>
+
           <button @click="$emit('close')" class="p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors border border-transparent hover:border-red-500/50">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
       </div>
 
-      <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative min-h-[400px]">
+      <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative min-h-[400px] flex flex-col">
 
         <div v-if="loading && !users.length" class="absolute inset-0 z-20 flex items-center justify-center bg-black/50">
           <span class="material-symbols-outlined text-6xl text-[#b84ff6] animate-spin">sync</span>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto flex-1">
           <table class="w-full text-left border-collapse">
             <thead>
             <tr class="border-b border-white/10 bg-white/5 text-xs uppercase tracking-widest text-gray-400">
@@ -83,12 +91,35 @@
             </tr>
             <tr v-if="!loading && users.length === 0">
               <td colspan="4" class="p-10 text-center text-gray-500">
-                No users found or unauthorized access (401).
+                No users found matching query.
               </td>
             </tr>
             </tbody>
           </table>
         </div>
+
+        <div class="border-t border-white/10 bg-white/5 p-4 flex items-center justify-between">
+            <span class="text-xs text-gray-400 font-mono">
+              Page {{ pagination.page }} of {{ pagination.totalPages }} (Total: {{ pagination.total }})
+            </span>
+          <div class="flex gap-2">
+            <button
+                @click="changePage(pagination.page - 1)"
+                :disabled="pagination.page <= 1"
+                class="px-4 py-2 rounded-lg bg-black/40 hover:bg-white/10 border border-white/10 text-xs font-bold text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <button
+                @click="changePage(pagination.page + 1)"
+                :disabled="pagination.page >= pagination.totalPages"
+                class="px-4 py-2 rounded-lg bg-black/40 hover:bg-white/10 border border-white/10 text-xs font-bold text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -148,7 +179,7 @@
               </div>
 
               <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                <h4 class="text-white font-bold mb-4">Modify Balance (Requires Backend Logic)</h4>
+                <h4 class="text-white font-bold mb-4">Modify Balance (Backend Logic)</h4>
                 <div class="flex gap-2">
                   <input v-model.number="walletAmount" type="number" placeholder="Amount" class="flex-1 bg-black/40 border border-white/20 rounded p-3 text-white text-xl font-mono outline-none focus:border-[#00f6ff]">
                   <button @click="mockWalletAction('ADD')" class="px-4 rounded bg-green-600 text-white font-bold hover:bg-green-500">Add</button>
@@ -161,11 +192,20 @@
               <div v-if="selectedUser.wallet?.transactions?.length" class="overflow-hidden rounded-lg border border-white/10">
                 <table class="w-full text-left text-sm">
                   <thead class="bg-white/5 text-gray-500">
-                  <tr><th class="p-3">Type</th><th class="p-3">Amount</th><th class="p-3">Date</th></tr>
+                  <tr><th class="p-3">Type / Game</th><th class="p-3">Amount</th><th class="p-3">Date</th></tr>
                   </thead>
                   <tbody class="divide-y divide-white/5">
                   <tr v-for="tx in selectedUser.wallet.transactions" :key="tx.id" class="hover:bg-white/5">
-                    <td class="p-3 font-bold" :class="tx.type === 'WIN' || tx.type === 'DEPOSIT' ? 'text-green-400' : 'text-gray-300'">{{ tx.type }}</td>
+
+                    <td class="p-3">
+                      <div class="font-bold" :class="tx.type === 'WIN' || tx.type === 'DEPOSIT' ? 'text-green-400' : 'text-gray-300'">
+                        {{ tx.type }}
+                      </div>
+                      <div v-if="tx.game" class="text-[10px] text-[#b84ff6] uppercase tracking-wider font-bold">
+                        {{ tx.game }}
+                      </div>
+                    </td>
+
                     <td class="p-3 font-mono" :class="tx.type === 'WIN' || tx.type === 'DEPOSIT' ? 'text-[#00f6ff]' : 'text-red-400'">
                       {{ (tx.type === 'WIN' || tx.type === 'DEPOSIT') ? '+' : '-' }}{{ tx.amount }}$
                     </td>
@@ -198,17 +238,21 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/auth'; // <--- DODANY IMPORT
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router'; // Import Routera
 
-const auth = useAuthStore(); // <--- INICJALIZACJA STORE
-const API_URL = 'http://localhost:8000';
+const auth = useAuthStore();
+const router = useRouter(); // Inicjalizacja Routera
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const emit = defineEmits(['close']);
 
 const users = ref<any[]>([]);
 const loading = ref(false);
 const saving = ref(false);
 const filters = reactive({ search: '', role: '' });
-const pagination = reactive({ page: 4, limit: 5, total: 0, totalPages: 4 });
+
+// Paginacja: Limit 4 na stronę
+const pagination = reactive({ page: 1, limit: 4, total: 0, totalPages: 1 });
 
 const isModalOpen = ref(false);
 const selectedUser = ref<any>(null);
@@ -224,24 +268,24 @@ const editForm = reactive({ name: '', surname: '', role: 'NORMAL' });
 const walletAmount = ref<number | null>(null);
 let timeout: any = null;
 
+// --- FUNKCJA POWROTU DO HOME ---
+const goHome = () => {
+  router.push('/');
+  emit('close');
+};
+
 // --- API ACTIONS ---
 
 // 1. LIST USERS
 const fetchUsers = async (page = 1) => {
   loading.value = true;
   try {
-    // ZMIANA: Pobieramy token ze store, a nie z localStorage 'token' (który może być pusty)
     const token = auth.token;
-
-    if (!token) {
-      console.error("No token found!");
-      // Opcjonalnie przekieruj do logowania
-      return;
-    }
+    if (!token) return;
 
     const params = new URLSearchParams({
       page: page.toString(),
-      limit: pagination.limit.toString(),
+      limit: pagination.limit.toString(), // 4
       search: filters.search,
       role: filters.role
     });
@@ -250,13 +294,15 @@ const fetchUsers = async (page = 1) => {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
+
     if(res.ok) {
       users.value = data.data;
       pagination.totalPages = data.pagination.totalPages;
       pagination.page = data.pagination.page;
+      pagination.total = data.pagination.total || 0;
     } else {
       console.error("Fetch error:", data);
-      if (res.status === 401) alert("Unauthorized: Please log in again.");
+      if (res.status === 401) alert("Unauthorized");
     }
   } catch (e) { console.error(e); }
   finally { loading.value = false; }
@@ -268,7 +314,7 @@ const openManageModal = async (userId: string) => {
   selectedUser.value = null;
   activeTab.value = 'profile';
   try {
-    const token = auth.token; // Zmiana na auth.token
+    const token = auth.token;
     const res = await fetch(`${API_URL}/api/admin/user-details/${userId}`, { headers: { 'Authorization': `Bearer ${token}` } });
     const data = await res.json();
     if(res.ok) {
@@ -284,7 +330,7 @@ const openManageModal = async (userId: string) => {
 const saveUser = async () => {
   saving.value = true;
   try {
-    const token = auth.token; // Zmiana na auth.token
+    const token = auth.token;
     const res = await fetch(`${API_URL}/api/admin/patch-user/${selectedUser.value.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -298,7 +344,7 @@ const saveUser = async () => {
 const deleteUser = async () => {
   if(!confirm("Irreversible action. Delete user?")) return;
   try {
-    const token = auth.token; // Zmiana na auth.token
+    const token = auth.token;
     const res = await fetch(`${API_URL}/api/admin/delete-user/${selectedUser.value.id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -308,8 +354,6 @@ const deleteUser = async () => {
     if(res.ok) {
       closeModal();
       fetchUsers(1);
-    } else {
-      alert('Delete failed. Check console.');
     }
   } catch (e) { console.error(e); }
 };
@@ -320,11 +364,18 @@ const mockWalletAction = (type: string) => {
 };
 
 const closeModal = () => { isModalOpen.value = false; };
-const changePage = (p: number) => { if(p > 0 && p <= pagination.totalPages) fetchUsers(p); };
+
+// OBSŁUGA PAGINACJI
+const changePage = (p: number) => {
+  if(p > 0 && p <= pagination.totalPages) {
+    fetchUsers(p);
+  }
+};
+
 const debounceSearch = () => { clearTimeout(timeout); timeout = setTimeout(() => fetchUsers(1), 500); };
 const formatDate = (d: string) => new Date(d).toLocaleDateString();
 
-onMounted(() => fetchUsers());
+onMounted(() => fetchUsers(1));
 </script>
 
 <style scoped>
