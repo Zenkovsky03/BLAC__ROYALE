@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import { PrismaClient, UserRole, TransactionType } from '@prisma/client';
+import { PrismaClient, UserRole, TransactionType, GameType } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import dotenv from "dotenv";
 
@@ -20,6 +20,12 @@ function randomInt(min: number, max: number): number {
 function randomDecimal(min: number, max: number, decimals: number = 2): number {
     const value = Math.random() * (max - min) + min;
     return Number(value.toFixed(decimals));
+}
+
+// Helper function to get random game type
+function randomGameType(): GameType {
+    const games = [GameType.COINFLIP, GameType.SAPPER, GameType.ROULETTE, GameType.SLIDER, GameType.SLOTS];
+    return games[randomInt(0, games.length - 1)]!;
 }
 
 async function main() {
@@ -277,7 +283,7 @@ async function main() {
 
         if (!wallet) continue;
 
-        // Initial deposit transaction
+        // Initial deposit transaction (no game associated)
         await prisma.transaction.create({
             data: {
                 walletId: wallet.id,
@@ -293,7 +299,7 @@ async function main() {
 
         for (let i = 0; i < numTransactions; i++) {
             const transactionDate = randomDate(oneWeekAgo, now);
-
+            const game = randomGameType();
 
             // More losses than wins for realistic casino odds
             const weights = [0.35, 0.50, 0.15]; // 35% wins, 50% losses, 15% bets
@@ -321,13 +327,14 @@ async function main() {
                     walletId: wallet.id,
                     amount,
                     type,
+                    game,
                     timestamp: transactionDate,
                 },
             });
             totalTransactions++;
         }
 
-        // Add some deposits and withdrawals
+        // Add some deposits and withdrawals (no game associated)
         if (Math.random() > 0.5) {
             await prisma.transaction.create({
                 data: {
@@ -362,60 +369,6 @@ async function main() {
 
     const sapperUsers = createdUsers.slice(0, 5); // First 5 users have active games
     let sapperGames = 0;
-
-    for (const user of sapperUsers) {
-        // Create a game that follows the rules from sapperController
-        const mapSize = randomInt(3, 8);
-        const totalCells = mapSize * mapSize;
-        const maxBombs = totalCells - 1;
-        const bombsCount = randomInt(2, Math.min(maxBombs, Math.floor(totalCells * 0.3)));
-
-        // Generate realistic map using the same logic as controller
-        const mapData = generateSapperMap(mapSize, bombsCount);
-
-        // Create realistic mask with some revealed cells
-        const revealedCells = randomInt(1, Math.floor(totalCells * 0.4));
-        const mask = Array(totalCells).fill('0');
-
-        // Reveal safe cells only
-        let revealed = 0;
-        while (revealed < revealedCells) {
-            const index = randomInt(0, totalCells - 1);
-            if (mask[index] === '0' && mapData[index] !== '.') {
-                mask[index] = '1';
-                revealed++;
-            }
-        }
-
-        const betAmount = randomDecimal(10, 200);
-
-        // Calculate realistic multiplier based on revealed safe cells
-        const totalBombs = mapData.split('').filter(c => c === '.').length;
-        let winMultiplayer = 1;
-
-        // Calculate multiplier for each revealed cell
-        for (let i = 0; i < revealed; i++) {
-            const remainingUnknown = totalCells - i;
-            const remainingSafe = remainingUnknown - totalBombs;
-            const probability = remainingSafe / remainingUnknown;
-            const houseEdge = 0.99;
-            winMultiplayer *= (1 / probability) * houseEdge;
-        }
-
-        await prisma.sapperMap.create({
-            data: {
-                userId: user.id,
-                n: mapSize,
-                map: mapData,
-                mask: mask.join(''),
-                bet: betAmount,
-                winMultiplayer: Number(winMultiplayer.toFixed(4)),
-            },
-        });
-
-        sapperGames++;
-        console.log(`   ✅ Created Sapper game for ${user.username} (${mapSize}x${mapSize}, ${bombsCount} bombs)`);
-    }
 
     console.log(`\n   📊 Total active Sapper games: ${sapperGames}\n`);
 
