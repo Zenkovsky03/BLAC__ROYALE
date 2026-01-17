@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { protect } from '../Middleware/authMiddleware.ts';
-import  { PlayRoulette } from '../Controllers/rouleteController.ts';
-import {balanceCheck} from "../Middleware/balanceMiddleware.ts";
-import {PlayCoinFlip} from "../Controllers/coinflipController.ts";
-import {slotsSpin} from "../Controllers/slotsController.ts";
-import {sliderPlay} from "../Controllers/sliderController.ts";
+import { protect } from '../Middleware/auth.Middleware.ts';
+import  { PlayRoulette } from '../Controllers/roulette.Controller.ts';
+import {balanceCheck} from "../Middleware/balance.Middleware.ts";
+import {PlayCoinFlip} from "../Controllers/coinFlip.Controller.ts";
+import {slotsSpin} from "../Controllers/slots.Controller.ts";
+import {sliderPlay} from "../Controllers/slider.Controller.ts";
 
 const GamesRouter = Router();
 

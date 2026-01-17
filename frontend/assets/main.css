@@ -52,3 +52,7 @@ body {
 .shadow-glow-primary-strong {
     box-shadow: 0 0 25px 8px rgba(249, 0, 255, 0.7), 0 0 10px 3px rgba(249, 0, 255, 0.7) inset;
 }
+
+input[type=number] {
+    -moz-appearance: textfield;
+}

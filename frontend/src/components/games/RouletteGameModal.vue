@@ -52,13 +52,15 @@
           <div class="flex flex-col gap-6 w-full max-w-md">
 
             <div class="grid grid-cols-2 gap-4 items-end">
-
               <div class="setting-group">
                 <label class="setting-label">
                   <span class="material-symbols-outlined text-sm">payments</span> Bet Amount:
                 </label>
-                <div class="relative group">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-mono">$</span>
+                <!-- Set fixed height to match the balance readout -->
+                <div class="relative flex items-center h-[58px]">
+                  <div class="absolute left-4 flex items-center justify-center pointer-events-none">
+                    <span class="text-white/50 font-mono text-lg -translate-y-[1px]">$</span>
+                  </div>
 
                   <input
                       v-model.number="betAmount"
@@ -66,24 +68,26 @@
                       min="0.01"
                       :max="props.balance"
                       :disabled="isSpinning"
-                      class="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-8 pr-16 text-white font-bold font-mono outline-none focus:border-[#00f6ff] focus:shadow-[0_0_15px_rgba(0,246,255,0.2)] transition-all placeholder-white/20"
+                      class="w-full h-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-16 text-white font-bold font-mono outline-none focus:border-[#00f6ff] focus:shadow-[0_0_15px_rgba(0,246,255,0.2)] transition-all placeholder-white/20 appearance-none"
                       placeholder="0.00"
                       @input="validateInput"
                   >
 
-                  <button
-                      @click="betAmount = Math.floor(props.balance || 0)"
-                      :disabled="isSpinning"
-                      class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-[#00f6ff] uppercase transition-colors"
-                  >
-                    MAX
-                  </button>
+                  <div class="absolute right-2 inset-y-0 flex items-center">
+                    <button
+                        @click="betAmount = Math.floor(props.balance || 0)"
+                        :disabled="isSpinning"
+                        class="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-[#00f6ff] uppercase transition-colors"
+                    >
+                      MAX
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div class="digital-readout bg-black/40 p-3 rounded-xl border border-white/10 h-[58px] flex justify-center">
-                <span class="label">BALANCE</span>
-                <span class="value text-green-400">${{ displayBalance }}</span>
+              <div class="digital-readout bg-black/40 px-4 rounded-xl border border-white/10 h-[58px] flex justify-between items-center">
+                <span class="label leading-none font-bold text-xs text-white/40 tracking-wider">BALANCE</span>
+                <span class="value text-green-400 leading-none font-mono text-xl -translate-y-[1px]">${{ displayBalance }}</span>
               </div>
             </div>
 

@@ -87,27 +87,27 @@ backend/
 │   └── seedRich.ts        # Rozszerzone dane testowe
 └── src/
     ├── Controllers/        # Logika biznesowa endpointów
-    │   ├── authController.ts      # Rejestracja, logowanie
-    │   ├── walletController.ts    # Operacje portfela
-    │   ├── coinflipController.ts  # Gra Coinflip
-    │   ├── rouleteController.ts   # Gra Ruletka
-    │   ├── slotsController.ts     # Gra Slots
-    │   ├── sliderController.ts    # Gra Slider
-    │   ├── sapperController.ts    # Gra Saper
-    │   ├── rankingController.ts   # Rankingi graczy
-    │   ├── passwordResetController.ts # Reset haseł
-    │   └── adminController.ts     # Panel administratora
+    │   ├── auth.Controller.ts      # Rejestracja, logowanie
+    │   ├── wallet.Controller.ts    # Operacje portfela
+    │   ├── coinFlip.Controller.ts  # Gra Coinflip
+    │   ├── roulette.Controller.ts   # Gra Ruletka
+    │   ├── slots.Controller.ts     # Gra Slots
+    │   ├── slider.Controller.ts    # Gra Slider
+    │   ├── sapper.Controller.ts    # Gra Saper
+    │   ├── ranking.Controller.ts   # Rankingi graczy
+    │   ├── passwordReset.Controller.ts # Reset haseł
+    │   └── admin.Controller.ts     # Panel administratora
     ├── Middleware/         # Middleware warstwy zabezpieczeń
-    │   ├── authMiddleware.ts      # Weryfikacja JWT tokenów
-    │   ├── adminMiddleware.ts     # Sprawdzanie uprawnień admin
-    │   └── balanceMiddleware.ts   # Walidacja salda przed grą
+    │   ├── auth.Middleware.ts      # Weryfikacja JWT tokenów
+    │   ├── admin.Middleware.ts     # Sprawdzanie uprawnień admin
+    │   └── balance.Middleware.ts   # Walidacja salda przed grą
     ├── Routes/            # Definicje tras API
-    │   ├── userRoutes.ts         # Trasy użytkowników
-    │   ├── walletRoutes.ts       # Trasy portfela
-    │   ├── gamesRoutes.ts        # Trasy gier
-    │   ├── sapperRoutes.ts       # Dedykowane trasy Sapera
-    │   ├── rankingRoutes.ts      # Trasy rankingów
-    │   └── adminRoutes.ts        # Trasy administratora
+    │   ├── user.Routes.ts         # Trasy użytkowników
+    │   ├── wallet.Routes.ts       # Trasy portfela
+    │   ├── games.Routes.ts        # Trasy gier
+    │   ├── sapper.Routes.ts       # Dedykowane trasy Sapera
+    │   ├── ranking.Routes.ts      # Trasy rankingów
+    │   └── admin.Routes.ts        # Trasy administratora
     └── index.ts           # Punkt wejściowy serwera
 ```
 

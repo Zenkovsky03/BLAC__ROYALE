@@ -1,5 +1,5 @@
 import {prisma} from "../../prisma/prismaSingleton.ts";
-import type {AuthRequest} from "./authMiddleware.ts";
+import type {AuthRequest} from "./auth.Middleware.ts";
 
 // Middleware to check admin role
 export const requireAdmin = async (req: AuthRequest, res: any, next: any) => {

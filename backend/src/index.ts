@@ -2,18 +2,18 @@ import express from 'express'
 import path, { dirname } from 'node:path'
 import { fileURLToPath} from "node:url";
 
-import UserRouter from "./Routes/userRoutes.ts";
-import WalletRouter from "./Routes/walletRoutes.ts";
-import GamesRouter from "./Routes/gamesRoutes.ts";
-import SapperRouter from "./Routes/sapperRoutes.ts";
+import UserRouter from "./Routes/user.Routes.ts";
+import WalletRouter from "./Routes/wallet.Routes.ts";
+import GamesRouter from "./Routes/games.Routes.ts";
+import SapperRouter from "./Routes/sapper.Routes.ts";
 
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
 import dotenv from 'dotenv';
-import RankingRoutes from "./Routes/rankingRoutes.ts";
+import RankingRoutes from "./Routes/ranking.Routes.ts";
 import cors from 'cors';
 import nodemailer from "nodemailer";
-import AdminRouter from "./Routes/adminRoutes.ts";
+import AdminRouter from "./Routes/admin.Routes.ts";
 dotenv.config({ path: './.env'});
 
 const app = express()

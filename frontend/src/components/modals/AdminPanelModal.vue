@@ -41,9 +41,7 @@
             <span class="material-symbols-outlined">home</span>
           </button>
 
-          <button @click="$emit('close')" class="p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors border border-transparent hover:border-red-500/50">
-            <span class="material-symbols-outlined">close</span>
-          </button>
+
         </div>
       </div>
 
@@ -383,3 +381,13 @@ onMounted(() => fetchUsers(1));
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 .neon-text-purple { text-shadow: 0 0 10px rgba(184, 79, 246, 0.7); }
 </style>
+
+<!--
+
+Deleted that cuz it done nothing
+
+<button @click="$emit('close')" class="p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors border border-transparent hover:border-red-500/50">
+<span class="material-symbols-outlined">close</span>
+</button>
+
+-->

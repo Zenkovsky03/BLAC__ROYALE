@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { protect } from '../Middleware/authMiddleware.ts';
-import { requireAdmin } from "../Middleware/adminMiddleware.ts";
-import {deleteUserAdmin, listUsers, patchUser, userDetails} from "../Controllers/adminController.ts";
+import { protect } from '../Middleware/auth.Middleware.ts';
+import { requireAdmin } from "../Middleware/admin.Middleware.ts";
+import {deleteUserAdmin, listUsers, patchUser, userDetails} from "../Controllers/admin.Controller.ts";
 
 const AdminRouter = Router();
 

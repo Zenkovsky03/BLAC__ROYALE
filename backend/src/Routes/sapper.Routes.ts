@@ -1,7 +1,7 @@
 import {Router} from 'express';
-import {protect} from '../Middleware/authMiddleware.ts';
-import {startSapper, playSapper, resignSapper} from "../Controllers/sapperController.ts";
-import {balanceCheck} from "../Middleware/balanceMiddleware.ts";
+import {protect} from '../Middleware/auth.Middleware.ts';
+import {startSapper, playSapper, resignSapper} from "../Controllers/sapper.Controller.ts";
+import {balanceCheck} from "../Middleware/balance.Middleware.ts";
 
 const SapperRouter = Router();
 

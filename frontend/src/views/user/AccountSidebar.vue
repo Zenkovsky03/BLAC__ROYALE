@@ -17,22 +17,6 @@
       <span>Change Password</span>
     </router-link>
 
-    <router-link
-        to="/panel/notifications"
-        :class="getItemClass('notifications')"
-    >
-      <span class="material-symbols-outlined text-xl">notifications</span>
-      <span>Notifications</span>
-    </router-link>
-
-    <router-link
-        to="/panel/security"
-        :class="getItemClass('security')"
-    >
-      <span class="material-symbols-outlined text-xl">security</span>
-      <span>Security Settings</span>
-    </router-link>
-
     <div class="my-2 border-t border-white/10"></div>
 
     <router-link

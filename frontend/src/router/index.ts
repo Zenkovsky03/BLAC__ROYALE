@@ -36,20 +36,10 @@ export const router = createRouter({
                     component: () => import('@/views/user/Profile.vue')
                 },
                 {
-                    path: 'security',
-                    name: 'user-security',
-                    component: () => import('@/views/user/Security.vue')
-                },
-                {
                     path: 'password',
                     name: 'user-password',
                     component: () => import('@/views/user/ChangePassword.vue')
                 },
-                {
-                    path: 'notifications',
-                    name: 'user-notifications',
-                    component: () => import('@/views/user/Notifications.vue')
-                }
             ]
         },
 

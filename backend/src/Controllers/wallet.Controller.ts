@@ -1,7 +1,7 @@
 import type { Response} from "express";
-import type { AuthRequest } from '../Middleware/authMiddleware.ts';
+import type { AuthRequest } from '../Middleware/auth.Middleware.ts';
 import {prisma} from "../../prisma/prismaSingleton.ts";
-import {walletService} from "../Services/walletService.ts";
+import {walletService} from "../Services/wallet.Service.ts";
 
 
 export async function getWallet(req: AuthRequest, res: Response)
