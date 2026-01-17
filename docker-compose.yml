@@ -17,10 +17,10 @@ services:
       dockerfile: backend.Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=postgresql://admin:password123@db:5432/casino_db?schema=public
-      - JWT_SECRET=super_tajny_klucz_123
-      - PORT=8000
     depends_on:
       - db
 
