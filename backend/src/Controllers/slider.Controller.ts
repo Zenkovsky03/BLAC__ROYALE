@@ -1,7 +1,7 @@
-import type {AuthRequest} from "../Middleware/authMiddleware.ts";
+import type {AuthRequest} from "../Middleware/auth.Middleware.ts";
 import type {Response} from "express";
 import {GameType} from "@prisma/client";
-import {walletService} from "../Services/walletService.ts";
+import {walletService} from "../Services/wallet.Service.ts";
 
 const game = GameType.SLIDER
 

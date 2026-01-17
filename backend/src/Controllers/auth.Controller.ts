@@ -1,7 +1,7 @@
 import type {Request, Response} from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import type {AuthRequest} from '../Middleware/authMiddleware.ts';
+import type {AuthRequest} from '../Middleware/auth.Middleware.ts';
 
 import {prisma} from "../../prisma/prismaSingleton.ts";
 

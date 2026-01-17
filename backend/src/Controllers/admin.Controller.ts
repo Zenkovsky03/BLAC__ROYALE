@@ -1,6 +1,6 @@
 import {  UserRole } from '@prisma/client';
 import {prisma} from "../../prisma/prismaSingleton.ts";
-import type {AuthRequest} from "../Middleware/authMiddleware.ts";
+import type {AuthRequest} from "../Middleware/auth.Middleware.ts";
 import type {Response} from "express";
 
 export const listUsers = async (req: AuthRequest, res: any) =>

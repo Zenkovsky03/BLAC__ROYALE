@@ -1,5 +1,5 @@
 import type {NextFunction} from "express";
-import type {AuthRequest} from "./authMiddleware.ts";
+import type {AuthRequest} from "./auth.Middleware.ts";
 import {prisma} from "../../prisma/prismaSingleton.ts";
 
 export const balanceCheck = async (req: AuthRequest, res: any, next: NextFunction) =>

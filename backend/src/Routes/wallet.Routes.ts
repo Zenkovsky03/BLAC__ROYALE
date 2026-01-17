@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { protect } from '../Middleware/authMiddleware.ts';
-import {deposit, getWallet, withdraw} from '../Controllers/walletController.ts'
-import {balanceCheck} from "../Middleware/balanceMiddleware.ts";
+import { protect } from '../Middleware/auth.Middleware.ts';
+import {deposit, getWallet, withdraw} from '../Controllers/wallet.Controller.ts'
+import {balanceCheck} from "../Middleware/balance.Middleware.ts";
 
 const WalletRouter = Router();
 

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { protect } from '../Middleware/authMiddleware.ts';
-import {register, login, profile, isAuthenticated, updateUsername, updateEmail, changePassword, deleteUser} from '../Controllers/authController.ts';
-import {requestPasswordReset , verifyResetToken , resetPassword  } from '../Controllers/passwordResetController.ts';
+import { protect } from '../Middleware/auth.Middleware.ts';
+import {register, login, profile, isAuthenticated, updateUsername, updateEmail, changePassword, deleteUser} from '../Controllers/auth.Controller.ts';
+import {requestPasswordReset , verifyResetToken , resetPassword  } from '../Controllers/passwordReset.Controller.ts';
 
 const UserRouter = Router();
 

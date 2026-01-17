@@ -1,7 +1,7 @@
 import type { Response} from "express";
-import type { AuthRequest } from '../Middleware/authMiddleware.ts';
+import type { AuthRequest } from '../Middleware/auth.Middleware.ts';
 import {prisma} from "../../prisma/prismaSingleton.ts";
-import {walletService} from "../Services/walletService.ts";
+import {walletService} from "../Services/wallet.Service.ts";
 import {GameType} from "@prisma/client";
 
 const game = GameType.SAPPER
@@ -34,7 +34,7 @@ export async function resignSapper(req: AuthRequest, res: Response)
 }
 
 //POST
-// backend/src/Controllers/sapperController.ts
+// backend/src/Controllers/sapper.Controller.ts
 
 export async function playSapper(req: AuthRequest, res: Response) {
     const { X, Y } = req.body;

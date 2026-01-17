@@ -1,6 +1,6 @@
 import type { Response} from "express";
-import type { AuthRequest } from '../Middleware/authMiddleware.ts';
-import {walletService} from "../Services/walletService.ts";
+import type { AuthRequest } from '../Middleware/auth.Middleware.ts';
+import {walletService} from "../Services/wallet.Service.ts";
 import {GameType} from "@prisma/client";
 
 const game = GameType.ROULETTE
