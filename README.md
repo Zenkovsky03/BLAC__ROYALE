@@ -7,9 +7,8 @@
 ---
 
 <p align="center">
-  <img src="frontend/assets/logo_protype.png" alt="kasyno logo" width="300">
+  <img src="frontend/assets/logo_prototype.png" alt="kasyno logo" width="300">
 </p>
-
 
 
 
