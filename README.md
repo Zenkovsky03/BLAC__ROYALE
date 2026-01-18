@@ -7,7 +7,7 @@
 ---
 
 <p align="center">
-  <img src="./design/logo_prototype.jpeg" alt="kasyno logo" width="300">
+  <img src="frontend/assets/logo_protype.png" alt="kasyno logo" width="300">
 </p>
 
 
@@ -72,6 +72,50 @@ Dostępne mini-gry w wersji MVP:
 
 
 ---
+
+## Galeria systemu
+
+### Główne widoki
+| Strona Główna | Panel Użytkownika | Panel Administratora |
+|:---:|:---:|:---:|
+| ![Home](frontend/assets/home.png) | ![Panel](frontend/assets/panel.png) | ![Admin](frontend/assets/admin_panel.png) |
+
+### Gry
+| Sloty | Ruletka | Coinflip |
+|:---:|:---:|:---:|
+| ![Slot](frontend/assets/slot.png) | ![Roulette](frontend/assets/roulette.png) | ![Coinflip](frontend/assets/coinflip.png) |
+
+| Saper | Suwak |
+|:---:|:---:|
+| ![Minesweeper](frontend/assets/minesweeper.png) | ![Slider](frontend/assets/slider.png) |
+
+---
+
+## Uruchomienie z Docker (Zalecane)
+
+Możesz uruchomić całą aplikację za pomocą jednej komendy, bez konieczności lokalnej instalacji Node.js czy PostgreSQL.
+
+### 1. Wymagania
+- Docker Desktop (lub Docker Engine + Docker Compose)
+
+### 2. Konfiguracja
+Upewnij się, że w głównym katalogu projektu znajduje się plik `.env` skonfigurowany zgodnie z sekcją Backend.
+Dla Dockera `DB_HOST` w pliku .env powinien być ustawiony na nazwę usługi bazy danych (zazwyczaj `db` lub `postgres`), a nie `localhost`.
+
+### 3. Uruchomienie
+W głównym katalogu projektu wykonaj komendę:
+
+```bash
+docker-compose up --build
+```
+
+Aby zatrzymać aplikację:
+
+```bash
+docker-compose down
+```
+
+
 
 # Backend
 
@@ -366,28 +410,6 @@ Każda gra ma dedykowany modal z ujednoliconą strukturą:
 - **Real-time updates** - natychmiastowa aktualizacja salda
 - **Error handling** - obsługa błędów API i sieci
 
-## Interfejs użytkownika
-
-### Design System
-- **Motyw** - ciemny z gradientowymi akcentami (fiolet/cyan)
-- **Typografia** - Space Grotesk (Google Fonts)
-- **Ikony** - Material Symbols Outlined
-- **Kolory** - gradientowe tła, transparentne elementy
-- **Responsywność** - mobile-first, adaptacyjny layout
-
-### Komponenty UI
-- **GameCard** - karty gier z hover effects
-- **GameGrid** - siatka prezentująca dostępne gry.
-- **LeaderboardSection** - sekcja rankingu z tabelą HTML, dynamicznym kolorowaniem TOP 3 (złoty/srebrny/brązowy) i filtrowaniem okresów (All/Month/Week).
-- **HeroSection** - baner powitalny z dynamicznym tłem i przyciskiem Call-to-Action.
-- **HeaderComponent** - różne wersje dla auth/unauth
-- **FooterComponent** - linki prawne i wsparcie
-
-### Animacje i UX
-- **Backdrop blur** - rozmycie tła pod modalami i elementami interfejsu
-- **Hover states** - interaktywne stany przycisków i kart
-- **Loading states** - wskaźniki ładowania
-- **Canvas confetti** - fajerwerki przy wygranych
 
 ## Panel użytkownika
 
@@ -433,26 +455,3 @@ npm run preview    # Podgląd buildu
 ```
 
 
-# Uruchomienie z Docker (Zalecane)
-
-Możesz uruchomić całą aplikację za pomocą jednej komendy, bez konieczności lokalnej instalacji Node.js czy PostgreSQL.
-
-## 1. Wymagania
-- Docker Desktop (lub Docker Engine + Docker Compose)
-
-## 2. Konfiguracja
-Upewnij się, że w głównym katalogu projektu znajduje się plik `.env` skonfigurowany zgodnie z sekcją Backend.
-Dla Dockera `DB_HOST` w pliku .env powinien być ustawiony na nazwę usługi bazy danych (zazwyczaj `db` lub `postgres`), a nie `localhost`.
-
-## 3. Uruchomienie
-W głównym katalogu projektu wykonaj komendę:
-
-```bash
-docker-compose up --build
-```
-
-Aby zatrzymać aplikację:
-
-```bash
-docker-compose down
-```
