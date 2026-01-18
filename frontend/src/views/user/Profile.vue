@@ -77,7 +77,6 @@ import { useAuthStore } from '@/stores/auth';
 import PanelSectionLayout from '@/views/user/PanelSectionLayout.vue';
 
 const auth = useAuthStore();
-// Adres API - upewnij się, że pasuje do Twojego backendu (np. port 3000)
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const loading = ref(false);
@@ -89,7 +88,6 @@ const form = reactive({
   email: ''
 });
 
-// 1. Wczytaj obecne dane użytkownika do pól formularza
 onMounted(() => {
   if (auth.user) {
     form.username = auth.user.username || '';
@@ -103,15 +101,14 @@ const handleSubmit = async () => {
   success.value = '';
 
   try {
-    // --- ZMIANA USERNAME ---
-    // Sprawdzamy, czy użytkownik w ogóle zmienił nazwę w polu input
+
     if (form.username !== auth.user?.username) {
 
       const res = await fetch(`${API}/api/users/update-username`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}` // Ważne: wysyłamy token
+          'Authorization': `Bearer ${auth.token}`
         },
         body: JSON.stringify({ username: form.username })
       });
@@ -122,13 +119,11 @@ const handleSubmit = async () => {
         throw new Error(data.message || data.error || 'Failed to update username');
       }
 
-      // Jeśli sukces -> Aktualizujemy nazwę w Store (dzięki temu zmieni się od razu w nagłówku)
       if (auth.user) {
         auth.user.username = form.username;
       }
     }
 
-    // --- ZMIANA EMAIL (Opcjonalnie, jeśli endpoint update-email też masz) ---
     if (form.email !== auth.user?.email) {
       const resEmail = await fetch(`${API}/api/users/update-email`, {
         method: 'PATCH',

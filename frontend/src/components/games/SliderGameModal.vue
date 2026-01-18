@@ -206,16 +206,14 @@ const emit = defineEmits(['close', 'balanceChange'])
 const auth = useAuthStore()
 const API = import.meta.env.VITE_API_URL || ''
 
-// State
 const betAmount = ref(10)
 const min = ref(25)
 const max = ref(75)
 const isRolling = ref(false)
 const lastResult = ref('')
 const isWin = ref(false)
-const resultPosition = ref(50) // Pozycja suwaka wyniku (0-100)
+const resultPosition = ref(50)
 
-// Computed
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
 const rangeSize = computed(() => Math.abs(max.value - min.value))
@@ -227,7 +225,6 @@ const estimatedMultiplier = computed(() => {
   return ((100 / rangeSize.value) * houseEdge).toFixed(2)
 })
 
-// Walidacja inputa
 function validateInput(e) {
   const target = e.target;
   const value = parseFloat(target.value);
@@ -236,7 +233,6 @@ function validateInput(e) {
   }
 }
 
-// Watchers
 watch(max, (newMax) => {
   if (newMax < min.value) min.value = newMax
 })
@@ -264,7 +260,6 @@ function fireSliderConfetti() {
   }, 250)
 }
 
-// Logic
 async function playGame() {
   if (isRolling.value) return
   if (betAmount.value <= 0 || isNaN(betAmount.value)) {
@@ -280,7 +275,6 @@ async function playGame() {
   lastResult.value = ''
   isWin.value = false
 
-  // Animacja losowania przed otrzymaniem wyniku
   const interval = setInterval(() => {
     resultPosition.value = Math.random() * 100
   }, 50)
@@ -323,10 +317,8 @@ async function playGame() {
 
     clearInterval(interval)
 
-    // Ustawienie ostatecznego wyniku - CSS cubic-bezier zrobi płynny "zjazd"
     resultPosition.value = winningNumber
 
-    // Czekamy na koniec animacji (1000ms = duration w CSS)
     setTimeout(async () => {
       if (!props.isTestMode && auth.fetchBalance) {
         await auth.fetchBalance()
@@ -345,7 +337,7 @@ async function playGame() {
       }
 
       isRolling.value = false
-    }, 1000) // Czas zgrany z animacją CSS
+    }, 1000)
 
   } catch (error) {
     clearInterval(interval)
@@ -357,7 +349,6 @@ async function playGame() {
 </script>
 
 <style scoped>
-/* --- SUWAKI CYBERPUNK --- */
 .cyber-range {
   -webkit-appearance: none;
   width: 100%;
@@ -389,23 +380,19 @@ async function playGame() {
   box-shadow: 0 0 20px #00f6ff;
 }
 
-/* --- NEON & GLOW --- */
 .neon-text-glow { text-shadow: 0 0 15px rgba(184, 79, 246, 0.7); }
 .neon-border-blue { border: 1px solid rgba(0, 246, 255, 0.5); box-shadow: 0 0 15px rgba(0, 246, 255, 0.2) inset; }
 
-/* --- INPUTS --- */
 .setting-group { display: flex; flex-direction: column; gap: 0.75rem; }
 .setting-label { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem; }
 .select-wrapper { position: relative; background: rgba(0,0,0,0.4); border-radius: 0.75rem; overflow: hidden; }
 .setting-select { width: 100%; background: transparent; color: #fff; padding: 1rem; font-size: 1.1rem; font-weight: bold; font-family: monospace; outline: none; appearance: none; cursor: pointer; }
 .select-wrapper::after { content: '▼'; position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); pointer-events: none; color: currentColor; opacity: 0.7; font-size: 0.8rem; }
 
-/* --- READOUTS --- */
 .digital-readout { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; }
 .digital-readout .label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); }
 .digital-readout .value { font-family: monospace; font-size: 1.5rem; font-weight: 700; text-shadow: 0 0 10px currentColor; }
 
-/* --- BUTTONS --- */
 .cyber-button-start {
   display: flex; align-items: center; justify-content: center; padding: 1rem 2rem;
   font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 0.75rem;

@@ -7,26 +7,20 @@ const emit = defineEmits(['open-wallet', 'open-panel'])
 
 const auth = useAuthStore()
 const router = useRouter()
-const isLoggingOut = ref(false) // <--- 2. Nowa zmienna stanu
+const isLoggingOut = ref(false)
 
-// Logika sprawdzania admina
 const isAdmin = computed(() => {
   return auth.user?.role === 'ADMIN'
 })
 
-// --- POPRAWIONA FUNKCJA WYLOGOWANIA ---
 async function handleLogout() {
-  // 1. Włączamy tryb wylogowywania (zmienia wygląd przycisku)
   isLoggingOut.value = true
 
-  // 2. Czekamy 1 sekundę (dla efektu animacji)
   await new Promise(resolve => setTimeout(resolve, 1000))
 
-  // 3. Dopiero teraz czyścimy dane i przenosimy
   auth.logout()
   router.push('/home')
 
-  // (Opcjonalnie) Resetujemy stan, choć komponent i tak zniknie/przeładuje się
   isLoggingOut.value = false
 }
 </script>

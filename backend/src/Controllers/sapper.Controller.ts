@@ -7,10 +7,9 @@ import {GameType} from "@prisma/client";
 const game = GameType.SAPPER
 
 
-//POST
+
 export async function resignSapper(req: AuthRequest, res: Response)
 {
-    // POPRAWKA: ID bierzemy z tokena (req.userId), a nie z parametrów URL
     const userId = req.userId!;
 
     try
@@ -23,7 +22,6 @@ export async function resignSapper(req: AuthRequest, res: Response)
         await walletService.recordWin(userId, winAmount , game)
 
         await destroyMap(userId);
-        // Zwracamy map.map (string), aby frontend mógł go wyświetlić
         return res.json({ message: 'Game ended.', map: { ...map, map: map.map } });
     }
     catch (err)
@@ -52,42 +50,29 @@ export async function playSapper(req: AuthRequest, res: Response) {
 
         if (index < 0 || index >= map.mask.length) return res.status(400).json({ message: 'Out of bounds.' });
 
-        // Jeśli już kliknięte - zwróć to co jest
         if (map.mask[index] === '1') {
             return res.json({ message: 'Field already revealed.', map: maskSapperMap(map.map, map.mask), multiplier: map.winMultiplayer });
         }
 
-        // Odkrywamy pole
         map.mask = map.mask.slice(0, index) + '1' + map.mask.slice(index + 1);
 
         if (map.map[index] === '.')
         {
-            // --- PRZEGRANA ---
             await destroyMap(userId);
-            // Zwracamy pełną mapę (map.map), żeby user widział gdzie były bomby
             return res.json({ message: 'Game lost.', map: map.map, multiplier: 0 });
         }
         else
         {
-            // --- WYGRANA RUNDA (MATEMATYKA KASYNA) ---
-
             const totalCells = map.n * map.n;
             const totalBombs = map.map.split('').filter(c => c === '.').length;
 
-            // Ile pól było odkrytych PRZED tym ruchem? (liczymy '1' w masce i odejmujemy to obecne, które właśnie dodaliśmy)
             const revealedBefore = map.mask.split('').filter(c => c === '1').length - 1;
-
-            // Ile było dostępnych pól do kliknięcia?
             const remainingUnknown = totalCells - revealedBefore;
 
-            // Ile z nich było bezpiecznych?
             const remainingSafe = remainingUnknown - totalBombs;
 
-            // Szansa na trafienie w tym ruchu:
             const probability = remainingSafe / remainingUnknown;
 
-            // Nowy mnożnik = Stary Mnożnik * (1 / Szansa).
-            // Dajemy 99% payout (1% dla kasyna house edge)
             const houseEdge = 0.99;
             const stepMultiplier = (1 / probability) * houseEdge;
 
@@ -97,7 +82,6 @@ export async function playSapper(req: AuthRequest, res: Response) {
 
             return res.json({
                 message: 'Game continues...',
-                // Zamiast liczb, frontend dostanie po prostu odkrytą mapę
                 map: maskSapperMap(updatedMap.map, updatedMap.mask),
                 multiplier: updatedMap.winMultiplayer
             });
@@ -123,7 +107,6 @@ export async function startSapper(req: AuthRequest, res: Response)
 
         if (mapSize * mapSize - 1 <= bombsCount)
         {
-            // Poprawione rzucanie błędu
             throw new Error('Too many bombs');
         }
 
@@ -152,8 +135,6 @@ export async function startSapper(req: AuthRequest, res: Response)
         res.status(500).json({message: 'Failed starting sapper game.'});
     }
 }
-
-// --- Helper Functions ---
 
 function generateSapperMap(size: number, bombs: number): string
 {

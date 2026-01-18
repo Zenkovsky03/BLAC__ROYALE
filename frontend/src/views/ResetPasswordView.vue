@@ -86,7 +86,6 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 
-// Token jest teraz edytowalny przez użytkownika (wkleja go z maila)
 const token = ref('');
 const password = ref('');
 const confirmPassword = ref('');
@@ -97,7 +96,6 @@ const success = ref(false);
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 onMounted(() => {
-  // Jeśli jednak w przyszłości zrobisz link, to ten kod automatycznie wpisze token w pole input
   if (route.query.token) {
     token.value = route.query.token as string;
   }
@@ -120,7 +118,6 @@ async function handleReset() {
   message.value = '';
 
   try {
-    // Wysyłamy ręcznie wpisany token i hasło
     const res = await fetch(`${API}/api/users/reset/resetPassword`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

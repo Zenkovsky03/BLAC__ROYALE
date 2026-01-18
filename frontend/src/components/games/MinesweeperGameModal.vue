@@ -236,7 +236,6 @@ const emit = defineEmits(['close', 'balanceChange'])
 const auth = useAuthStore()
 const API = import.meta.env.VITE_API_URL || ''
 
-// Funkcja confetti przy wygranej w minesweeper
 function fireMinesweeperConfetti() {
   confetti({
     particleCount: 100,
@@ -266,7 +265,6 @@ function fireMinesweeperConfetti() {
   }, 400)
 }
 
-// === STATE ===
 const betAmount = ref(10)
 const gridSize = ref(5)
 const bombs = ref(3)
@@ -277,7 +275,6 @@ const lastResult = ref('')
 const currentMultiplier = ref(1.0)
 const cells = ref([])
 
-// === COMPUTED ===
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
 const bombOptions = computed(() => {
@@ -292,7 +289,6 @@ const gridStyle = computed(() => ({
   gap: '10px'
 }))
 
-// === HELPERS ===
 function parseMapString(mapStr) {
   if (!mapStr) return []
   return mapStr.split('').map(char => {
@@ -316,7 +312,6 @@ function getCellClasses(cell) {
   return `${base} bg-cyan-900/10 border-cyan-500/50 shadow-[inset_0_0_20px_rgba(6,182,212,0.2)]`
 }
 
-// === WALIDACJA INPUTA ===
 function validateInput(e) {
   const target = e.target;
   const value = parseFloat(target.value);
@@ -325,9 +320,7 @@ function validateInput(e) {
   }
 }
 
-// === LOGIC ===
 async function startGame() {
-  // NOWA WALIDACJA
   if (betAmount.value <= 0 || isNaN(betAmount.value)) {
     alert("Please enter a valid bet amount!");
     return;
@@ -432,7 +425,6 @@ function resetGame() {
 </script>
 
 <style scoped>
-/* --- SCROLLBAR --- */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -446,7 +438,6 @@ function resetGame() {
   border-radius: 10px;
 }
 
-/* --- NEON & UTILS --- */
 .neon-text-glow {
   text-shadow: 0 0 15px rgba(184, 79, 246, 0.7);
 }
@@ -469,7 +460,6 @@ function resetGame() {
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.1) inset;
 }
 
-/* --- INPUTS --- */
 .setting-group {
   display: flex;
   flex-direction: column;
@@ -516,7 +506,6 @@ function resetGame() {
   font-size: 0.7rem;
 }
 
-/* --- HUD --- */
 .digital-readout {
   display: flex;
   flex-direction: column;
@@ -536,7 +525,6 @@ function resetGame() {
   font-weight: 700;
 }
 
-/* --- GRID --- */
 .game-board-container {
   padding: 1rem;
   background: rgba(0, 0, 0, 0.3);
@@ -546,7 +534,7 @@ function resetGame() {
 .minesweeper-grid {
   display: grid;
   width: 100%;
-  aspect-ratio: 1; /* Kwadratowa plansza */
+  aspect-ratio: 1;
 }
 
 .minesweeper-cell {
@@ -557,7 +545,6 @@ function resetGame() {
   justify-content: center;
 }
 
-/* --- ANIMACJE IKON --- */
 .diamond-anim {
   animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -589,7 +576,6 @@ function resetGame() {
   }
 }
 
-/* --- BUTTONS --- */
 .cyber-button-start {
   background: linear-gradient(90deg, #00f6ff, #b84ff6);
   color: #000;

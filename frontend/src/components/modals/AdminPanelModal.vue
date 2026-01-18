@@ -237,10 +237,10 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router'; // Import Routera
+import { useRouter } from 'vue-router';
 
 const auth = useAuthStore();
-const router = useRouter(); // Inicjalizacja Routera
+const router = useRouter();
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const emit = defineEmits(['close']);
 
@@ -249,7 +249,6 @@ const loading = ref(false);
 const saving = ref(false);
 const filters = reactive({ search: '', role: '' });
 
-// Paginacja: Limit 4 na stronę
 const pagination = reactive({ page: 1, limit: 4, total: 0, totalPages: 1 });
 
 const isModalOpen = ref(false);
@@ -266,15 +265,11 @@ const editForm = reactive({ name: '', surname: '', role: 'NORMAL' });
 const walletAmount = ref<number | null>(null);
 let timeout: any = null;
 
-// --- FUNKCJA POWROTU DO HOME ---
 const goHome = () => {
   router.push('/');
   emit('close');
 };
 
-// --- API ACTIONS ---
-
-// 1. LIST USERS
 const fetchUsers = async (page = 1) => {
   loading.value = true;
   try {
@@ -306,7 +301,6 @@ const fetchUsers = async (page = 1) => {
   finally { loading.value = false; }
 };
 
-// 2. USER DETAILS
 const openManageModal = async (userId: string) => {
   isModalOpen.value = true;
   selectedUser.value = null;
@@ -324,7 +318,6 @@ const openManageModal = async (userId: string) => {
   } catch (e) { console.error(e); }
 };
 
-// 3. UPDATE USER
 const saveUser = async () => {
   saving.value = true;
   try {
@@ -338,7 +331,6 @@ const saveUser = async () => {
   } catch (e) { console.error(e); } finally { saving.value = false; }
 };
 
-// 4. DELETE USER
 const deleteUser = async () => {
   if(!confirm("Irreversible action. Delete user?")) return;
   try {
@@ -363,7 +355,6 @@ const mockWalletAction = (type: string) => {
 
 const closeModal = () => { isModalOpen.value = false; };
 
-// OBSŁUGA PAGINACJI
 const changePage = (p: number) => {
   if(p > 0 && p <= pagination.totalPages) {
     fetchUsers(p);
@@ -381,13 +372,3 @@ onMounted(() => fetchUsers(1));
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 .neon-text-purple { text-shadow: 0 0 10px rgba(184, 79, 246, 0.7); }
 </style>
-
-<!--
-
-Deleted that cuz it done nothing
-
-<button @click="$emit('close')" class="p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors border border-transparent hover:border-red-500/50">
-<span class="material-symbols-outlined">close</span>
-</button>
-
--->

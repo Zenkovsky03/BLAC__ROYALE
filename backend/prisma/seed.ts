@@ -8,15 +8,12 @@ const prisma = new PrismaClient();
 async function main() {
     console.log('Starting database seeding...');
 
-    // Admin user credentials
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-    // Check if admin already exists
     const existingAdmin = await prisma.user.findUnique({
         where: { email: adminEmail },
     });
@@ -24,14 +21,12 @@ async function main() {
     if (existingAdmin) {
         console.log(`Admin user already exists: ${adminEmail}`);
 
-        // Update to ensure they have admin role
         await prisma.user.update({
             where: { email: adminEmail },
             data: { role: UserRole.ADMIN },
         });
         console.log('✅ Ensured admin role is set.');
     } else {
-        // Create admin user with wallet
         const admin = await prisma.user.create({
             data: {
                 email: adminEmail,
@@ -44,7 +39,7 @@ async function main() {
                 banned: false,
                 wallet: {
                     create: {
-                        balance: 10000.00, // Give admin some starting balance
+                        balance: 10000.00,
                     },
                 },
             },
@@ -56,7 +51,6 @@ async function main() {
         console.log(`   Username: ${admin.username}`);
     }
 
-    // Optional: Create a few test normal users
     const testUsers = [
         {
             email: 'user1@example.com',

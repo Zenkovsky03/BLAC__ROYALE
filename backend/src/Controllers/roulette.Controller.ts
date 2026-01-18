@@ -5,7 +5,7 @@ import {GameType} from "@prisma/client";
 
 const game = GameType.ROULETTE
 
-//POST
+
 export async function PlayRoulette(req: AuthRequest, res: Response)
 {
     const userId = req.userId!;

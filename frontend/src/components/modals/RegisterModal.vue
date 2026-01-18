@@ -166,7 +166,6 @@ const emit = defineEmits(['close'])
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 const auth = useAuthStore()
 
-// --- DANE FORMULARZA ---
 const name = ref('')
 const surname = ref('')
 const username = ref('')
@@ -175,11 +174,9 @@ const dateOfBirth = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
-// --- STAN ---
 const loading = ref(false)
 const globalError = ref('')
 
-// --- WALIDACJA ---
 const errors = reactive({
   name: '',
   surname: '',
@@ -190,19 +187,15 @@ const errors = reactive({
   confirmPassword: ''
 })
 
-// Czy są jakiekolwiek błędy?
 const hasErrors = computed(() => Object.values(errors).some(msg => msg.length > 0))
 
-// Czy wszystkie pola są wypełnione?
 const isFormFilled = computed(() =>
     name.value && surname.value && username.value && email.value &&
     dateOfBirth.value && password.value && confirmPassword.value
 )
 
-// Pobierz pierwszy błąd do wyświetlenia
 const getFirstError = computed(() => Object.values(errors).find(msg => msg.length > 0) || '')
 
-// --- FUNKCJE SPRAWDZAJĄCE (uruchamiane przy pisaniu) ---
 
 const validateName = () => {
   errors.name = name.value.trim().length >= 2 ? '' : 'Name too short'
@@ -234,9 +227,7 @@ const validateConfirmPassword = () => {
   errors.confirmPassword = password.value === confirmPassword.value ? '' : 'Passwords do not match'
 }
 
-// --- REJESTRACJA ---
 async function handleRegister() {
-  // Ostatnie sprawdzenie
   validateName(); validateSurname(); validateUsername(); validateEmail();
   validateAge(); validatePassword(); validateConfirmPassword();
 
@@ -287,7 +278,6 @@ async function handleRegister() {
   text-shadow: 0 0 10px rgba(184, 79, 246, 0.6);
 }
 
-/* Kalendarz w trybie ciemnym */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.6;

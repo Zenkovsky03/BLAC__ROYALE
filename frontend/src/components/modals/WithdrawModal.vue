@@ -149,18 +149,15 @@ const emit = defineEmits(['close'])
 const auth = useAuthStore()
 const API = import.meta.env.VITE_API_URL || ''
 
-// --- STATE DANYCH ---
 const amount = ref(0)
 const savedCard = ref<{last4: string, brand: string} | null>(null)
 const useSavedCard = ref(false)
 
-// Dane nowej karty
 const cardNumber = ref('')
 const cardExpiry = ref('')
 const cardCvc = ref('')
 const cardName = ref('')
 
-// State UI
 const isProcessing = ref(false)
 const isSuccess = ref(false)
 
@@ -168,13 +165,12 @@ onMounted(() => {
   const stored = localStorage.getItem('user_card')
   if (stored) {
     savedCard.value = JSON.parse(stored)
-    useSavedCard.value = true // Domyślnie użyj zapisanej, jeśli jest
+    useSavedCard.value = true
   } else {
-    useSavedCard.value = false // Jeśli nie ma, pokaż formularz
+    useSavedCard.value = false
   }
 })
 
-// --- FORMATOWANIE INPUTÓW ---
 function formatCardNumber(e: Event) {
   let val = (e.target as HTMLInputElement).value.replace(/\D/g, '')
   val = val.substring(0, 16)
@@ -190,23 +186,18 @@ function formatExpiry(e: Event) {
   cardExpiry.value = val
 }
 
-// --- WALIDACJA ---
 const canSubmit = computed(() => {
-  // Walidacja kwoty
   if (amount.value <= 0) return false
   if (amount.value > (auth.balance || 0)) return false
 
-  // Jeśli używamy zapisanej, formularz nas nie obchodzi
   if (useSavedCard.value && savedCard.value) return true
 
-  // Jeśli wpisujemy nową, sprawdzamy poprawność danych
   return cardNumber.value.length === 19 &&
       cardExpiry.value.length === 5 &&
       cardCvc.value.length === 3 &&
       cardName.value.length > 2
 })
 
-// --- AKCJA WYPŁATY ---
 async function handleWithdraw() {
   if (!canSubmit.value) return
 
@@ -222,7 +213,6 @@ async function handleWithdraw() {
 
     if (!res.ok) throw new Error('Withdrawal failed')
 
-    // Zapisz nową kartę, jeśli była używana
     if (!useSavedCard.value) {
       const last4 = cardNumber.value.slice(-4)
       const brand = cardNumber.value.startsWith('4') ? 'Visa' : 'MasterCard'

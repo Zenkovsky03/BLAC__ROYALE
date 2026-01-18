@@ -9,7 +9,6 @@ export interface AuthRequest extends Request
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) =>
 {
-    // Unwrap token from a request header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer '))
     {
@@ -19,12 +18,10 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     const token = authHeader.split(' ')[1];
 
     try {
-        //Verify and decode the token
         const decoded = jwt.verify(token as string, process.env.JWT_SECRET as string) as unknown as {
             userId: string;
         };
 
-        //Checking if user is banned
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
             select: { id: true, banned: true }
@@ -42,10 +39,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
         req.userId = decoded.userId;
 
-        // Continue
         next();
     } catch (error) {
-        // Token is invalid
         res.status(401).json({ message: 'Invalid token.' });
     }
 };

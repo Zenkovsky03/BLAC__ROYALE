@@ -56,7 +56,6 @@
                 <label class="setting-label">
                   <span class="material-symbols-outlined text-sm">payments</span> Bet Amount:
                 </label>
-                <!-- Set fixed height to match the balance readout -->
                 <div class="relative flex items-center h-[58px]">
                   <div class="absolute left-4 flex items-center justify-center pointer-events-none">
                     <span class="text-white/50 font-mono text-lg -translate-y-[1px]">$</span>
@@ -219,7 +218,6 @@ const emit = defineEmits(['close', 'balanceChange'])
 const auth = useAuthStore()
 const API_URL = import.meta.env.VITE_API_URL || ''
 
-// Funkcja confetti przy wygranej
 function fireConfetti() {
   confetti({
     particleCount: 100,
@@ -249,7 +247,6 @@ function fireConfetti() {
   }, 400)
 }
 
-// --- STATE ---
 const betAmount = ref(10)
 const selectedNumber = ref(null)
 const selectedColor = ref(null)
@@ -259,7 +256,6 @@ const lastResult = ref('')
 const wheel = ref(null)
 const pinJolt = ref(false)
 
-// --- COMPUTED ---
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
 const isValidBet = computed(() => {
@@ -268,7 +264,6 @@ const isValidBet = computed(() => {
   return isSelectionMade && hasEnoughMoney
 })
 
-// --- WALIDACJA INPUTA ---
 function validateInput(e) {
   const target = e.target;
   const value = parseFloat(target.value);
@@ -277,12 +272,10 @@ function validateInput(e) {
   }
 }
 
-// --- CONFIG ---
 const segmentCount = 37
 const segmentAngle = 360 / segmentCount
 const wheelRadius = 200
 
-// Generowanie segmentów
 const segments = Array.from({ length: segmentCount }, (_, i) => {
   let color, label
   if (i === 0) {
@@ -298,7 +291,6 @@ const segments = Array.from({ length: segmentCount }, (_, i) => {
   return { label, color }
 })
 
-// --- STYLES HELPER ---
 function segmentStyle(i, color) {
   const halfWidth = Math.ceil((wheelRadius * Math.PI) / segmentCount) / 2 + 1
   return {
@@ -350,7 +342,6 @@ function getNumberColor(n) {
   return 'bg-slate-700/40 border-slate-500/30 text-slate-200 hover:bg-slate-700'
 }
 
-// --- ACTIONS ---
 function selectNumber(n) {
   selectedNumber.value = n; selectedColor.value = null; selectedGreen.value = false; lastResult.value = '';
 }
@@ -361,11 +352,9 @@ function selectGreen() {
   selectedGreen.value = true; selectedNumber.value = null; selectedColor.value = null; lastResult.value = '';
 }
 
-// --- GŁÓWNA FUNKCJA SPIN ---
 async function spin() {
   if (isSpinning.value) return
 
-  // WALIDACJA INPUTA
   if (betAmount.value <= 0 || isNaN(betAmount.value)) {
     alert("Please enter a valid bet amount!");
     return;

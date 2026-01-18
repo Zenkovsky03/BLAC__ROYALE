@@ -58,7 +58,7 @@ export async function deposit(req: AuthRequest, res: Response)
             }
         });
 
-        res.status(200).json(updatedWallet); // Respond with updated wallet
+        res.status(200).json(updatedWallet);
     }
     catch (error)
     {
@@ -88,7 +88,7 @@ export async function withdraw(req: AuthRequest, res: Response)
             }
         });
 
-        res.status(200).json(updatedWallet); // Respond with updated wallet
+        res.status(200).json(updatedWallet);
     }
     catch (error)
     {

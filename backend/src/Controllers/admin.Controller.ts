@@ -125,7 +125,6 @@ export const patchUser = async (req: AuthRequest, res: any) =>
             });
         }
 
-        // Check if user exists
         const existingUser = await prisma.user.findUnique({
             where: { id },
             select: { id: true, email: true },
@@ -135,7 +134,6 @@ export const patchUser = async (req: AuthRequest, res: any) =>
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Prevent self-demotion from admin
         if (req.userId === id && validation.data.role === 'NORMAL') {
             return res.status(400).json({ error: 'Cannot demote yourself from admin' });
         }
@@ -184,7 +182,6 @@ export const deleteUserAdmin = async (req: AuthRequest, res: Response) =>
 };
 
 
-// Validation helpers
 const validateUpdateUser = (body: any) => {
     const errors: string[] = [];
     const data: any = {};

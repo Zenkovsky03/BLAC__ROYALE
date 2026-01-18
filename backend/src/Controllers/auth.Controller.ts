@@ -6,12 +6,11 @@ import type {AuthRequest} from '../Middleware/auth.Middleware.ts';
 import {prisma} from "../../prisma/prismaSingleton.ts";
 
 export const profile = async (req: AuthRequest, res: Response) => {
-    const userId = req.userId!; // From token
+    const userId = req.userId!;
 
     try {
         const userProfile = await prisma.user.findUnique({
             where: {id: userId},
-            // ZMIANA: Dodano role: true
             select: {email: true, createdAt: true, username: true, role: true},
         });
 
@@ -42,10 +41,8 @@ export async function register(req: Request, res: Response) {
             return res.status(400).json({message: 'Email already in use.'});
         }
 
-        //dateOfBirth check
         const today = new Date();
         const birthDate = new Date(dateOfBirth);
-        // Prosta walidacja wieku (18 lat)
         let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -57,11 +54,9 @@ export async function register(req: Request, res: Response) {
             return res.status(400).json({message: 'You are too young.'});
         }
 
-        // Hash password
         const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create a new user
         const newUser = await prisma.user.create({
             data: {
                 name : name || "",
@@ -87,7 +82,6 @@ export async function login(req: Request, res: Response) {
     const {email, password , rememberMe} = req.body;
 
     try {
-        // Tu pobieramy całą instancję, żeby sprawdzić hasło (hashedPassword jest potrzebne)
         const user = await prisma.user.findUnique({where: {email}});
         if (!user) {
             return res.status(401).json({message: 'Invalid credentials.'});
@@ -100,17 +94,14 @@ export async function login(req: Request, res: Response) {
 
         const expiresIn = rememberMe ? '30d' : '3h';
 
-        // JWT token
         const token = jwt.sign(
             {userId: user.id, email: user.email},
             process.env.JWT_SECRET as string,
             {expiresIn: expiresIn}
         );
 
-        // Tu pobieramy dane do odesłania na frontend
         const loggedInUser = await prisma.user.findUnique({
             where: {email},
-            // ZMIANA KLUCZOWA: Dodano role: true
             select: {email: true, createdAt: true, username: true, role: true}
         })
 
@@ -133,7 +124,6 @@ export async function updateUsername(req: AuthRequest, res: Response) {
         const updatedUser = await prisma.user.update({
             where: {id: userId},
             data: {username: username},
-            // ZMIANA: Dodano role: true
             select: {email: true, createdAt: true, username: true, role: true}
         });
         res.status(200).json({message: 'Username updated successfully.', user: updatedUser})
@@ -165,7 +155,6 @@ export async function updateEmail (req: AuthRequest, res: Response)  {
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: { email },
-            // ZMIANA: Dodano role: true
             select: {email: true, createdAt: true, username: true, role: true},
         });
 

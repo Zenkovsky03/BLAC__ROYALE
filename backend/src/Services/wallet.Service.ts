@@ -18,7 +18,6 @@ export class WalletService
                 });
             }
 
-            // Update balance
             const updatedWallet = await tx.wallet.update({
                 where: { id: wallet.id },
                 data: {
@@ -28,7 +27,6 @@ export class WalletService
                 }
             });
 
-            // Create transaction record
             await tx.transaction.create({
                 data: {
                     walletId: wallet.id,

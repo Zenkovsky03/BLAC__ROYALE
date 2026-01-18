@@ -51,7 +51,6 @@ export const useAuthStore = defineStore('auth', {
                 this.transactions = []
             }
         },
-        // --- TO JEST FUNKCJA, KTÓREJ CI BRAKOWAŁO ---
         async fetchUser() {
             const base = import.meta.env.VITE_API_URL || ''
             if (!this.token) return;
@@ -64,17 +63,14 @@ export const useAuthStore = defineStore('auth', {
                 if (res.ok) {
                     const userData = await res.json()
 
-                    // Aktualizujemy dane w aplikacji
                     this.user = userData
 
-                    // Aktualizujemy dane w pamięci przeglądarki
                     localStorage.setItem('auth_user', JSON.stringify(userData))
                 }
             } catch (error) {
                 console.error("Błąd pobierania profilu:", error)
             }
         },
-        // ---------------------------------------------
 
         async updateUsername(newUsername: string) {
             const base = import.meta.env.VITE_API_URL || ''

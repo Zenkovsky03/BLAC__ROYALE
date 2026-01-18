@@ -158,8 +158,7 @@ const benefits = ref([
 ]);
 
 const joinProgram = () => {
-  // Tutaj możesz dodać logikę, np. przekierowanie do rejestracji ze specjalnym parametrem
-  // lub otwarcie modala kontaktowego dla partnerów
+  //CONTINUEEEEEE
   alert("Redirecting to Affiliate Registration...");
 };
 </script>

@@ -212,7 +212,6 @@ const coinResult = ref<'heads'|'tails'|null>(null)
 
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
-// --- WALIDACJA INPUTA ---
 function validateInput(e: Event) {
   const target = e.target as HTMLInputElement;
   const value = parseFloat(target.value);
@@ -221,7 +220,6 @@ function validateInput(e: Event) {
   }
 }
 
-// Funkcja confetti przy wygranej
 function fireConfetti() {
   confetti({
     particleCount: 100,
@@ -254,7 +252,6 @@ function fireConfetti() {
 async function flipCoin() {
   if (isFlipping.value) return
 
-  // WALIDACJA PRZED GRĄ
   if (betAmount.value <= 0 || isNaN(betAmount.value)) {
     alert("Please enter a valid bet amount!")
     return
@@ -275,7 +272,6 @@ async function flipCoin() {
     let finalSide: 'heads' | 'tails'
 
     if (props.isTestMode) {
-      // === TRYB TESTOWY ===
       const randomResult = Math.random() < 0.5
       const coinLanded = randomResult ? 'heads' : 'tails'
 
@@ -284,7 +280,7 @@ async function flipCoin() {
       finalSide = coinLanded
 
     } else {
-      // === API ===
+      // API
       const betValue = selectedSide.value === 'heads' ? 0 : 1;
 
       const res = await fetch(`${API}/api/games/play-coin-flip`, {
@@ -312,21 +308,19 @@ async function flipCoin() {
       }
     }
 
-    // Ustawienie rotacji CSS
     const ANIM_DURATION = 2500;
     const coinElement = document.querySelector('.coin');
     if (coinElement) {
       // @ts-ignore
       if (finalSide === 'heads') {
         // @ts-ignore
-        coinElement.style.setProperty('--final-rotation', '1440deg'); // 4 obroty (HEADS)
+        coinElement.style.setProperty('--final-rotation', '1440deg');
       } else {
         // @ts-ignore
-        coinElement.style.setProperty('--final-rotation', '1620deg'); // 4.5 obrotu (TAILS)
+        coinElement.style.setProperty('--final-rotation', '1620deg');
       }
     }
 
-    // Zakończenie animacji i odblokowanie przycisku
     setTimeout(async () => {
       coinResult.value = finalSide;
       isFlipping.value = false;
@@ -340,7 +334,6 @@ async function flipCoin() {
         resultMessage.value = `DEFEAT! IT WAS ${finalSide.toUpperCase()}.`;
       }
 
-      // Aktualizacja balansu
       if (!props.isTestMode) {
         auth.fetchBalance();
       } else if (props.isTestMode) {
@@ -358,7 +351,6 @@ async function flipCoin() {
 </script>
 
 <style scoped>
-/* STYLE BEZ ZMIAN */
 .custom-scrollbar::-webkit-scrollbar { width: 8px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(184, 79, 246, 0.3); border-radius: 10px; }

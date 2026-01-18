@@ -201,15 +201,12 @@
 import { ref, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth.js'
 
-// Stan widoku: 'login' | 'email' | 'reset'
 const viewState = ref('login')
 
-// Formularze
 const loginForm = reactive({ email: '', password: '' })
 const recoveryForm = reactive({ email: '' })
 const resetForm = reactive({ token: '', password: '', confirm: '' })
 
-// UI
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -218,15 +215,13 @@ const emit = defineEmits(['close', 'login'])
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const auth = useAuthStore()
 
-// Przełącznik widoków
 const switchToRecovery = () => {
   viewState.value = 'email'
   errorMessage.value = ''
   successMessage.value = ''
-  recoveryForm.email = loginForm.email // Przepisz email jeśli już wpisany
+  recoveryForm.email = loginForm.email
 }
 
-// 1. LOGOWANIE
 async function handleLogin() {
   errorMessage.value = ''
   if (!loginForm.email || !loginForm.password) {
@@ -255,14 +250,12 @@ async function handleLogin() {
   }
 }
 
-// 2. WYSŁANIE MAILA Z KODEM
 async function handleRecoveryRequest() {
   errorMessage.value = ''
   if (!recoveryForm.email) return
 
   loading.value = true
   try {
-    // Endpoint: PATCH request-password-reset
     const res = await fetch(`${API}/api/users/reset/request-password-reset`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -279,7 +272,6 @@ async function handleRecoveryRequest() {
   }
 }
 
-// 3. FINALNE RESETOWANIE HASŁA
 async function handleFinalReset() {
   errorMessage.value = ''
   successMessage.value = ''
@@ -295,7 +287,6 @@ async function handleFinalReset() {
 
   loading.value = true
   try {
-    // Endpoint: PATCH resetPassword
     const res = await fetch(`${API}/api/users/reset/resetPassword`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

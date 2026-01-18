@@ -227,9 +227,7 @@ const emit = defineEmits(['close', 'balanceChange'])
 
 const auth = useAuthStore()
 
-// Funkcja confetti przy wygranej w slocie
 function fireSlotConfetti() {
-  // Kolorowe confetti dla wygranej w slocie
   confetti({
     particleCount: 120,
     spread: 70,
@@ -237,7 +235,6 @@ function fireSlotConfetti() {
     colors: ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57']
   })
 
-  // Dodatkowy burst z lewej strony
   setTimeout(() => {
     confetti({
       particleCount: 60,
@@ -248,7 +245,6 @@ function fireSlotConfetti() {
     })
   }, 300)
 
-  // Dodatkowy burst z prawej strony
   setTimeout(() => {
     confetti({
       particleCount: 60,
@@ -260,18 +256,15 @@ function fireSlotConfetti() {
   }, 600)
 }
 
-// --- STATE ---
 const betAmount = ref(10)
 const isSpinning = ref(false)
 const lastResult = ref('')
 const reelIcons = ref([[], [], []])
 
-// Refs do DOM
 const reel1 = ref(null)
 const reel2 = ref(null)
 const reel3 = ref(null)
 
-// --- KONFIGURACJA SYMBOLI ---
 const iconMap = [
   "CHERRY", "LEMON", "ORANGE", "PLUM", "GRAPE", "WATERMELON", "BELL", "STAR", "SEVEN"
 ]
@@ -279,7 +272,6 @@ const ICON_HEIGHT = 100
 
 const displayBalance = computed(() => (props.balance ?? 0).toFixed(2))
 
-// --- WYGLĄD IKON ---
 const getIconContent = (iconName) => {
   const icons = {
     'CHERRY': '🍒', 'LEMON': '🍋', 'ORANGE': '🍊', 'PLUM': '🍇',
@@ -306,7 +298,6 @@ const initReels = () => {
   }
 }
 
-// --- WALIDACJA INPUTA ---
 function validateInput(e) {
   const target = e.target;
   const value = parseFloat(target.value);
@@ -315,7 +306,6 @@ function validateInput(e) {
   }
 }
 
-// --- LOGIKA ANIMACJI ---
 const spinReel = async (reelIndex, targetSymbol) => {
   const reelRef = [reel1.value, reel2.value, reel3.value][reelIndex]
   if (!reelRef) return
@@ -341,7 +331,7 @@ const spinReel = async (reelIndex, targetSymbol) => {
   return new Promise(resolve => setTimeout(resolve, duration))
 }
 
-// --- FUNKCJA SZUKAJĄCA TOKENA ---
+
 const findToken = () => {
   if (auth.token) return auth.token;
   let t = localStorage.getItem('auth_token');
@@ -360,11 +350,9 @@ const findToken = () => {
   return null;
 }
 
-// --- SPIN ---
 const spin = async () => {
   if (isSpinning.value) return
 
-  // WALIDACJA
   if (betAmount.value <= 0 || isNaN(betAmount.value)) {
     alert("Please enter a valid bet amount!");
     return;
@@ -440,7 +428,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* STYLE BEZ ZMIAN */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }

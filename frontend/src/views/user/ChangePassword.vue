@@ -87,11 +87,9 @@ const error = ref('');
 const successMessage = ref('');
 
 const handleSubmit = async () => {
-  // Reset komunikatów
   error.value = '';
   successMessage.value = '';
 
-  // 1. Walidacja frontendowa
   if (newPassword.value !== confirmPassword.value) {
     error.value = "New passwords do not match!";
     return;
@@ -104,16 +102,15 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
-    // 2. Zapytanie do API zgodnie ze zrzutem ekranu
     const res = await fetch(`${API}/api/users/changePassword`, {
       method: 'PATCH', //
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${auth.token}` // Wymagane dla autoryzowanego usera
+        'Authorization': `Bearer ${auth.token}`
       },
       body: JSON.stringify({
-        currentPassword: currentPassword.value, //
-        newPassword: newPassword.value          //
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value
       })
     });
 
@@ -123,10 +120,8 @@ const handleSubmit = async () => {
       throw new Error(data.message || data.error || 'Failed to change password');
     }
 
-    // 3. Sukces
     successMessage.value = data.message || "Password changed successfully!";
 
-    // Wyczyść pola
     currentPassword.value = '';
     newPassword.value = '';
     confirmPassword.value = '';

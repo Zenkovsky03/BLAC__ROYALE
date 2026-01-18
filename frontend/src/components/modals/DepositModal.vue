@@ -153,18 +153,15 @@ const emit = defineEmits(['close'])
 const auth = useAuthStore()
 const API = import.meta.env.VITE_API_URL || ''
 
-// Stan formularza
 const amount = ref(100)
 const cardNumber = ref('')
 const cardExpiry = ref('')
 const cardCvc = ref('')
 const cardName = ref('')
 
-// Obsługa zapisanej karty
 const savedCard = ref<{last4: string, brand: string} | null>(null)
 const useSavedCard = ref(false)
 
-// Stan UI
 const isProcessing = ref(false)
 const isSuccess = ref(false)
 

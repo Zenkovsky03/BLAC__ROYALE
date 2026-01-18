@@ -113,7 +113,6 @@ const form = reactive({
 
 const submitForm = async () => {
   sending.value = true;
-  // Symulacja wysyłania
   await new Promise(resolve => setTimeout(resolve, 1500));
   sending.value = false;
   success.value = true;

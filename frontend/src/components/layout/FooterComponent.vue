@@ -1,7 +1,6 @@
 <template>
   <footer class="mt-10 border-t border-solid border-primary/20 bg-background-dark/50 px-4 py-8 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-6xl">
-      <!-- Logo i opis na górze -->
       <div class="mb-8 flex flex-col gap-4">
         <div class="flex items-center gap-4">
           <div class="size-6 text-primary">
@@ -15,7 +14,6 @@
         <p class="text-sm text-white/60 max-w-md">The future of online gaming. Fair, secure, and immersive experiences.</p>
       </div>
 
-      <!-- 3 kolumny: Legal, Support, Connect -->
       <div class="grid grid-cols-3 gap-8 lg:gap-16">
         <div>
           <h3 class="font-bold text-primary mb-4">Legal</h3>

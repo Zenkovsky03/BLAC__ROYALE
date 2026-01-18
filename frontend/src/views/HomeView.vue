@@ -57,14 +57,12 @@ import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
-// Importy komponentów layoutu
 import HeaderComponent from '@/components/layout/HeaderComponent.vue'
 import HeaderComponentWithBalance from '@/components/layout/HeaderComponentWithBalance.vue'
 import FooterComponent from '@/components/layout/FooterComponent.vue'
 import HeroSection from '@/components/sections/HeroSection.vue'
 import GamesGrid from '@/components/sections/GamesGrid.vue'
 
-// Importy Modali
 import LoginModal from '@/components/modals/LoginModal.vue'
 import RegisterModal from '@/components/modals/RegisterModal.vue'
 import DepositModal from '@/components/modals/DepositModal.vue'
@@ -73,7 +71,6 @@ import TransactionHistoryModal from '@/components/modals/TransactionHistoryModal
 import WalletSelectionModal from '@/components/modals/WalletSelectionModal.vue'
 import AdminPanelModal from '@/components/modals/AdminPanelModal.vue'
 
-// Importy Gier
 import SlotGameModal from '@/components/games/SlotGameModal.vue'
 import MinesweeperGameModal from '@/components/games/MinesweeperGameModal.vue'
 import SliderGameModal from '@/components/games/SliderGameModal.vue'
@@ -83,7 +80,6 @@ import RouletteGameModal from '@/components/games/RouletteGameModal.vue'
 const auth = useAuthStore()
 const router = useRouter()
 
-// --- Stan Modali ---
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showWalletSelection = ref(false)
@@ -91,7 +87,6 @@ const showDeposit = ref(false)
 const showWithdraw = ref(false)
 const showAdminPanel = ref(false)
 
-// Gry
 const showMinesweeper = ref(false)
 const showSlider = ref(false)
 const showCoinflip = ref(false)
@@ -102,7 +97,6 @@ const isAdmin = computed(() => {
   return auth.user?.role === 'ADMIN'
 })
 
-// --- LOGIKA PRZYCISKU PANELU ---
 
 function handlePanelClick() {
   if (isAdmin.value) {

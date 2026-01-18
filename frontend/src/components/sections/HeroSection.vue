@@ -31,7 +31,6 @@
 <script setup>
 import { computed } from 'vue'
 
-// ZMIANA: Definiujemy zdarzenie 'playRandom'
 defineEmits(['playRandom'])
 
 const backgroundStyle = computed(() => ({

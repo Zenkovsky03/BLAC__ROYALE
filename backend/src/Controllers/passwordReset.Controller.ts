@@ -31,7 +31,6 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
             where: { userId: user.id },
         });
 
-        // Generate reset token
         const resetToken = crypto.randomBytes(8).toString('hex');
         const hashedToken = await bcrypt.hash(resetToken, 10);
         const expires = new Date(Date.now() + 3600000); // 1 hour from now
@@ -126,7 +125,6 @@ export const resetPassword = async (req: Request, res: Response) => {
             },
         });
 
-        // Check if any token matches
         let matchedRecord = null;
         for (const record of resetRecords) {
             const isMatch = await bcrypt.compare(token, record.token);
@@ -142,9 +140,7 @@ export const resetPassword = async (req: Request, res: Response) => {
             });
         }
 
-        // Hash new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        // Update user password
         await prisma.user.update({
             where: { id: matchedRecord.userId },
             data: { hashedPassword },

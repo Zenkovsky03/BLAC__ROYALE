@@ -6,23 +6,19 @@ import dotenv from "dotenv";
 const prisma = new PrismaClient();
 dotenv.config({ path: './.env'});
 
-// Helper function to generate random date within range
 function randomDate(start: Date, end: Date): Date {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
-// Helper function to generate random integer
 function randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Helper function to generate random decimal
 function randomDecimal(min: number, max: number, decimals: number = 2): number {
     const value = Math.random() * (max - min) + min;
     return Number(value.toFixed(decimals));
 }
 
-// Helper function to get random game type
 function randomGameType(): GameType {
     const games = [GameType.COINFLIP, GameType.SAPPER, GameType.ROULETTE, GameType.SLIDER, GameType.SLOTS];
     return games[randomInt(0, games.length - 1)]!;
@@ -31,9 +27,6 @@ function randomGameType(): GameType {
 async function main() {
     console.log('🎰 Starting comprehensive casino database seeding...\n');
 
-    // ============================================
-    // 1. CREATE ADMIN USER
-    // ============================================
     console.log('👑 Creating admin user...');
 
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@casino.com';
@@ -85,9 +78,6 @@ async function main() {
         console.log(`   👤 Username: ${admin.username}\n`);
     }
 
-    // ============================================
-    // 2. CREATE REALISTIC TEST USERS
-    // ============================================
     console.log('👥 Creating test users...');
 
     const testUsers = [
@@ -263,9 +253,6 @@ async function main() {
 
     console.log(`\n   📊 Total users in system: ${createdUsers.length + 1} (including admin)\n`);
 
-    // ============================================
-    // 3. CREATE REALISTIC TRANSACTION HISTORY
-    // ============================================
     console.log('💰 Generating transaction history...');
 
     const now = new Date();
@@ -283,7 +270,6 @@ async function main() {
 
         if (!wallet) continue;
 
-        // Initial deposit transaction (no game associated)
         await prisma.transaction.create({
             data: {
                 walletId: wallet.id,
@@ -294,15 +280,13 @@ async function main() {
         });
         totalTransactions++;
 
-        // Generate random game transactions
         const numTransactions = randomInt(10, 30);
 
         for (let i = 0; i < numTransactions; i++) {
             const transactionDate = randomDate(oneWeekAgo, now);
             const game = randomGameType();
 
-            // More losses than wins for realistic casino odds
-            const weights = [0.35, 0.50, 0.15]; // 35% wins, 50% losses, 15% bets
+            const weights = [0.35, 0.50, 0.15];
             const random = Math.random();
             let type: TransactionType;
             if (random < weights[0]!) {
@@ -334,7 +318,6 @@ async function main() {
             totalTransactions++;
         }
 
-        // Add some deposits and withdrawals (no game associated)
         if (Math.random() > 0.5) {
             await prisma.transaction.create({
                 data: {
@@ -362,29 +345,24 @@ async function main() {
 
     console.log(`   ✅ Generated ${totalTransactions} transactions\n`);
 
-    // ============================================
-    // 4. CREATE ACTIVE SAPPER GAMES
-    // ============================================
     console.log('💣 Creating active Sapper games...');
 
-    const sapperUsers = createdUsers.slice(0, 5); // First 5 users have active games
+    const sapperUsers = createdUsers.slice(0, 5);
     let sapperGames = 0;
 
     console.log(`\n   📊 Total active Sapper games: ${sapperGames}\n`);
 
-    // ============================================
-    // 5. CREATE PASSWORD RESET TOKENS (SOME EXPIRED)
-    // ============================================
+
     console.log('🔑 Creating password reset tokens...');
 
-    const resetUsers = createdUsers.slice(5, 8); // 3 users with reset tokens
+    const resetUsers = createdUsers.slice(5, 8);
     let resetTokens = 0;
 
     for (const user of resetUsers) {
         const isExpired = Math.random() > 0.5;
         const expiresAt = isExpired
-            ? new Date(Date.now() - 3600000) // 1 hour ago (expired)
-            : new Date(Date.now() + 3600000); // 1 hour from now (valid)
+            ? new Date(Date.now() - 3600000)
+            : new Date(Date.now() + 3600000);
 
         const token = Math.random().toString(36).substring(2, 18);
         const hashedToken = await bcrypt.hash(token, 10);
@@ -403,9 +381,7 @@ async function main() {
 
     console.log(`\n   📊 Total reset tokens: ${resetTokens}\n`);
 
-    // ============================================
-    // FINAL SUMMARY
-    // ============================================
+
     console.log('════════════════════════════════════════════════════════');
     console.log('                    SEEDING COMPLETE                     ');
     console.log('════════════════════════════════════════════════════════');
@@ -421,9 +397,6 @@ async function main() {
     console.log('════════════════════════════════════════════════════════\n');
 }
 
-// ============================================
-// HELPER FUNCTIONS (from sapperController)
-// ============================================
 
 function generateSapperMap(size: number, bombs: number): string {
     const totalCells = size * size;
@@ -477,9 +450,6 @@ function getRandomIntInclusive(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// ============================================
-// RUN SEED
-// ============================================
 
 main()
     .catch((e) => {

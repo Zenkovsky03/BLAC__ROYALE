@@ -1,5 +1,4 @@
-// WARNING: this file contains profanity. The below list of profane words is necessary for this tool to function properly.
-// Do not read below this line if you do not wish to be exposed to lots of profane words
+
 
 export const profaneWords: Map<string, string[]> = new Map([
   [

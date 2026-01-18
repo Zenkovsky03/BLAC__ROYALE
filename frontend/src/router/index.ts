@@ -54,7 +54,6 @@ export const router = createRouter({
             component: () => import('@/components/sections/LeaderboardSection.vue')
         },
 
-        // TRASA ADMINA
         {
             path: '/admin',
             name: 'AdminPanel',
@@ -77,7 +76,6 @@ export const router = createRouter({
             component: () => import('@/components/layout/footer/ResponsibleGamingView.vue')
         },
 
-        // SUPPORT
         {
             path: '/support/faq',
             name: 'faq',
@@ -118,10 +116,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.meta.requiresAdmin) {
-        // Jeśli rola użytkownika to NIE jest 'ADMIN'
         if (auth.user?.role !== 'ADMIN') {
-            // Przekieruj na stronę 404 (NotFound), przekazując obecną ścieżkę jako parametr
-            // Dzięki temu URL zmieni się na taki, jaki wpisał użytkownik, ale wyświetli się błąd 404
             return next({
                 name: 'not-found',
                 params: { pathMatch: to.path.substring(1).split('/') }
@@ -129,6 +124,5 @@ router.beforeEach(async (to, from, next) => {
         }
     }
 
-    // Jeśli wszystko ok, idź dalej
     next()
 })

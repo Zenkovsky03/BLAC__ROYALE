@@ -105,7 +105,6 @@ import { useAuthStore } from '@/stores/auth';
 const router = useRouter();
 const auth = useAuthStore();
 
-// Funkcje obsługujące kliknięcia w kafelki
 const handlePersonalInfoClick = () => {
   router.push('/panel/profile');
 };
@@ -123,7 +122,6 @@ const handleNotificationsClick = () => {
 };
 
 
-// Helpery do ikon i kolorów
 const getIconName = (type) => {
   if (['DEPOSIT', 'WIN'].includes(type)) return 'arrow_upward';
   if (['WITHDRAWAL', 'LOST', 'BET'].includes(type)) return 'arrow_downward';

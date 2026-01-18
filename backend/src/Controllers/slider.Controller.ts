@@ -25,7 +25,6 @@ export async function sliderPlay(req: AuthRequest, res: Response)
         const num = getRandomInt(0, 100);
         const winChance = max - min;
 
-        // OBLICZANIE MNOŻNIKA (Standard Kasynowy)
         const houseEdge = 0.99;
         let multiplier = 0;
 
@@ -33,7 +32,6 @@ export async function sliderPlay(req: AuthRequest, res: Response)
             multiplier = (100 / winChance) * houseEdge;
         }
 
-        // Formatowanie mnożnika (opcjonalne, dla czystości danych)
         multiplier = Number(multiplier.toFixed(4));
 
         let winAmount = 0;

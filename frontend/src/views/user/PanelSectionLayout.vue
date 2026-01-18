@@ -32,9 +32,9 @@
 
 <script setup>
 import AccountSidebar from '@/views/user/AccountSidebar.vue';
-import { useAuthStore } from '@/stores/auth'; // 1. Import
+import { useAuthStore } from '@/stores/auth';
 
-const auth = useAuthStore(); // 2. Inicjalizacja
+const auth = useAuthStore();
 defineProps({
   activePage: {
     type: String,
