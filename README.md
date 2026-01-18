@@ -80,36 +80,40 @@ Dostępne mini-gry w wersji MVP:
 ### Główne katalogi
 ```
 backend/
-├── prisma/                  # Konfiguracja bazy danych
-│   ├── schema.prisma       # Schema modeli i relacji
-│   ├── prismaSingleton.ts  # Singleton klienta Prisma
-│   ├── seed.ts            # Podstawowe dane testowe
-│   └── seedRich.ts        # Rozszerzone dane testowe
-└── src/
-    ├── Controllers/        # Logika biznesowa endpointów
-    │   ├── auth.Controller.ts      # Rejestracja, logowanie
-    │   ├── wallet.Controller.ts    # Operacje portfela
-    │   ├── coinFlip.Controller.ts  # Gra Coinflip
-    │   ├── roulette.Controller.ts   # Gra Ruletka
-    │   ├── slots.Controller.ts     # Gra Slots
-    │   ├── slider.Controller.ts    # Gra Slider
-    │   ├── sapper.Controller.ts    # Gra Saper
-    │   ├── ranking.Controller.ts   # Rankingi graczy
-    │   ├── passwordReset.Controller.ts # Reset haseł
-    │   └── admin.Controller.ts     # Panel administratora
-    ├── Middleware/         # Middleware warstwy zabezpieczeń
-    │   ├── auth.Middleware.ts      # Weryfikacja JWT tokenów
-    │   ├── admin.Middleware.ts     # Sprawdzanie uprawnień admin
-    │   └── balance.Middleware.ts   # Walidacja salda przed grą
-    ├── Routes/            # Definicje tras API
-    │   ├── user.Routes.ts         # Trasy użytkowników
-    │   ├── wallet.Routes.ts       # Trasy portfela
-    │   ├── games.Routes.ts        # Trasy gier
-    │   ├── sapper.Routes.ts       # Dedykowane trasy Sapera
-    │   ├── ranking.Routes.ts      # Trasy rankingów
-    │   └── admin.Routes.ts        # Trasy administratora
-    └── index.ts           # Punkt wejściowy serwera
+├── prisma                          # Konfiguracja i zarządzanie bazą danych
+│   ├── prismaSingleton.ts          # Singleton klienta Prisma (pojedyncze połączenie DB)
+│   ├── schema.prisma               # Definicje modeli, relacji i enumów
+│   ├── seedRich.ts                 # Rozszerzone dane testowe (bogatszy seed)
+│   └── seed.ts                     # Podstawowy seed bazy danych
+└── src
+    ├── Controllers                 # Logika biznesowa poszczególnych endpointów
+    │   ├── admin.Controller.ts         # Operacje administracyjne (zarządzanie graczami, grami)
+    │   ├── auth.Controller.ts          # Rejestracja, logowanie, autoryzacja
+    │   ├── coinFlip.Controller.ts      # Logika gry CoinFlip
+    │   ├── passwordReset.Controller.ts # Resetowanie haseł i obsługa tokenów
+    │   ├── ranking.Controller.ts       # Generowanie rankingów graczy
+    │   ├── roulette.Controller.ts      # Logika gry Ruletka
+    │   ├── sapper.Controller.ts        # Logika gry Saper
+    │   ├── slider.Controller.ts        # Logika gry Slider
+    │   ├── slots.Controller.ts         # Logika gry Slot Machine
+    │   └── wallet.Controller.ts        # Operacje portfela (wpłaty, wypłaty, saldo)
+    ├── index.ts                     # Główny punkt startowy serwera Express
+    ├── Middleware                   # Middleware zabezpieczeń i walidacji
+    │   ├── admin.Middleware.ts         # Sprawdzanie uprawnień administratora
+    │   ├── auth.Middleware.ts          # Weryfikacja tokenów JWT
+    │   └── balance.Middleware.ts       # Sprawdzanie salda przed rozpoczęciem gry
+    ├── Routes                       # Definicje tras API
+    │   ├── admin.Routes.ts             # Trasy panelu administratora
+    │   ├── games.Routes.ts             # Trasy wspólne dla gier
+    │   ├── ranking.Routes.ts           # Trasy rankingów
+    │   ├── sapper.Routes.ts            # Dedykowane trasy gry Saper
+    │   ├── user.Routes.ts              # Trasy użytkownika (profil, auth)
+    │   └── wallet.Routes.ts            # Trasy portfela użytkownika
+    └── Services                     # Warstwa usług (logika pomocnicza)
+        ├── special.file.ts             # Plik pomocniczy / narzędziowy (custom logic)
+        └── wallet.Service.ts           # Logika biznesowa portfela (używana przez kontrolery)
 ```
+
 
 ## Struktura bazy danych
 
@@ -117,8 +121,8 @@ backend/
 
 #### User
 Użytkownicy aplikacji z podstawowymi danymi osobowymi, rolą (NORMAL/ADMIN) i systemem banów.
-- **Klucze:** email (unikalny), username
-- **Relacje:** 1:1 z Wallet, 1:N z SapperMap i PasswordReset
+- **Klucze:** email (unikalny), id (UUID)
+- **Relacje:** 1:1 z Wallet, 1:N z SapperMap, 1:N z PasswordReset
 
 #### Wallet  
 Portfel użytkownika przechowujący saldo w formacie Decimal(10,2).
@@ -136,15 +140,17 @@ Aktywna gra Saper użytkownika z planszą zapisaną jako string.
 Katalog dostępnych gier w kasynie z możliwością włączania/wyłączania.
 
 #### PasswordReset
-Tokeny resetowania haseł z datą wygaśnięcia i indeksami wydajnościowymi.
+Tokeny resetowania hasła powiązane z użytkownikiem.
+- **Indeksy:**  po userId oraz expiresAt
 
 ### Kluczowe cechy
 - **UUID** jako ID we wszystkich tabelach
-- **Cascade delete** dla powiązanych danych użytkownika
+- **Cascade delete** dla powiązanych danych użytkownika (Wallet, Transaction, SapperMap, PasswordReset)
 - **Indeksy** na często wyszukiwanych polach
-- **Enumy** dla typów transakcji i ról użytkowników
+- **Enumy** dla ról użytkowników (UserRole), typów transakcji (TransactionType) oraz typów gier (GameType)
+- **Unikalność relacji 1:1** np. userId w Wallet i SapperMap
 
-**Uwaga:** Tabela `spatial_ref_sys` to systemowa tabela PostgreSQL.
+**Uwaga:** Tabela `spatial_ref_sys` to systemowa tabela PostgreSQL i nie jest częścią logiki aplikacji.
 
 ## Logika gier
 
@@ -154,22 +160,23 @@ Tokeny resetowania haseł z datą wygaśnięcia i indeksami wydajnościowymi.
 |-----|-----|-----------|---------|------------|
 | **Ruletka** | `Math.random() * 100 % 37` | Liczby 0-36 + kolory (parz./nieparz.) | Liczba: 5x, Kolor: 2x (kumulatywne) | ~13.5% |
 | **Coinflip** | `Math.random() * 100 % 2` | 50/50 (parz./nieparz.) | 2x przy wygranej | 0% |
-| **Slots** | Weighted random | 9 symboli, 3 bębny, tylko 3x | 🍒🍋: 2x, 🍊: 3x, 🍇: 4-5x, 🍉: 8x, 🔔: 10x, ⭐: 15x, 7️⃣: 50x | ~25% |
+| **Slots** | Weighted random | 9 symboli, 3 bębny, wypłaty za 2 i 3 symbole | 2 symbole: 0.5–10x, 3 symbole: 2–50x | Zmienny |
 | **Slider** | `getRandomInt(0, 100)` | Gracz wybiera zakres [min,max] | `bet * (100/zakres) * 0.98` | 2% |
 | **Saper** | - | NxN plansza, progresywny mnożnik | Rośnie z odkrytymi polami | Zmienny |
 
 ### Slot Machine - symbole i wagi
-| Symbol | Waga | Wypłata (3x) | 
-|--------|------|--------------|
-| 🍒 CHERRY | 100 | 2x |
-| 🍋 LEMON | 100 | 2x |
-| 🍊 ORANGE | 90 | 3x |
-| 🍇 PLUM | 80 | 4x |
-| 🍇 GRAPE | 70 | 5x |
-| 🍉 WATERMELON | 60 | 8x |
-| 🔔 BELL | 40 | 10x |
-| ⭐ STAR | 20 | 15x |
-| 7️⃣ SEVEN | 10 | 50x |
+| Symbol | Waga | Wypłata (2x) | Wypłata (3x) | 
+|--------|------|--------------|--------------|
+| 🍒 CHERRY | 50 | 0.5x | 2x |
+| 🍋 LEMON | 50 | 0.5x | 2x |
+| 🍊 ORANGE | 45 | 1x | 3x |
+| 🍇 PLUM | 50 | 1x | 4x |
+| 🍇 GRAPE | 35 | 2x | 5x |
+| 🍉 WATERMELON | 30 | 2x | 8x |
+| 🔔 BELL | 25 | 3x | 10x |
+| ⭐ STAR | 20 | 5x | 15x |
+| 7️⃣ SEVEN | 15 | 10x | 50x |
+
 
 ### Zabezpieczenia
 - **Walidacja:** Wszystkie kontrolery sprawdzają użytkownika
@@ -247,11 +254,20 @@ http://localhost:8000/docs
 - `POST /api/users/login` – Logowanie
 - `GET /api/users/is-authenticated` – Sprawdź autoryzację
 - `PATCH /api/users/update-username` – Zmień nazwę użytkownika
+- `PATCH /api/users/update-update-email` – Zmień adres e-mail
+- `PATCH /api/users/update-changePassword` – Zmień hasło
+- `PATCH /api/users/update-delete-user` – Usuń konto
 
 #### Wallet
 - `GET /api/wallet/get-wallet` – Pobierz portfel
 - `POST /api/wallet/deposit` – Dodaj środki do portfela
 - `POST /api/wallet/withdraw` – Wypłać środki z portfela
+
+#### Admin
+- `GET /api/admin/list-users` – Lista użytkowników z paginacją i filtrowaniem
+- `GET /api/admin/user-details/{id}` – Szczegóły użytkownika
+- `PATCH /api/admin/patch-user/{id}` – Edycja danych użytkownika
+- `DELETE /api/admin/delete-user/{id}` - Usunięcie użytkownika (tylko admin)
 
 #### General
 - `GET /` – Endpoint powitalny
@@ -264,9 +280,10 @@ http://localhost:8000/docs
 - Tokeny zawierają ID użytkownika i czas wygaśnięcia
 
 ### Walidacja danych
-- Wszystkie dane wejściowe są walidowane
-- Użycie `express-validator` do sprawdzania formatów
-- Sanityzacja danych przed zapisem do bazy
+- Dane wejściowe są walidowane ręcznie w kontrolerach 
+- Walidacja wieku przy rejestracji
+- Sprawdzanie unikalności emaila
+- Walidacja haseł przy zmianie
 
 ### Hashowanie haseł
 - Hasła są hashowane za pomocą bcrypt
@@ -286,16 +303,27 @@ Frontend zbudowany w **Vue 3** z **Composition API**, wykorzystujący nowoczesne
 ### Główne katalogi
 ```
 frontend/src/
+├── assets/               # Statyczne zasoby (grafiki, style)
 ├── components/           # Komponenty wielokrotnego użytku
-│   ├── games/           # Modale gier (Slots, Roulette, itp.)
-│   ├── layout/          # Layout (Header, Footer)
-│   ├── modals/          # Modale systemowe (Login, Wallet)
-│   ├── sections/        # Sekcje strony (Hero, Games, Leaderboard)
-│   └── ui/             # Komponenty UI (GameCard, LeaderboardRow)
-├── views/               # Widoki główne aplikacji
-│   └── user/           # Panel użytkownika
-├── router/             # Konfiguracja routingu
-└── stores/            # Magazyny stanu (Pinia)
+│   ├── games/            # Modale gier (Slots, Roulette, Slider, Minesweeper)
+│   ├── layout/           # Layout aplikacji (Header, Footer)
+│   ├── modals/           # Modale systemowe (Login, Register, Wallet, Admin)
+│   ├── sections/         # Sekcje strony (Hero, GamesGrid, Leaderboard)
+│   └── ui/               # Komponenty UI (GameCard, LeaderboardRow)
+├── views/                # Widoki główne aplikacji
+│   ├── HomeView.vue
+│   ├── NotFoundView.vue
+│   ├── ResetPasswordView.vue
+│   └── user/             # Panel użytkownika
+│       ├── UserDashboard.vue
+│       ├── Profile.vue
+│       ├── ChangePassword.vue
+│       ├── PanelSectionLayout.vue
+│       └── AccountSidebar.vue
+├── router/               # Konfiguracja routingu (Vue Router)
+├── stores/               # Magazyny stanu (Pinia)
+├── main.js               # Punkt wejścia aplikacji
+└── env.d.ts              # Typowanie zmiennych środowiskowych
 ```
 
 ### Routing i nawigacja
@@ -309,17 +337,17 @@ System routingu obsługuje:
 
 #### Auth Store
 Centralny magazyn autoryzacji obsługujący:
-- **Autentyfikację JWT** - logowanie, wylogowanie, odświeżanie tokenów
+- **Autentyfikację JWT** - logowanie i wylogowanie użytkownika
 - **Dane użytkownika** - profil, rola, uprawnienia
-- **Saldo portfela** - aktualne środki, historia transakcji
-- **Persystencję** - zapis do `localStorage`
+- **Saldo portfela** - aktualne środki oraz historia transakcji
+- **Persystencję** - zapis tokena i danych użytkownika w `localStorage`
 
 ```typescript
 // Kluczowe metody auth store
-loginSuccess(token, user)    // Logowanie użytkownika
-fetchBalance()               // Pobieranie salda z API
-updateUsername(newUsername)  // Aktualizacja nazwy użytkownika
-logout()                    // Wylogowanie i czyszczenie danych
+loginSuccess(token, user) // Logowanie użytkownika i zapis danych 
+fetchBalance() // Pobieranie salda i transakcji z API 
+updateUsername(newUsername) // Aktualizacja nazwy użytkownika 
+logout() // Wylogowanie i czyszczenie danych
 ```
 
 ## Komponenty gier
@@ -349,14 +377,15 @@ Każda gra ma dedykowany modal z ujednoliconą strukturą:
 
 ### Komponenty UI
 - **GameCard** - karty gier z hover effects
-- **LeaderboardRow** - wiersze rankingu z kolorowym tłem
+- **GameGrid** - siatka prezentująca dostępne gry.
+- **LeaderboardSection** - sekcja rankingu z tabelą HTML, dynamicznym kolorowaniem TOP 3 (złoty/srebrny/brązowy) i filtrowaniem okresów (All/Month/Week).
+- **HeroSection** - baner powitalny z dynamicznym tłem i przyciskiem Call-to-Action.
 - **HeaderComponent** - różne wersje dla auth/unauth
 - **FooterComponent** - linki prawne i wsparcie
 
 ### Animacje i UX
-- **Smooth scrolling** - płynne przewijanie do sekcji
-- **Backdrop blur** - rozmycie tła modali
-- **Hover states** - interaktywne stany elementów
+- **Backdrop blur** - rozmycie tła pod modalami i elementami interfejsu
+- **Hover states** - interaktywne stany przycisków i kart
 - **Loading states** - wskaźniki ładowania
 - **Canvas confetti** - fajerwerki przy wygranych
 
@@ -365,9 +394,7 @@ Każda gra ma dedykowany modal z ujednoliconą strukturą:
 Chroniona sekcja `/panel` z podstronami:
 - **Dashboard** - podsumowanie konta i aktywności
 - **Profil** - edycja danych osobowych
-- **Bezpieczeństwo** - ustawienia zabezpieczeń
 - **Hasło** - zmiana hasła
-- **Powiadomienia** - centrum powiadomień
 
 ## Zabezpieczenia frontend
 
@@ -375,11 +402,9 @@ Chroniona sekcja `/panel` z podstronami:
 - **Route guards** - middleware sprawdzający autoryzację
 - **Role-based access** - różne uprawnienia (USER/ADMIN)
 - **Token validation** - weryfikacja JWT w każdym żądaniu
-- **Auto-logout** - wylogowanie po wygaśnięciu tokena
 
 ### Walidacja po stronie klienta
 - **Input validation** - sprawdzanie formularzy przed wysłaniem
-- **Sanityzacja danych** - oczyszczanie danych wejściowych  
 - **XSS protection** - ochrona przed atakami skryptowymi
 - **CSRF tokens** - (planowane) tokeny antyfałszywościowe
 
@@ -407,3 +432,27 @@ npm run build      # Budowanie
 npm run preview    # Podgląd buildu
 ```
 
+
+# Uruchomienie z Docker (Zalecane)
+
+Możesz uruchomić całą aplikację za pomocą jednej komendy, bez konieczności lokalnej instalacji Node.js czy PostgreSQL.
+
+## 1. Wymagania
+- Docker Desktop (lub Docker Engine + Docker Compose)
+
+## 2. Konfiguracja
+Upewnij się, że w głównym katalogu projektu znajduje się plik `.env` skonfigurowany zgodnie z sekcją Backend.
+Dla Dockera `DB_HOST` w pliku .env powinien być ustawiony na nazwę usługi bazy danych (zazwyczaj `db` lub `postgres`), a nie `localhost`.
+
+## 3. Uruchomienie
+W głównym katalogu projektu wykonaj komendę:
+
+```bash
+docker-compose up --build
+```
+
+Aby zatrzymać aplikację:
+
+```bash
+docker-compose down
+```
